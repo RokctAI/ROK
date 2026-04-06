@@ -1,0 +1,293 @@
+---
+sidebar_position: 7
+---
+
+# Profile Commands Reference
+
+This page covers all commands related to [Rok profiles](../user-guide/profiles.md). For general CLI commands, see [CLI Commands Reference](./cli-commands.md).
+
+## `rok profile`
+
+```bash
+rok profile <subcommand>
+```
+
+Top-level command for managing profiles. Running `rok profile` without a subcommand shows help.
+
+| Subcommand | Description |
+|------------|-------------|
+| `list` | List all profiles. |
+| `use` | Set the active (default) profile. |
+| `create` | Create a new profile. |
+| `delete` | Delete a profile. |
+| `show` | Show details about a profile. |
+| `alias` | Regenerate the shell alias for a profile. |
+| `rename` | Rename a profile. |
+| `export` | Export a profile to a tar.gz archive. |
+| `import` | Import a profile from a tar.gz archive. |
+
+## `rok profile list`
+
+```bash
+rok profile list
+```
+
+Lists all profiles. The currently active profile is marked with `*`.
+
+**Example:**
+
+```bash
+$ rok profile list
+  default
+* work
+  dev
+  personal
+```
+
+No options.
+
+## `rok profile use`
+
+```bash
+rok profile use <name>
+```
+
+Sets `<name>` as the active profile. All subsequent `rok` commands (without `-p`) will use this profile.
+
+| Argument | Description |
+|----------|-------------|
+| `<name>` | Profile name to activate. Use `default` to return to the base profile. |
+
+**Example:**
+
+```bash
+rok profile use work
+rok profile use default
+```
+
+## `rok profile create`
+
+```bash
+rok profile create <name> [options]
+```
+
+Creates a new profile.
+
+| Argument / Option | Description |
+|-------------------|-------------|
+| `<name>` | Name for the new profile. Must be a valid directory name (alphanumeric, hyphens, underscores). |
+| `--clone` | Copy `config.yaml`, `.env`, and `SOUL.md` from the current profile. |
+| `--clone-all` | Copy everything (config, memories, skills, sessions, state) from the current profile. |
+| `--clone-from <profile>` | Clone from a specific profile instead of the current one. Used with `--clone` or `--clone-all`. |
+
+**Examples:**
+
+```bash
+# Blank profile — needs full setup
+rok profile create mybot
+
+# Clone config only from current profile
+rok profile create work --clone
+
+# Clone everything from current profile
+rok profile create backup --clone-all
+
+# Clone config from a specific profile
+rok profile create work2 --clone --clone-from work
+```
+
+## `rok profile delete`
+
+```bash
+rok profile delete <name> [options]
+```
+
+Deletes a profile and removes its shell alias.
+
+| Argument / Option | Description |
+|-------------------|-------------|
+| `<name>` | Profile to delete. |
+| `--yes`, `-y` | Skip confirmation prompt. |
+
+**Example:**
+
+```bash
+rok profile delete mybot
+rok profile delete mybot --yes
+```
+
+:::warning
+This permanently deletes the profile's entire directory including all config, memories, sessions, and skills. Cannot delete the currently active profile.
+:::
+
+## `rok profile show`
+
+```bash
+rok profile show <name>
+```
+
+Displays details about a profile including its home directory, configured model, active platforms, and disk usage.
+
+| Argument | Description |
+|----------|-------------|
+| `<name>` | Profile to inspect. |
+
+**Example:**
+
+```bash
+$ rok profile show work
+Profile:    work
+Home:       ~/.rok/profiles/work
+Model:      anthropic/claude-sonnet-4
+Platforms:  telegram, discord
+Skills:     12 installed
+Disk:       48 MB
+```
+
+## `rok profile alias`
+
+```bash
+rok profile alias <name> [options]
+```
+
+Regenerates the shell alias script at `~/.local/bin/<name>`. Useful if the alias was accidentally deleted or if you need to update it after moving your Rok installation.
+
+| Argument / Option | Description |
+|-------------------|-------------|
+| `<name>` | Profile to create/update the alias for. |
+| `--remove` | Remove the wrapper script instead of creating it. |
+| `--name <alias>` | Custom alias name (default: profile name). |
+
+**Example:**
+
+```bash
+rok profile alias work
+# Creates/updates ~/.local/bin/work
+
+rok profile alias work --name mywork
+# Creates ~/.local/bin/mywork
+
+rok profile alias work --remove
+# Removes the wrapper script
+```
+
+## `rok profile rename`
+
+```bash
+rok profile rename <old-name> <new-name>
+```
+
+Renames a profile. Updates the directory and shell alias.
+
+| Argument | Description |
+|----------|-------------|
+| `<old-name>` | Current profile name. |
+| `<new-name>` | New profile name. |
+
+**Example:**
+
+```bash
+rok profile rename mybot assistant
+# ~/.rok/profiles/mybot → ~/.rok/profiles/assistant
+# ~/.local/bin/mybot → ~/.local/bin/assistant
+```
+
+## `rok profile export`
+
+```bash
+rok profile export <name> [options]
+```
+
+Exports a profile as a compressed tar.gz archive.
+
+| Argument / Option | Description |
+|-------------------|-------------|
+| `<name>` | Profile to export. |
+| `-o`, `--output <path>` | Output file path (default: `<name>.tar.gz`). |
+
+**Example:**
+
+```bash
+rok profile export work
+# Creates work.tar.gz in the current directory
+
+rok profile export work -o ./work-2026-03-29.tar.gz
+```
+
+## `rok profile import`
+
+```bash
+rok profile import <archive> [options]
+```
+
+Imports a profile from a tar.gz archive.
+
+| Argument / Option | Description |
+|-------------------|-------------|
+| `<archive>` | Path to the tar.gz archive to import. |
+| `--name <name>` | Name for the imported profile (default: inferred from archive). |
+
+**Example:**
+
+```bash
+rok profile import ./work-2026-03-29.tar.gz
+# Infers profile name from the archive
+
+rok profile import ./work-2026-03-29.tar.gz --name work-restored
+```
+
+## `rok -p` / `rok --profile`
+
+```bash
+rok -p <name> <command> [options]
+rok --profile <name> <command> [options]
+```
+
+Global flag to run any Rok command under a specific profile without changing the sticky default. This overrides the active profile for the duration of the command.
+
+| Option | Description |
+|--------|-------------|
+| `-p <name>`, `--profile <name>` | Profile to use for this command. |
+
+**Examples:**
+
+```bash
+rok -p work chat -q "Check the server status"
+rok --profile dev gateway start
+rok -p personal skills list
+rok -p work config edit
+```
+
+## `rok completion`
+
+```bash
+rok completion <shell>
+```
+
+Generates shell completion scripts. Includes completions for profile names and profile subcommands.
+
+| Argument | Description |
+|----------|-------------|
+| `<shell>` | Shell to generate completions for: `bash` or `zsh`. |
+
+**Examples:**
+
+```bash
+# Install completions
+rok completion bash >> ~/.bashrc
+rok completion zsh >> ~/.zshrc
+
+# Reload shell
+source ~/.bashrc
+```
+
+After installation, tab completion works for:
+- `rok profile <TAB>` — subcommands (list, use, create, etc.)
+- `rok profile use <TAB>` — profile names
+- `rok -p <TAB>` — profile names
+
+## See also
+
+- [Profiles User Guide](../user-guide/profiles.md)
+- [CLI Commands Reference](./cli-commands.md)
+- [FAQ — Profiles section](./faq.md#profiles)

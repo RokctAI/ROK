@@ -1,0 +1,28 @@
+
+hermes-3
+nous-hermes-3
+openrouter/nousresearch/hermes-3-llama-3.1-405b
+https://raw.githubusercontent.com/NousResearch/hermes-agent
+github:NousResearch/hermes-agent
+NousResearch/hermes-agent-megascience-sft1
+NousResearch/Hermes-Agent-Thinking-GLM-4.7-SFT2
+NousResearch/Hermes-Agent-Thinking-GLM-4.7-SFT1
+NousResearch/terminal-tasks-glm-hermes-agent
+NousResearch/openthoughts-tblite
+https://huggingface.co/datasets/NousResearch/openthoughts-tblite
+NousResearch/terminal-bench-2
+NousResearch/openthoughts-tblite
+NousResearch/Hermes-3-Llama-3.1-8
+env.dataset_name NousResearch/terminal-bench-2
+NousResearch/DeepHermes-3-Llama-3-3B-Preview
+NousResearch/q-30b-t-h45-e1
+https://github.com/NousResearch/atropos
+NousResearch/swe-terminus-agent-glm-kimi-minimax
+NousResearch/pokemon-agent
+NousResearch/Nous-Hermes-llama-1b-v1
+base_model: NousResearch/Llama-3.2-1B
+NousResearch/autoreason
+https://github.com/NousResearch/autoreason
+discord.gg/NousResearch
+NousResearch/dataset-name
+huggingface-cli upload NousResearch
