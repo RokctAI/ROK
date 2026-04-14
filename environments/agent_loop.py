@@ -1,13 +1,13 @@
 """
-HermesAgentLoop -- Reusable Multi-Turn Agent Engine
+RokLoop -- Reusable Multi-Turn Agent Engine
 
-Runs the rok-agent tool-calling loop using standard OpenAI-spec tool calling.
+Runs the rok tool-calling loop using standard OpenAI-spec tool calling.
 Works with any server that returns ChatCompletion objects with tool_calls:
     - Phase 1: OpenAI server type (VLLM, SGLang, OpenRouter, OpenAI API)
     - Phase 2: ManagedServer with client-side tool call parser
 
 The loop passes tools= and checks response.choices[0].message.tool_calls,
-identical to rok-agent's run_agent.py. Tool execution is dispatched via
+identical to rok's run_agent.py. Tool execution is dispatched via
 handle_function_call() from model_tools.py.
 """
 
@@ -21,13 +21,15 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set
 
 from model_tools import handle_function_call
+from tools.terminal_tool import get_active_env
+from tools.tool_result_storage import maybe_persist_tool_result, enforce_turn_budget
 
 # Thread pool for running sync tool calls that internally use asyncio.run()
 # (e.g., the Modal/Docker/Daytona terminal backends). Running them in a separate
 # thread gives them a clean event loop so they don't deadlock inside Atropos's loop.
 # Size must be large enough for concurrent eval tasks (e.g., 89 TB2 tasks all
 # making tool calls). Too small = thread pool starvation, tasks queue for minutes.
-# Resized at runtime by HermesAgentBaseEnv.__init__ via resize_tool_pool().
+# Resized at runtime by RokBaseEnv.__init__ via resize_tool_pool().
 _tool_executor = concurrent.futures.ThreadPoolExecutor(max_workers=128)
 
 
@@ -35,7 +37,7 @@ def resize_tool_pool(max_workers: int):
     """
     Replace the global tool executor with a new one of the given size.
 
-    Called by HermesAgentBaseEnv.__init__ based on config.tool_pool_size.
+    Called by RokBaseEnv.__init__ based on config.tool_pool_size.
     Safe to call before any tasks are submitted.
     """
     global _tool_executor
@@ -114,9 +116,9 @@ def _extract_reasoning_from_message(message) -> Optional[str]:
     return None
 
 
-class HermesAgentLoop:
+class RokLoop:
     """
-    Runs rok-agent's tool-calling loop using standard OpenAI-spec tool calling.
+    Runs rok's tool-calling loop using standard OpenAI-spec tool calling.
 
     Same pattern as run_agent.py:
     - Pass tools= to the API
@@ -138,6 +140,7 @@ class HermesAgentLoop:
         temperature: float = 1.0,
         max_tokens: Optional[int] = None,
         extra_body: Optional[Dict[str, Any]] = None,
+        budget_config: Optional["BudgetConfig"] = None,
     ):
         """
         Initialize the agent loop.
@@ -154,7 +157,11 @@ class HermesAgentLoop:
             extra_body: Extra parameters passed to the OpenAI client's create() call.
                         Used for OpenRouter provider preferences, transforms, etc.
                         e.g. {"provider": {"ignore": ["DeepInfra"]}}
+            budget_config: Tool result persistence budget. Controls per-tool
+                        thresholds, per-turn aggregate budget, and preview size.
+                        If None, uses DEFAULT_BUDGET (current hardcoded values).
         """
+        from tools.budget_config import DEFAULT_BUDGET
         self.server = server
         self.tool_schemas = tool_schemas
         self.valid_tool_names = valid_tool_names
@@ -163,6 +170,7 @@ class HermesAgentLoop:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.extra_body = extra_body
+        self.budget_config = budget_config or DEFAULT_BUDGET
 
     async def run(self, messages: List[Dict[str, Any]]) -> AgentResult:
         """
@@ -254,7 +262,7 @@ class HermesAgentLoop:
             # Check for tool calls -- standard OpenAI spec.
             # Fallback: if response has no structured tool_calls but content
             # contains raw tool call tags (e.g. <tool_call>), parse them using
-            # rok-agent's standalone parsers. This handles the case where
+            # rok's standalone parsers. This handles the case where
             # ManagedServer's ToolCallTranslator couldn't parse because vLLM
             # isn't installed.
             if (
@@ -317,7 +325,7 @@ class HermesAgentLoop:
 
                 messages.append(msg_dict)
 
-                # Execute each tool call via rok-agent's dispatch
+                # Execute each tool call via rok's dispatch
                 for tc in assistant_msg.tool_calls:
                     # Handle both object (OpenAI) and dict (vLLM) formats
                     if isinstance(tc, dict):
@@ -446,14 +454,29 @@ class HermesAgentLoop:
                         except (json.JSONDecodeError, TypeError):
                             pass
 
-                    # Add tool response to conversation
                     tc_id = tc.get("id", "") if isinstance(tc, dict) else tc.id
+                    tool_result = maybe_persist_tool_result(
+                        content=tool_result,
+                        tool_name=tool_name,
+                        tool_use_id=tc_id,
+                        env=get_active_env(self.task_id),
+                        config=self.budget_config,
+                    )
+
                     messages.append(
                         {
                             "role": "tool",
                             "tool_call_id": tc_id,
                             "content": tool_result,
                         }
+                    )
+
+                num_tcs = len(assistant_msg.tool_calls)
+                if num_tcs > 0:
+                    enforce_turn_budget(
+                        messages[-num_tcs:],
+                        env=get_active_env(self.task_id),
+                        config=self.budget_config,
                     )
 
                 turn_elapsed = _time.monotonic() - turn_start

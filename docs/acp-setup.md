@@ -45,15 +45,15 @@ Open your VS Code settings (`Ctrl+,` → click the `{}` icon for JSON) and add:
 {
   "acpClient.agents": [
     {
-      "name": "rok-agent",
-      "registryDir": "/path/to/rok-agent/acp_registry"
+      "name": "rok",
+      "registryDir": "/path/to/rok/acp_registry"
     }
   ]
 }
 ```
 
-Replace `/path/to/rok-agent` with the actual path to your Rok Agent
-installation (e.g. `~/.rok/rok-agent`).
+Replace `/path/to/rok` with the actual path to your Rok Agent
+installation (e.g. `~/.rok/rok`).
 
 Alternatively, if `rok` is on your PATH, the ACP Client can discover it
 automatically via the registry directory.
@@ -77,7 +77,7 @@ Open Zed settings (`Cmd+,` on macOS or `Ctrl+,` on Linux) and add to your
 ```json
 {
   "agent_servers": {
-    "rok-agent": {
+    "rok": {
       "type": "custom",
       "command": "rok",
       "args": ["acp"],
@@ -105,7 +105,7 @@ Rok Agent will appear in the agent panel. Select it and start a conversation.
 - Open **Settings** → **Tools** → **ACP Agents**
 - Click **+** to add a new agent
 - Set the registry directory to your `acp_registry/` folder:
-  `/path/to/rok-agent/acp_registry`
+  `/path/to/rok/acp_registry`
 - Click **OK**
 
 ### 3. Use the agent
@@ -224,5 +224,5 @@ ROK_LOG_LEVEL=DEBUG rok acp
 ## Further Reading
 
 - [ACP Specification](https://github.com/anysphere/acp)
-- [Rok Agent Documentation](https://github.com/RokctAI/rok-agent)
+- [Rok Agent Documentation](https://github.com/RokctAI/rok)
 - Run `rok --help` for all CLI options

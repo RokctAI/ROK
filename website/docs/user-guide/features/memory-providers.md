@@ -1,12 +1,12 @@
 ---
 sidebar_position: 4
 title: "Memory Providers"
-description: "External memory provider plugins — Honcho, OpenViking, Mem0, Hindsight, Holographic, RetainDB, ByteRover"
+description: "External memory provider plugins — Honcho, OpenViking, Mem0, Hindsight, Holographic, RetainDB, ByteRover, Supermemory"
 ---
 
 # Memory Providers
 
-Rok Agent ships with 7 external memory provider plugins that give the agent persistent, cross-session knowledge beyond the built-in MEMORY.md and USER.md. Only **one** external provider can be active at a time — the built-in memory is always active alongside it.
+Rok Agent ships with 8 external memory provider plugins that give the agent persistent, cross-session knowledge beyond the built-in MEMORY.md and USER.md. Only **one** external provider can be active at a time — the built-in memory is always active alongside it.
 
 ## Quick Start
 
@@ -16,11 +16,13 @@ rok memory status     # check what's active
 rok memory off        # disable external provider
 ```
 
+You can also select the active memory provider via `rok plugins` → Provider Plugins → Memory Provider.
+
 Or set manually in `~/.rok/config.yaml`:
 
 ```yaml
 memory:
-  provider: openviking   # or honcho, mem0, hindsight, holographic, retaindb, byterover
+  provider: openviking   # or honcho, mem0, hindsight, holographic, retaindb, byterover, supermemory
 ```
 
 ## How It Works
@@ -44,26 +46,157 @@ AI-native cross-session user modeling with dialectic Q&A, semantic search, and p
 
 | | |
 |---|---|
-| **Best for** | Teams using Honcho's user modeling platform |
-| **Requires** | `pip install honcho-ai` + API key |
-| **Data storage** | Honcho Cloud |
-| **Cost** | Honcho pricing |
+| **Best for** | Multi-agent systems with cross-session context, user-agent alignment |
+| **Requires** | `pip install honcho-ai` + [API key](https://app.honcho.dev) or self-hosted instance |
+| **Data storage** | Honcho Cloud or self-hosted |
+| **Cost** | Honcho pricing (cloud) / free (self-hosted) |
 
 **Tools:** `honcho_profile` (peer card), `honcho_search` (semantic search), `honcho_context` (LLM-synthesized), `honcho_conclude` (store facts)
 
-**Setup:**
+**Setup Wizard:**
 ```bash
-rok memory setup    # select "honcho"
-# Or manually:
-rok config set memory.provider honcho
-echo "HONCHO_API_KEY=your-key" >> ~/.rok/.env
+rok honcho setup        # (legacy command) 
+# or
+rok memory setup        # select "honcho"
 ```
 
-**Config:** `$ROK_HOME/honcho.json` — existing Honcho users' configuration and data are fully preserved.
+**Config:** `$ROK_HOME/honcho.json` (profile-local) or `~/.honcho/config.json` (global). Resolution order: `$ROK_HOME/honcho.json` > `~/.rok/honcho.json` > `~/.honcho/config.json`. See the [config reference](https://github.com/rok-ai/rok/blob/main/plugins/memory/honcho/README.md) and the [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/rok).
+
+<details>
+<summary>Key config options</summary>
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `apiKey` | -- | API key from [app.honcho.dev](https://app.honcho.dev) |
+| `baseUrl` | -- | Base URL for self-hosted Honcho |
+| `peerName` | -- | User peer identity |
+| `aiPeer` | host key | AI peer identity (one per profile) |
+| `workspace` | host key | Shared workspace ID |
+| `recallMode` | `hybrid` | `hybrid` (auto-inject + tools), `context` (inject only), `tools` (tools only) |
+| `observation` | all on | Per-peer `observeMe`/`observeOthers` booleans |
+| `writeFrequency` | `async` | `async`, `turn`, `session`, or integer N |
+| `sessionStrategy` | `per-directory` | `per-directory`, `per-repo`, `per-session`, `global` |
+| `dialecticReasoningLevel` | `low` | `minimal`, `low`, `medium`, `high`, `max` |
+| `dialecticDynamic` | `true` | Auto-bump reasoning by query length |
+| `messageMaxChars` | `25000` | Max chars per message (chunked if exceeded) |
+
+</details>
+
+<details>
+<summary>Minimal honcho.json (cloud)</summary>
+
+```json
+{
+  "apiKey": "your-key-from-app.honcho.dev",
+  "hosts": {
+    "rok": {
+      "enabled": true,
+      "aiPeer": "rok",
+      "peerName": "your-name",
+      "workspace": "rok"
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Minimal honcho.json (self-hosted)</summary>
+
+```json
+{
+  "baseUrl": "http://localhost:8000",
+  "hosts": {
+    "rok": {
+      "enabled": true,
+      "aiPeer": "rok",
+      "peerName": "your-name",
+      "workspace": "rok"
+    }
+  }
+}
+```
+
+</details>
 
 :::tip Migrating from `rok honcho`
-If you previously used `rok honcho setup`, your config and all server-side data are intact. Just set `memory.provider: honcho` to reactivate via the new system.
+If you previously used `rok honcho setup`, your config and all server-side data are intact. Just re-enable through the setup wizard again or manually set `memory.provider: honcho` to reactivate via the new system.
 :::
+
+**Multi-agent / Profiles:**
+
+Each Rok profile gets its own Honcho AI peer while sharing the same workspace -- all profiles see the same user representation, but each agent builds its own identity and observations.
+
+```bash
+rok profile create coder --clone   # creates honcho peer "coder", inherits config from default
+```
+
+What `--clone` does: creates a `rok.coder` host block in `honcho.json` with `aiPeer: "coder"`, shared `workspace`, inherited `peerName`, `recallMode`, `writeFrequency`, `observation`, etc. The peer is eagerly created in Honcho so it exists before first message.
+
+For profiles created before Honcho was set up:
+
+```bash
+rok honcho sync   # scans all profiles, creates host blocks for any missing ones
+```
+
+This inherits settings from the default `rok` host block and creates new AI peers for each profile. Idempotent -- skips profiles that already have a host block.
+
+<details>
+<summary>Full honcho.json example (multi-profile)</summary>
+
+```json
+{
+  "apiKey": "your-key",
+  "workspace": "rok",
+  "peerName": "eri",
+  "hosts": {
+    "rok": {
+      "enabled": true,
+      "aiPeer": "rok",
+      "workspace": "rok",
+      "peerName": "eri",
+      "recallMode": "hybrid",
+      "writeFrequency": "async",
+      "sessionStrategy": "per-directory",
+      "observation": {
+        "user": { "observeMe": true, "observeOthers": true },
+        "ai": { "observeMe": true, "observeOthers": true }
+      },
+      "dialecticReasoningLevel": "low",
+      "dialecticDynamic": true,
+      "dialecticMaxChars": 600,
+      "messageMaxChars": 25000,
+      "saveMessages": true
+    },
+    "rok.coder": {
+      "enabled": true,
+      "aiPeer": "coder",
+      "workspace": "rok",
+      "peerName": "eri",
+      "recallMode": "tools",
+      "observation": {
+        "user": { "observeMe": true, "observeOthers": false },
+        "ai": { "observeMe": true, "observeOthers": true }
+      }
+    },
+    "rok.writer": {
+      "enabled": true,
+      "aiPeer": "writer",
+      "workspace": "rok",
+      "peerName": "eri"
+    }
+  },
+  "sessions": {
+    "/home/user/myproject": "myproject-main"
+  }
+}
+```
+
+</details>
+
+See the [config reference](https://github.com/rok-ai/rok/blob/main/plugins/memory/honcho/README.md) and [Honcho integration guide](https://docs.honcho.dev/v3/guides/integrations/rok).
+
 
 ---
 
@@ -132,12 +265,12 @@ echo "MEM0_API_KEY=your-key" >> ~/.rok/.env
 
 ### Hindsight
 
-Long-term memory with knowledge graph, entity resolution, and multi-strategy retrieval. The `hindsight_reflect` tool provides cross-memory synthesis that no other provider offers.
+Long-term memory with knowledge graph, entity resolution, and multi-strategy retrieval. The `hindsight_reflect` tool provides cross-memory synthesis that no other provider offers. Automatically retains full conversation turns (including tool calls) with session-level document tracking.
 
 | | |
 |---|---|
 | **Best for** | Knowledge graph-based recall with entity relationships |
-| **Requires** | Cloud: `pip install hindsight-client` + API key. Local: `pip install hindsight` + LLM key |
+| **Requires** | Cloud: API key from [ui.hindsight.vectorize.io](https://ui.hindsight.vectorize.io). Local: LLM API key (OpenAI, Groq, OpenRouter, etc.) |
 | **Data storage** | Hindsight Cloud or local embedded PostgreSQL |
 | **Cost** | Hindsight pricing (cloud) or free (local) |
 
@@ -151,13 +284,25 @@ rok config set memory.provider hindsight
 echo "HINDSIGHT_API_KEY=your-key" >> ~/.rok/.env
 ```
 
+The setup wizard installs dependencies automatically and only installs what's needed for the selected mode (`hindsight-client` for cloud, `hindsight-all` for local). Requires `hindsight-client >= 0.4.22` (auto-upgraded on session start if outdated).
+
+**Local mode UI:** `hindsight-embed -p rok ui start`
+
 **Config:** `$ROK_HOME/hindsight/config.json`
 
 | Key | Default | Description |
 |-----|---------|-------------|
 | `mode` | `cloud` | `cloud` or `local` |
 | `bank_id` | `rok` | Memory bank identifier |
-| `budget` | `mid` | Recall thoroughness: `low` / `mid` / `high` |
+| `recall_budget` | `mid` | Recall thoroughness: `low` / `mid` / `high` |
+| `memory_mode` | `hybrid` | `hybrid` (context + tools), `context` (auto-inject only), `tools` (tools only) |
+| `auto_retain` | `true` | Automatically retain conversation turns |
+| `auto_recall` | `true` | Automatically recall memories before each turn |
+| `retain_async` | `true` | Process retain asynchronously on the server |
+| `tags` | — | Tags applied when storing memories |
+| `recall_tags` | — | Tags to filter on recall |
+
+See [plugin README](https://github.com/RokctAI/rok/blob/main/plugins/memory/hindsight/README.md) for the full configuration reference.
 
 ---
 
@@ -251,6 +396,68 @@ rok config set memory.provider byterover
 
 ---
 
+### Supermemory
+
+Semantic long-term memory with profile recall, semantic search, explicit memory tools, and session-end conversation ingest via the Supermemory graph API.
+
+| | |
+|---|---|
+| **Best for** | Semantic recall with user profiling and session-level graph building |
+| **Requires** | `pip install supermemory` + [API key](https://supermemory.ai) |
+| **Data storage** | Supermemory Cloud |
+| **Cost** | Supermemory pricing |
+
+**Tools:** `supermemory_store` (save explicit memories), `supermemory_search` (semantic similarity search), `supermemory_forget` (forget by ID or best-match query), `supermemory_profile` (persistent profile + recent context)
+
+**Setup:**
+```bash
+rok memory setup    # select "supermemory"
+# Or manually:
+rok config set memory.provider supermemory
+echo 'SUPERMEMORY_API_KEY=***' >> ~/.rok/.env
+```
+
+**Config:** `$ROK_HOME/supermemory.json`
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `container_tag` | `rok` | Container tag used for search and writes. Supports `{identity}` template for profile-scoped tags. |
+| `auto_recall` | `true` | Inject relevant memory context before turns |
+| `auto_capture` | `true` | Store cleaned user-assistant turns after each response |
+| `max_recall_results` | `10` | Max recalled items to format into context |
+| `profile_frequency` | `50` | Include profile facts on first turn and every N turns |
+| `capture_mode` | `all` | Skip tiny or trivial turns by default |
+| `search_mode` | `hybrid` | Search mode: `hybrid`, `memories`, or `documents` |
+| `api_timeout` | `5.0` | Timeout for SDK and ingest requests |
+
+**Environment variables:** `SUPERMEMORY_API_KEY` (required), `SUPERMEMORY_CONTAINER_TAG` (overrides config).
+
+**Key features:**
+- Automatic context fencing — strips recalled memories from captured turns to prevent recursive memory pollution
+- Session-end conversation ingest for richer graph-level knowledge building
+- Profile facts injected on first turn and at configurable intervals
+- Trivial message filtering (skips "ok", "thanks", etc.)
+- **Profile-scoped containers** — use `{identity}` in `container_tag` (e.g. `rok-{identity}` → `rok-coder`) to isolate memories per Rok profile
+- **Multi-container mode** — enable `enable_custom_container_tags` with a `custom_containers` list to let the agent read/write across named containers. Automatic operations (sync, prefetch) stay on the primary container.
+
+<details>
+<summary>Multi-container example</summary>
+
+```json
+{
+  "container_tag": "rok",
+  "enable_custom_container_tags": true,
+  "custom_containers": ["project-alpha", "shared-knowledge"],
+  "custom_container_instructions": "Use project-alpha for coding context."
+}
+```
+
+</details>
+
+**Support:** [Discord](https://supermemory.link/discord) · [support@supermemory.com](mailto:support@supermemory.com)
+
+---
+
 ## Provider Comparison
 
 | Provider | Storage | Cost | Tools | Dependencies | Unique Feature |
@@ -262,13 +469,14 @@ rok config set memory.provider byterover
 | **Holographic** | Local | Free | 2 | None | HRR algebra + trust scoring |
 | **RetainDB** | Cloud | $20/mo | 5 | `requests` | Delta compression |
 | **ByteRover** | Local/Cloud | Free/Paid | 3 | `brv` CLI | Pre-compression extraction |
+| **Supermemory** | Cloud | Paid | 4 | `supermemory` | Context fencing + session graph ingest + multi-container |
 
 ## Profile Isolation
 
 Each provider's data is isolated per [profile](/docs/user-guide/profiles):
 
 - **Local storage providers** (Holographic, ByteRover) use `$ROK_HOME/` paths which differ per profile
-- **Config file providers** (Honcho, Mem0, Hindsight) store config in `$ROK_HOME/` so each profile has its own credentials
+- **Config file providers** (Honcho, Mem0, Hindsight, Supermemory) store config in `$ROK_HOME/` so each profile has its own credentials
 - **Cloud providers** (RetainDB) auto-derive profile-scoped project names
 - **Env var providers** (OpenViking) are configured via each profile's `.env` file
 

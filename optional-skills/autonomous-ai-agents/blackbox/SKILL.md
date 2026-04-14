@@ -7,7 +7,7 @@ license: MIT
 metadata:
   rok:
     tags: [Coding-Agent, Blackbox, Multi-Agent, Judge, Multi-Model]
-    related_skills: [claude-code, codex, rok-agent]
+    related_skills: [claude-code, codex, rok]
 ---
 
 # Blackbox CLI

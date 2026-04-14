@@ -2,7 +2,7 @@
 Longcat Flash Chat tool call parser.
 
 Same as Rok but uses <longcat_tool_call> tags instead of <tool_call>.
-Based on VLLM's LongcatFlashToolParser (extends Hermes2ProToolParser).
+Based on VLLM's LongcatFlashToolParser (extends Rok2ProToolParser).
 """
 
 import json

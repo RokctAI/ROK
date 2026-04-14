@@ -20,18 +20,25 @@ from zoneinfo import ZoneInfo
 import rok_time
 
 
+def _reset_rok_time_cache():
+    """Reset the rok_time module cache (replacement for removed reset_cache)."""
+    rok_time._cached_tz = None
+    rok_time._cached_tz_name = None
+    rok_time._cache_resolved = False
+
+
 # =========================================================================
 # rok_time.now() — core helper
 # =========================================================================
 
-class TestHermesTimeNow:
+class TestRokTimeNow:
     """Test the timezone-aware now() helper."""
 
     def setup_method(self):
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
     def teardown_method(self):
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
         os.environ.pop("ROK_TIMEZONE", None)
 
     def test_valid_timezone_applies(self):
@@ -86,24 +93,24 @@ class TestHermesTimeNow:
     def test_cache_invalidation(self):
         """Changing env var + reset_cache picks up new timezone."""
         os.environ["ROK_TIMEZONE"] = "UTC"
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
         r1 = rok_time.now()
         assert r1.utcoffset() == timedelta(0)
 
         os.environ["ROK_TIMEZONE"] = "Asia/Kolkata"
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
         r2 = rok_time.now()
         assert r2.utcoffset() == timedelta(hours=5, minutes=30)
 
 
 class TestGetTimezone:
-    """Test get_timezone() and get_timezone_name()."""
+    """Test get_timezone()."""
 
     def setup_method(self):
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
     def teardown_method(self):
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
         os.environ.pop("ROK_TIMEZONE", None)
 
     def test_returns_zoneinfo_for_valid(self):
@@ -122,9 +129,6 @@ class TestGetTimezone:
         tz = rok_time.get_timezone()
         assert tz is None
 
-    def test_get_timezone_name(self):
-        os.environ["ROK_TIMEZONE"] = "Asia/Tokyo"
-        assert rok_time.get_timezone_name() == "Asia/Tokyo"
 
 
 # =========================================================================
@@ -136,8 +140,11 @@ class TestCodeExecutionTZ:
     """Verify TZ env var is passed to sandboxed child process via real execute_code."""
 
     @pytest.fixture(autouse=True)
-    def _import_execute_code(self):
+    def _import_execute_code(self, monkeypatch):
         """Lazy-import execute_code to avoid pulling in firecrawl at collection time."""
+        # Force local backend — other tests in the same xdist worker may leak
+        # TERMINAL_ENV=modal/docker which causes modal.exception.AuthError.
+        monkeypatch.setenv("TERMINAL_ENV", "local")
         try:
             from tools.code_execution_tool import execute_code
             self._execute_code = execute_code
@@ -202,10 +209,10 @@ class TestCronTimezone:
     """Verify cron paths use timezone-aware now()."""
 
     def setup_method(self):
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
     def teardown_method(self):
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
         os.environ.pop("ROK_TIMEZONE", None)
 
     def test_parse_schedule_duration_uses_tz_aware_now(self):
@@ -234,7 +241,7 @@ class TestCronTimezone:
         monkeypatch.setattr(jobs_module, "OUTPUT_DIR", tmp_path / "cron" / "output")
 
         os.environ["ROK_TIMEZONE"] = "Asia/Kolkata"
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
         # Create a job with a NAIVE past timestamp (simulating pre-tz data)
         from cron.jobs import create_job, load_jobs, save_jobs, get_due_jobs
@@ -259,7 +266,7 @@ class TestCronTimezone:
         from cron.jobs import _ensure_aware
 
         os.environ["ROK_TIMEZONE"] = "Asia/Kolkata"
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
         # Create a naive datetime — will be interpreted as system-local time
         naive_dt = datetime(2026, 3, 11, 12, 0, 0)
@@ -283,7 +290,7 @@ class TestCronTimezone:
         from cron.jobs import _ensure_aware
 
         os.environ["ROK_TIMEZONE"] = "Asia/Kolkata"
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
         # Create an aware datetime in UTC
         utc_dt = datetime(2026, 3, 11, 15, 0, 0, tzinfo=timezone.utc)
@@ -309,7 +316,7 @@ class TestCronTimezone:
         monkeypatch.setattr(jobs_module, "OUTPUT_DIR", tmp_path / "cron" / "output")
 
         os.environ["ROK_TIMEZONE"] = "UTC"
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
         from cron.jobs import create_job, load_jobs, save_jobs, get_due_jobs
 
@@ -340,7 +347,7 @@ class TestCronTimezone:
         # of the naive timestamp exceeds _rok_now's wall time — this would
         # have caused a false "not due" with the old replace(tzinfo=...) approach.
         os.environ["ROK_TIMEZONE"] = "Pacific/Midway"  # UTC-11
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
         from cron.jobs import create_job, load_jobs, save_jobs, get_due_jobs
         create_job(prompt="Cross-tz job", schedule="every 1h")
@@ -364,7 +371,7 @@ class TestCronTimezone:
         monkeypatch.setattr(jobs_module, "OUTPUT_DIR", tmp_path / "cron" / "output")
 
         os.environ["ROK_TIMEZONE"] = "US/Eastern"
-        rok_time.reset_cache()
+        _reset_rok_time_cache()
 
         from cron.jobs import create_job
         job = create_job(prompt="TZ test", schedule="every 2h")

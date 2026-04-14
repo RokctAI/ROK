@@ -1,12 +1,12 @@
 ---
 sidebar_position: 14
 title: "API Server"
-description: "Expose rok-agent as an OpenAI-compatible API for any frontend"
+description: "Expose rok as an OpenAI-compatible API for any frontend"
 ---
 
 # API Server
 
-The API server exposes rok-agent as an OpenAI-compatible HTTP endpoint. Any frontend that speaks the OpenAI format — Open WebUI, LobeChat, LibreChat, NextChat, ChatBox, and hundreds more — can connect to rok-agent and use it as a backend.
+The API server exposes rok as an OpenAI-compatible HTTP endpoint. Any frontend that speaks the OpenAI format — Open WebUI, LobeChat, LibreChat, NextChat, ChatBox, and hundreds more — can connect to rok and use it as a backend.
 
 Your agent handles requests with its full toolset (terminal, file operations, web search, memory, skills) and returns the final response. When streaming, tool progress indicators appear inline so frontends can show what the agent is doing.
 
@@ -44,7 +44,7 @@ Point any OpenAI-compatible client at `http://localhost:8642/v1`:
 curl http://localhost:8642/v1/chat/completions \
   -H "Authorization: Bearer change-me-local-dev" \
   -H "Content-Type: application/json" \
-  -d '{"model": "rok-agent", "messages": [{"role": "user", "content": "Hello!"}]}'
+  -d '{"model": "rok", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
 
 Or connect Open WebUI, LobeChat, or any other frontend — see the [Open WebUI integration guide](/docs/user-guide/messaging/open-webui) for step-by-step instructions.
@@ -58,7 +58,7 @@ Standard OpenAI Chat Completions format. Stateless — the full conversation is 
 **Request:**
 ```json
 {
-  "model": "rok-agent",
+  "model": "rok",
   "messages": [
     {"role": "system", "content": "You are a Python expert."},
     {"role": "user", "content": "Write a fibonacci function"}
@@ -73,7 +73,7 @@ Standard OpenAI Chat Completions format. Stateless — the full conversation is 
   "id": "chatcmpl-abc123",
   "object": "chat.completion",
   "created": 1710000000,
-  "model": "rok-agent",
+  "model": "rok",
   "choices": [{
     "index": 0,
     "message": {"role": "assistant", "content": "Here's a fibonacci function..."},
@@ -94,7 +94,7 @@ OpenAI Responses API format. Supports server-side conversation state via `previo
 **Request:**
 ```json
 {
-  "model": "rok-agent",
+  "model": "rok",
   "input": "What files are in my project?",
   "instructions": "You are a helpful coding assistant.",
   "store": true
@@ -107,7 +107,7 @@ OpenAI Responses API format. Supports server-side conversation state via `previo
   "id": "resp_abc123",
   "object": "response",
   "status": "completed",
-  "model": "rok-agent",
+  "model": "rok",
   "output": [
     {"type": "function_call", "name": "terminal", "arguments": "{\"command\": \"ls\"}", "call_id": "call_1"},
     {"type": "function_call_output", "call_id": "call_1", "output": "README.md src/ tests/"},
@@ -152,7 +152,7 @@ Delete a stored response.
 
 ### GET /v1/models
 
-Lists `rok-agent` as an available model. Required by most frontends for model discovery.
+Lists the agent as an available model. The advertised model name defaults to the [profile](/docs/user-guide/features/profiles) name (or `rok` for the default profile). Required by most frontends for model discovery.
 
 ### GET /health
 
@@ -160,7 +160,7 @@ Health check. Returns `{"status": "ok"}`. Also available at **GET /v1/health** f
 
 ## System Prompt Handling
 
-When a frontend sends a `system` message (Chat Completions) or `instructions` field (Responses API), rok-agent **layers it on top** of its core system prompt. Your agent keeps all its tools, memory, and skills — the frontend's system prompt adds extra instructions.
+When a frontend sends a `system` message (Chat Completions) or `instructions` field (Responses API), rok **layers it on top** of its core system prompt. Your agent keeps all its tools, memory, and skills — the frontend's system prompt adds extra instructions.
 
 This means you can customize behavior per-frontend without losing capabilities:
 - Open WebUI system prompt: "You are a Python expert. Always include type hints."
@@ -177,7 +177,7 @@ Authorization: Bearer ***
 Configure the key via `API_SERVER_KEY` env var. If you need a browser to call Rok directly, also set `API_SERVER_CORS_ORIGINS` to an explicit allowlist.
 
 :::warning Security
-The API server gives full access to rok-agent's toolset, **including terminal commands**. If you change the bind address to `0.0.0.0` (network-accessible), **always set `API_SERVER_KEY`** and keep `API_SERVER_CORS_ORIGINS` narrow — without that, remote callers may be able to execute arbitrary commands on your machine.
+The API server gives full access to rok's toolset, **including terminal commands**. When binding to a non-loopback address like `0.0.0.0`, `API_SERVER_KEY` is **required**. Also keep `API_SERVER_CORS_ORIGINS` narrow to control browser access.
 
 The default bind address (`127.0.0.1`) is for local-only use. Browser access is disabled by default; enable it only for explicit trusted origins.
 :::
@@ -193,6 +193,7 @@ The default bind address (`127.0.0.1`) is for local-only use. Browser access is 
 | `API_SERVER_HOST` | `127.0.0.1` | Bind address (localhost only by default) |
 | `API_SERVER_KEY` | _(none)_ | Bearer token for auth |
 | `API_SERVER_CORS_ORIGINS` | _(none)_ | Comma-separated allowed browser origins |
+| `API_SERVER_MODEL_NAME` | _(profile name)_ | Model name on `/v1/models`. Defaults to profile name, or `rok` for default profile. |
 
 ### config.yaml
 
@@ -241,6 +242,36 @@ Any frontend that supports the OpenAI API format works. Tested/documented integr
 | big-AGI | 7k | Custom endpoint |
 | OpenAI Python SDK | — | `OpenAI(base_url="http://localhost:8642/v1")` |
 | curl | — | Direct HTTP requests |
+
+## Multi-User Setup with Profiles
+
+To give multiple users their own isolated Rok instance (separate config, memory, skills), use [profiles](/docs/user-guide/features/profiles):
+
+```bash
+# Create a profile per user
+rok profile create alice
+rok profile create bob
+
+# Configure each profile's API server on a different port
+rok -p alice config set API_SERVER_ENABLED true
+rok -p alice config set API_SERVER_PORT 8643
+rok -p alice config set API_SERVER_KEY alice-secret
+
+rok -p bob config set API_SERVER_ENABLED true
+rok -p bob config set API_SERVER_PORT 8644
+rok -p bob config set API_SERVER_KEY bob-secret
+
+# Start each profile's gateway
+rok -p alice gateway &
+rok -p bob gateway &
+```
+
+Each profile's API server automatically advertises the profile name as the model ID:
+
+- `http://localhost:8643/v1/models` → model `alice`
+- `http://localhost:8644/v1/models` → model `bob`
+
+In Open WebUI, add each as a separate connection. The model dropdown shows `alice` and `bob` as distinct models, each backed by a fully isolated Rok instance. See the [Open WebUI guide](/docs/user-guide/messaging/open-webui#multi-user-setup-with-profiles) for details.
 
 ## Limitations
 

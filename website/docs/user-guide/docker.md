@@ -21,7 +21,7 @@ If this is your first time running Rok Agent, create a data directory on the hos
 mkdir -p ~/.rok
 docker run -it --rm \
   -v ~/.rok:/opt/data \
-  rokctai/rok-agent
+  rokctai/rok setup
 ```
 
 This drops you into the setup wizard, which will prompt you for your API keys and write them to `~/.rok/.env`. You only need to do this once. It is highly recommended to set up a chat system for the gateway to work with at this point.
@@ -35,7 +35,7 @@ docker run -d \
   --name rok \
   --restart unless-stopped \
   -v ~/.rok:/opt/data \
-  rokctai/rok-agent gateway run
+  rokctai/rok gateway run
 ```
 
 ## Running interactively (CLI chat)
@@ -45,7 +45,7 @@ To open an interactive chat session against a running data directory:
 ```sh
 docker run -it --rm \
   -v ~/.rok:/opt/data \
-  rokctai/rok-agent
+  rokctai/rok
 ```
 
 ## Persistent volumes
@@ -78,7 +78,7 @@ docker run -it --rm \
   -v ~/.rok:/opt/data \
   -e ANTHROPIC_API_KEY="sk-ant-..." \
   -e OPENAI_API_KEY="sk-..." \
-  rokctai/rok-agent
+  rokctai/rok
 ```
 
 Direct `-e` flags override values from `.env`. This is useful for CI/CD or secrets-manager integrations where you don't want keys on disk.
@@ -91,7 +91,7 @@ For persistent gateway deployment, a `docker-compose.yaml` is convenient:
 version: "3.8"
 services:
   rok:
-    image: rokctai/rok-agent:latest
+    image: rokctai/rok:latest
     container_name: rok
     restart: unless-stopped
     command: gateway run
@@ -131,7 +131,7 @@ docker run -d \
   --restart unless-stopped \
   --memory=4g --cpus=2 \
   -v ~/.rok:/opt/data \
-  rokctai/rok-agent gateway run
+  rokctai/rok gateway run
 ```
 
 ## What the Dockerfile does
@@ -157,13 +157,13 @@ The entrypoint script (`docker/entrypoint.sh`) bootstraps the data volume on fir
 Pull the latest image and recreate the container. Your data directory is untouched.
 
 ```sh
-docker pull rokctai/rok-agent:latest
+docker pull rokctai/rok:latest
 docker rm -f rok
 docker run -d \
   --name rok \
   --restart unless-stopped \
   -v ~/.rok:/opt/data \
-  rokctai/rok-agent gateway run
+  rokctai/rok gateway run
 ```
 
 Or with Docker Compose:
@@ -204,7 +204,7 @@ docker run -d \
   --name rok \
   --shm-size=1g \
   -v ~/.rok:/opt/data \
-  rokctai/rok-agent gateway run
+  rokctai/rok gateway run
 ```
 
 ### Gateway not reconnecting after network issues

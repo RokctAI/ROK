@@ -7,7 +7,7 @@ license: MIT
 metadata:
   rok:
     tags: [Coding-Agent, OpenCode, Autonomous, Refactoring, Code-Review]
-    related_skills: [claude-code, codex, rok-agent]
+    related_skills: [claude-code, codex, rok]
 ---
 
 # OpenCode CLI

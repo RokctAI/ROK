@@ -18,7 +18,7 @@ The evaluate flow:
         a. rollout_and_score_eval()  -- Per-task agent loop + test verification
             - Resolves Docker image (pre-built Hub image or Dockerfile fallback)
             - Registers per-task Modal sandbox via register_task_env_overrides()
-            - Runs the HermesAgentLoop (terminal + file tools)
+            - Runs the RokLoop (terminal + file tools)
             - Uploads test suite and runs test.sh in the same sandbox
             - Returns binary pass/fail result
         b. Aggregates per-task, per-category, and overall pass rates
@@ -44,7 +44,7 @@ import tempfile
 import time
 import uuid
 from collections import defaultdict
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Ensure repo root is on sys.path for imports
@@ -57,8 +57,8 @@ from pydantic import Field
 from atroposlib.envs.base import EvalHandlingEnum
 from atroposlib.envs.server_handling.server_manager import APIServerConfig
 
-from environments.agent_loop import AgentResult, HermesAgentLoop
-from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
+from environments.agent_loop import AgentResult, RokLoop
+from environments.rok_base_env import RokBaseEnv, RokEnvConfig
 from environments.tool_context import ToolContext
 from tools.terminal_tool import (
     register_task_env_overrides,
@@ -73,11 +73,11 @@ logger = logging.getLogger(__name__)
 # Configuration
 # =============================================================================
 
-class TerminalBench2EvalConfig(HermesAgentEnvConfig):
+class TerminalBench2EvalConfig(RokEnvConfig):
     """
     Configuration for the Terminal-Bench 2.0 evaluation environment.
 
-    Extends HermesAgentEnvConfig with TB2-specific settings for dataset loading,
+    Extends RokEnvConfig with TB2-specific settings for dataset loading,
     test execution, task filtering, and eval concurrency.
     """
 
@@ -148,6 +148,62 @@ MODAL_INCOMPATIBLE_TASKS = {
 # Tar extraction helper
 # =============================================================================
 
+def _normalize_tar_member_parts(member_name: str) -> list:
+    """Return safe path components for a tar member or raise ValueError."""
+    normalized_name = member_name.replace("\\", "/")
+    posix_path = PurePosixPath(normalized_name)
+    windows_path = PureWindowsPath(member_name)
+
+    if (
+        not normalized_name
+        or posix_path.is_absolute()
+        or windows_path.is_absolute()
+        or windows_path.drive
+    ):
+        raise ValueError(f"Unsafe archive member path: {member_name}")
+
+    parts = [part for part in posix_path.parts if part not in ("", ".")]
+    if not parts or any(part == ".." for part in parts):
+        raise ValueError(f"Unsafe archive member path: {member_name}")
+    return parts
+
+
+def _safe_extract_tar(tar: tarfile.TarFile, target_dir: Path) -> None:
+    """Extract a tar archive without allowing traversal or link entries."""
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_root = target_dir.resolve()
+
+    for member in tar.getmembers():
+        parts = _normalize_tar_member_parts(member.name)
+        target = target_dir.joinpath(*parts)
+        target_real = target.resolve(strict=False)
+
+        try:
+            target_real.relative_to(target_root)
+        except ValueError as exc:
+            raise ValueError(f"Unsafe archive member path: {member.name}") from exc
+
+        if member.isdir():
+            target_real.mkdir(parents=True, exist_ok=True)
+            continue
+
+        if not member.isfile():
+            raise ValueError(f"Unsupported archive member type: {member.name}")
+
+        target_real.parent.mkdir(parents=True, exist_ok=True)
+        extracted = tar.extractfile(member)
+        if extracted is None:
+            raise ValueError(f"Cannot read archive member: {member.name}")
+
+        with extracted, open(target_real, "wb") as dst:
+            shutil.copyfileobj(extracted, dst)
+
+        try:
+            os.chmod(target_real, member.mode & 0o777)
+        except OSError:
+            pass
+
+
 def _extract_base64_tar(b64_data: str, target_dir: Path):
     """Extract a base64-encoded tar.gz archive into target_dir."""
     if not b64_data:
@@ -155,18 +211,18 @@ def _extract_base64_tar(b64_data: str, target_dir: Path):
     raw = base64.b64decode(b64_data)
     buf = io.BytesIO(raw)
     with tarfile.open(fileobj=buf, mode="r:gz") as tar:
-        tar.extractall(path=str(target_dir))
+        _safe_extract_tar(tar, target_dir)
 
 
 # =============================================================================
 # Main Environment
 # =============================================================================
 
-class TerminalBench2EvalEnv(HermesAgentBaseEnv):
+class TerminalBench2EvalEnv(RokBaseEnv):
     """
     Terminal-Bench 2.0 evaluation environment (eval-only, no training).
 
-    Inherits from HermesAgentBaseEnv for:
+    Inherits from RokBaseEnv for:
       - Terminal backend setup (os.environ["TERMINAL_ENV"])
       - Tool resolution via _resolve_tools_for_group()
       - Monkey patches for async-safe tool operation
@@ -179,7 +235,7 @@ class TerminalBench2EvalEnv(HermesAgentBaseEnv):
     Each task in rollout_and_score_eval():
       1. Resolve Docker image (pre-built Hub image or Dockerfile fallback)
       2. Register per-task Modal sandbox override
-      3. Run HermesAgentLoop with terminal + file tools
+      3. Run RokLoop with terminal + file tools
       4. Upload test suite and execute test.sh in the same sandbox
       5. Check /logs/verifier/reward.txt for pass/fail
       6. Clean up sandbox, overrides, and temp files
@@ -328,7 +384,7 @@ class TerminalBench2EvalEnv(HermesAgentBaseEnv):
     # =========================================================================
     # Training pipeline stubs -- NOT used in eval-only mode
     # =========================================================================
-    # These satisfy the abstract method requirements from HermesAgentBaseEnv.
+    # These satisfy the abstract method requirements from RokBaseEnv.
     # The evaluate subcommand calls setup() -> evaluate() directly, bypassing
     # the training pipeline entirely.
 
@@ -414,7 +470,7 @@ class TerminalBench2EvalEnv(HermesAgentBaseEnv):
 
         This is the core evaluation method. For each task it:
         1. Resolves the Docker image and registers the Modal sandbox override
-        2. Runs HermesAgentLoop with terminal + file tools
+        2. Runs RokLoop with terminal + file tools
         3. Uploads the test suite into the sandbox
         4. Executes test.sh and checks the result
         5. Cleans up the sandbox and temp files
@@ -476,7 +532,7 @@ class TerminalBench2EvalEnv(HermesAgentBaseEnv):
                     tokenizer=self.tokenizer,
                     preserve_think_blocks=bool(self.config.thinking_mode),
                 ) as managed:
-                    agent = HermesAgentLoop(
+                    agent = RokLoop(
                         server=managed,
                         tool_schemas=tools,
                         valid_tool_names=valid_names,
@@ -485,10 +541,11 @@ class TerminalBench2EvalEnv(HermesAgentBaseEnv):
                         temperature=self.config.agent_temperature,
                         max_tokens=self.config.max_token_length,
                         extra_body=self.config.extra_body,
+                        budget_config=self.config.build_budget_config(),
                     )
                     result = await agent.run(messages)
             else:
-                agent = HermesAgentLoop(
+                agent = RokLoop(
                     server=self.server,
                     tool_schemas=tools,
                     valid_tool_names=valid_names,
@@ -497,6 +554,7 @@ class TerminalBench2EvalEnv(HermesAgentBaseEnv):
                     temperature=self.config.agent_temperature,
                     max_tokens=self.config.max_token_length,
                     extra_body=self.config.extra_body,
+                    budget_config=self.config.build_budget_config(),
                 )
                 result = await agent.run(messages)
 

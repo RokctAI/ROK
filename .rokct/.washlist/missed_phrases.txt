@@ -1,213 +1,82 @@
 C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:1: # Hermes Agent Environment Configuration
 C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:12: # Default model is configured in ~/.hermes/config.yaml (model.default).
 C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:13: # Use 'hermes model' or 'hermes setup' to change it.
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:105: # Terminal backend is configured in ~/.hermes/config.yaml (terminal.backend).
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:106: # Use 'hermes setup' or 'hermes config set terminal.backend docker' to change.
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:250: # WhatsApp (built-in Baileys bridge — run `hermes whatsapp` to pair)
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:254: # Email (IMAP/SMTP — send and receive emails as Hermes)
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:256: # EMAIL_ADDRESS=hermes@gmail.com
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:275: # HERMES_HUMAN_DELAY_MODE=off     # off | natural | custom
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:276: # HERMES_HUMAN_DELAY_MIN_MS=800   # Min delay in ms (custom mode)
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:277: # HERMES_HUMAN_DELAY_MAX_MS=2500  # Max delay in ms (custom mode)
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:293: # Context compression is configured in ~/.hermes/config.yaml under compression:
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:91: # HERMES_QWEN_BASE_URL=https://portal.qwen.ai/v1
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:133: # Terminal backend is configured in ~/.hermes/config.yaml (terminal.backend).
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:134: # Use 'hermes setup' or 'hermes config set terminal.backend docker' to change.
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:278: # WhatsApp (built-in Baileys bridge — run `hermes whatsapp` to pair)
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:282: # Email (IMAP/SMTP — send and receive emails as Hermes)
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:284: # EMAIL_ADDRESS=hermes@gmail.com
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:303: # HERMES_HUMAN_DELAY_MODE=off     # off | natural | custom
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:304: # HERMES_HUMAN_DELAY_MIN_MS=800   # Min delay in ms (custom mode)
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:305: # HERMES_HUMAN_DELAY_MAX_MS=2500  # Max delay in ms (custom mode)
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:321: # Context compression is configured in ~/.hermes/config.yaml under compression:
 C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1: # Hermes Agent CLI Configuration
 C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:16: #   "nous"         - Nous Portal OAuth (requires: hermes login)
 C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:19: #   "openai-codex" - OpenAI Codex (requires: hermes login --provider openai-codex)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:37: # Can also be overridden with --provider flag or HERMES_INFERENCE_PROVIDER env var.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:105: #   - CLI (`hermes` command): Uses "." (current directory where you run hermes)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:143: #   # These values come from your current shell first, then ~/.hermes/.env.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:292: # Hermes uses lightweight "auxiliary" models for side tasks: image analysis,
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:311: #   "nous"       - Force Nous Portal (requires: hermes login)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:312: #   "codex"      - Force Codex OAuth (requires: hermes model → Codex).
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:424: # copying them into ~/.hermes/skills/.  Each path is expanded (~ and ${VAR})
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:426: # creation always writes to ~/.hermes/skills/.  Local skills take precedence
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:458: pirate: "Arrr! Ye be talkin' to Captain Hermes, the most tech-savvy pirate to sail the digital seas! Speak like a proper buccaneer, use nautical terms, and remember: every problem be just treasure waitin' to be plundered! Yo ho ho!"
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:461: noir: "The rain hammered against the terminal like regrets on a guilty conscience. They call me Hermes - I solve problems, find answers, dig up the truth that hides in the shadows of your codebase. In this city of silicon and secrets, everyone's got something to hide. What's your story, pal?"
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:470: # Use `hermes tools` to interactively enable/disable tools per platform.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:479: #   - A preset like "hermes-cli" or "hermes-telegram" (curated tool set)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:488: #     cli: [hermes-cli]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:489: #     telegram: [hermes-telegram]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:504: #   cli:           hermes-cli            (everything + cronjob management)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:505: #   telegram:      hermes-telegram       (terminal, file, web, vision, image, tts, browser, skills, todo, cronjob, messaging)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:506: #   discord:       hermes-discord        (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:507: #   whatsapp:      hermes-whatsapp       (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:508: #   slack:         hermes-slack          (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:509: #   signal:        hermes-signal         (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:510: #   homeassistant: hermes-homeassistant  (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:513: cli: [hermes-cli]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:514: telegram: [hermes-telegram]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:515: discord: [hermes-discord]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:516: whatsapp: [hermes-whatsapp]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:517: slack: [hermes-slack]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:518: signal: [hermes-signal]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:519: homeassistant: [hermes-homeassistant]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:524: # Run `hermes chat --list-toolsets` to see all toolsets and their tools.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:525: # Run `hermes chat --list-tools` to see every individual tool with descriptions.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:547: #   hermes-cli       - All of the above except rl + send_message
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:548: #   hermes-telegram  - terminal, file, web, vision, image_gen, tts, browser,
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:550: #   hermes-discord   - Same as hermes-telegram
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:551: #   hermes-whatsapp  - Same as hermes-telegram
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:552: #   hermes-slack     - Same as hermes-telegram
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:581: # Use `hermes tools` to configure interactively, or edit platform_toolsets directly.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:583: # CLI override: hermes chat --toolsets terminal,web,file
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:671: # The execute_code tool runs Python scripts that call Hermes tools via RPC.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:699: # API key: HONCHO_API_KEY in ~/.hermes/.env or ~/.honcho/config.json
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:701: # Hermes-specific overrides (optional — most config comes from ~/.honcho/config.json):
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:719: # What Enter does when Hermes is already busy in the CLI.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:720: #   interrupt: Interrupt the current run and redirect Hermes (default)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:758: #   default  — Classic Hermes gold/kawaii
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:763: # Custom skins: drop a YAML file in ~/.hermes/skins/<name>.yaml
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:9: COPY . /opt/hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:10: WORKDIR /opt/hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:16: cd /opt/hermes/scripts/whatsapp-bridge && \
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:20: WORKDIR /opt/hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:21: RUN chmod +x /opt/hermes/docker/entrypoint.sh
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:23: ENV HERMES_HOME=/opt/data
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:25: ENTRYPOINT [ "/opt/hermes/docker/entrypoint.sh" ]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:45: # Can also be overridden with --provider flag or HERMES_INFERENCE_PROVIDER env var.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:55: #   Controls when Hermes compresses history and validates requests.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:56: #   Leave unset — Hermes auto-detects the correct value from the provider.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:132: #   - CLI (`hermes` command): Uses "." (current directory where you run hermes)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:171: #   # These values come from your current shell first, then ~/.hermes/.env.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:240: # from leaving it unset. Hermes will try an empty password via `sudo -S` and
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:318: # Hermes uses lightweight "auxiliary" models for side tasks: image analysis,
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:337: #   "nous"       - Force Nous Portal (requires: hermes login)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:339: #   "codex"       - Force Codex OAuth (requires: hermes model → Codex).
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:451: # copying them into ~/.hermes/skills/.  Each path is expanded (~ and ${VAR})
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:453: # creation always writes to ~/.hermes/skills/.  Local skills take precedence
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:501: pirate: "Arrr! Ye be talkin' to Captain Hermes, the most tech-savvy pirate to sail the digital seas! Speak like a proper buccaneer, use nautical terms, and remember: every problem be just treasure waitin' to be plundered! Yo ho ho!"
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:504: noir: "The rain hammered against the terminal like regrets on a guilty conscience. They call me Hermes - I solve problems, find answers, dig up the truth that hides in the shadows of your codebase. In this city of silicon and secrets, everyone's got something to hide. What's your story, pal?"
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:513: # Use `hermes tools` to interactively enable/disable tools per platform.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:522: #   - A preset like "hermes-cli" or "hermes-telegram" (curated tool set)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:531: #     cli: [hermes-cli]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:532: #     telegram: [hermes-telegram]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:547: #   cli:           hermes-cli            (everything + cronjob management)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:548: #   telegram:      hermes-telegram       (terminal, file, web, vision, image, tts, browser, skills, todo, cronjob, messaging)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:549: #   discord:       hermes-discord        (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:550: #   whatsapp:      hermes-whatsapp       (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:551: #   slack:         hermes-slack          (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:552: #   signal:        hermes-signal         (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:553: #   homeassistant: hermes-homeassistant  (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:556: cli: [hermes-cli]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:557: telegram: [hermes-telegram]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:558: discord: [hermes-discord]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:559: whatsapp: [hermes-whatsapp]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:560: slack: [hermes-slack]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:561: signal: [hermes-signal]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:562: homeassistant: [hermes-homeassistant]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:567: # Run `hermes chat --list-toolsets` to see all toolsets and their tools.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:568: # Run `hermes chat --list-tools` to see every individual tool with descriptions.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:590: #   hermes-cli       - All of the above except rl + send_message
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:591: #   hermes-telegram  - terminal, file, web, vision, image_gen, tts, browser,
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:593: #   hermes-discord   - Same as hermes-telegram
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:594: #   hermes-whatsapp  - Same as hermes-telegram
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:595: #   hermes-slack     - Same as hermes-telegram
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:624: # Use `hermes tools` to configure interactively, or edit platform_toolsets directly.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:626: # CLI override: hermes chat --toolsets terminal,web,file
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:722: # The execute_code tool runs Python scripts that call Hermes tools via RPC.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:750: # API key: HONCHO_API_KEY in ~/.hermes/.env or ~/.honcho/config.json
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:752: # Hermes-specific overrides (optional — most config comes from ~/.honcho/config.json):
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:775: # What Enter does when Hermes is already busy in the CLI.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:776: #   interrupt: Interrupt the current run and redirect Hermes (default)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:814: #   default  — Classic Hermes gold/kawaii
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:819: # Custom skins: drop a YAML file in ~/.hermes/skins/<name>.yaml
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:10: ENV PLAYWRIGHT_BROWSERS_PATH=/opt/hermes/.playwright
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:18: # Non-root user for runtime; UID can be overridden via HERMES_UID at runtime
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:19: RUN useradd -u 10000 -m -d /opt/data hermes
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:24: COPY . /opt/hermes
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:25: WORKDIR /opt/hermes
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:30: cd /opt/hermes/scripts/whatsapp-bridge && \
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:34: # Hand ownership to hermes user, then install Python deps in a virtualenv
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:35: RUN chown -R hermes:hermes /opt/hermes
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:36: USER hermes
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:42: RUN chmod +x /opt/hermes/docker/entrypoint.sh
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:44: ENV HERMES_HOME=/opt/data
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:46: ENTRYPOINT [ "/opt/hermes/docker/entrypoint.sh" ]
 C:\Users\sinya\Desktop\RokctAI\ROK\rok:3: Hermes Agent CLI launcher.
 C:\Users\sinya\Desktop\RokctAI\ROK\rok:5: This wrapper should behave like the installed `hermes` command, including
 C:\Users\sinya\Desktop\RokctAI\ROK\rok:10: from hermes_cli.main import main
-C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\entry.py:73: from .server import HermesACPAgent
-C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\entry.py:75: agent = HermesACPAgent()
-C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\server.py:84: class HermesACPAgent(acp.Agent):
 C:\Users\sinya\Desktop\RokctAI\ROK\datagen-config-examples\example_browser_tasks.jsonl:2: {"prompt": "Navigate to https://en.wikipedia.org/wiki/Hermes and extract the first paragraph of the article, the image caption, and the list of items in the infobox. Summarize what you find."}
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:161: <p class="subtitle">Comparison of Hermes Agent vs. openclaw-honcho — and a porting spec for bringing Hermes patterns into other Honcho integrations.</p>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:163: <span>hermes-agent / openclaw-honcho</span>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:175: <li><a href="#patterns">Hermes patterns to port</a></li>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:191: <p>Two independent Honcho integrations have been built for two different agent runtimes: <strong>Hermes Agent</strong> (Python, baked into the runner) and <strong>openclaw-honcho</strong> (TypeScript plugin via hook/tool API). Both use the same Honcho peer paradigm — dual peer model, <code>session.context()</code>, <code>peer.chat()</code> — but they made different tradeoffs at every layer.</p>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:193: <p>This document maps those tradeoffs and defines a porting spec: a set of Hermes-originated patterns, each stated as an integration-agnostic interface, that any Honcho integration can adopt regardless of runtime or language.</p>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:196: <strong>Scope</strong> Both integrations work correctly today. This spec is about the delta — patterns in Hermes that are worth propagating and patterns in openclaw-honcho that Hermes should eventually adopt. The spec is additive, not prescriptive.
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:204: <h3>Hermes: baked-in runner</h3>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:265: <th>Hermes Agent</th>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:342: <td>Replaces "Hermes Agent" in DEFAULT_AGENT_IDENTITY when configured.</td>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:362: <h2>Hermes patterns to port</h2>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:364: <p>Six patterns from Hermes are worth adopting in any Honcho integration. They are described below as integration-agnostic interfaces — the implementation will differ per runtime, but the contract is the same.</p>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:368: <h4>Patterns Hermes contributes</h4>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:644: <li class="todo"><strong>honcho mode / honcho sessions / honcho map</strong> — CLI parity with Hermes. (<a href="#spec-sessions">spec</a>)</li>
-C:\Users\sinya\Desktop\RokctAI\ROK\docs\honcho-integration-spec.html:656: <p>nanobot-honcho is a greenfield integration. Start from openclaw-honcho's architecture (hook-based, dual peer) and apply all Hermes patterns from day one rather than retrofitting. Priority order:</p>
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agentic_opd_env.py:87: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agentic_opd_env.py:88: from environments.agent_loop import AgentResult, HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agentic_opd_env.py:318: class AgenticOPDConfig(HermesAgentEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agentic_opd_env.py:379: class AgenticOPDEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agentic_opd_env.py:1042: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agent_loop.py:2: HermesAgentLoop -- Reusable Multi-Turn Agent Engine
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agent_loop.py:30: # Resized at runtime by HermesAgentBaseEnv.__init__ via resize_tool_pool().
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agent_loop.py:38: Called by HermesAgentBaseEnv.__init__ based on config.tool_pool_size.
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\agent_loop.py:117: class HermesAgentLoop:
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:19: │  HermesAgentBaseEnv    │  rok_base_env.py
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:29: TerminalTestEnv     HermesSweEnv    TerminalBench2EvalEnv
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:42: **HermesAgentBaseEnv** (`rok_base_env.py`) extends BaseEnv with rok-agent specifics:
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:49: Concrete environments inherit from `HermesAgentBaseEnv` and implement:
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:60: `HermesAgentLoop` is the reusable multi-turn agent engine. It runs the same pattern as rok-agent's `run_agent.py`:
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:162: ├── rok_base_env.py            # Abstract base (HermesAgentBaseEnv)
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:163: ├── agent_loop.py                 # Multi-turn agent engine (HermesAgentLoop)
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:212: ### HermesSweEnv (`rok_swe_env/`)
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:254: 2. Create your env file inheriting from `HermesAgentBaseEnv`
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:258: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:260: class MyEnvConfig(HermesAgentEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:263: class MyEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\README.md:306: 2. Inherit from `HermesAgentBaseEnv`
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:2: HermesAgentBaseEnv -- Abstract Base Environment for Rok-Agent + Atropos
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:7: - Agent loop orchestration via HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:63: from environments.agent_loop import AgentResult, HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:73: class HermesAgentEnvConfig(BaseEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:180: class HermesAgentBaseEnv(BaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:203: env_config_cls = HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:207: config: HermesAgentEnvConfig,
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:484: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:501: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\rok_base_env.py:514: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\web_research_env.py:71: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\web_research_env.py:149: class WebResearchEnvConfig(HermesAgentEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\web_research_env.py:201: class WebResearchEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\web_research_env.py:436: from environments.agent_loop import HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\web_research_env.py:466: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\__init__.py:22: from environments.agent_loop import AgentResult, HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\__init__.py:24: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\__init__.py:32: "HermesAgentLoop",
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\__init__.py:34: "HermesAgentBaseEnv",
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\__init__.py:35: "HermesAgentEnvConfig",
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:21: - Runs the HermesAgentLoop (terminal + file tools)
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:60: from environments.agent_loop import AgentResult, HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:61: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:76: class TerminalBench2EvalConfig(HermesAgentEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:80: Extends HermesAgentEnvConfig with TB2-specific settings for dataset loading,
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:165: class TerminalBench2EvalEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:169: Inherits from HermesAgentBaseEnv for:
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:182: 3. Run HermesAgentLoop with terminal + file tools
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:331: # These satisfy the abstract method requirements from HermesAgentBaseEnv.
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:417: 2. Runs HermesAgentLoop with terminal + file tools
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:479: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\terminalbench_2\terminalbench2_env.py:491: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\README.md:45: HermesAgentLoop (our agent)
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\README.md:52: The environment initialises the simulation via `yc-bench sim init` (NOT `yc-bench run`, which would start yc-bench's own built-in agent loop). Our `HermesAgentLoop` then drives all interaction through CLI commands.
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:24: - Runs HermesAgentLoop with terminal tool only
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:65: from environments.agent_loop import HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:66: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:179: class YCBenchEvalConfig(HermesAgentEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:183: Extends HermesAgentEnvConfig with YC-Bench-specific settings for
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:329: class YCBenchEvalEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:335: a competing built-in agent loop). The HermesAgentLoop then drives the
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:488: 3. Runs HermesAgentLoop with terminal tool
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:514: # LiteLLM), which would compete with our HermesAgentLoop.
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:534: # Step 2: Run the HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\benchmarks\yc_bench\yc_bench_env.py:543: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\hermes_swe_env\rok_swe_env.py:2: HermesSweEnv -- SWE-Bench Style Environment with Modal Sandboxes
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\hermes_swe_env\rok_swe_env.py:50: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\hermes_swe_env\rok_swe_env.py:56: class HermesSweEnvConfig(HermesAgentEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\hermes_swe_env\rok_swe_env.py:62: class HermesSweEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\hermes_swe_env\rok_swe_env.py:74: env_config_cls = HermesSweEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\hermes_swe_env\rok_swe_env.py:77: def config_init(cls) -> Tuple[HermesSweEnvConfig, List[APIServerConfig]]:
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\hermes_swe_env\rok_swe_env.py:83: env_config = HermesSweEnvConfig(
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\hermes_swe_env\rok_swe_env.py:229: HermesSweEnv.cli()
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\terminal_test_env\terminal_test_env.py:48: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\terminal_test_env\terminal_test_env.py:85: class TerminalTestEnvConfig(HermesAgentEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\terminal_test_env\terminal_test_env.py:91: class TerminalTestEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\tool_call_parsers\longcat_parser.py:5: Based on VLLM's LongcatFlashToolParser (extends Hermes2ProToolParser).
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\tool_call_parsers\qwen_parser.py:9: from environments.tool_call_parsers.rok_parser import HermesToolCallParser
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\tool_call_parsers\qwen_parser.py:13: class QwenToolCallParser(HermesToolCallParser):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\tool_call_parsers\rok_parser.py:5: Based on VLLM's Hermes2ProToolParser.extract_tool_calls()
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\tool_call_parsers\rok_parser.py:22: class HermesToolCallParser(ToolCallParser):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\tool_call_parsers\__init__.py:71: class HermesToolCallParser(ToolCallParser):
-C:\Users\sinya\Desktop\RokctAI\ROK\environments\tool_call_parsers\__init__.py:110: from environments.tool_call_parsers.rok_parser import HermesToolCallParser  # noqa: E402, F401
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:6: <title>Hermes Agent — An Agent That Grows With You</title>
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:13: <meta property="og:title" content="Hermes Agent — AI Agent Framework" />
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:19: <meta property="og:url" content="https://hermes-agent.nousresearch.com" />
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:22: content="https://hermes-agent.nousresearch.com/hermes-agent-banner.png"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:53: >Hermes Agent <span class="nav-by">by Nous Research</span></span
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:61: href="https://github.com/NousResearch/hermes-agent"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:88: href="https://github.com/NousResearch/hermes-agent"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:189: href="https://portal.nousresearch.com"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:264: data-text="hermes setup"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:270: hermes setup
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:273: hermes model</code></pre>
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:292: data-text="hermes"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:297: <pre><code>hermes</code></pre>
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:317: data-text="hermes gateway setup"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:323: hermes gateway setup
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:326: hermes gateway
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:329: hermes gateway install</code></pre>
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:348: data-text="hermes update"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:353: <pre><code>hermes update</code></pre>
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:373: and run Hermes Agent from there.
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:393: <span class="terminal-title">hermes</span>
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:602: href="https://portal.nousresearch.com"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\index.html:655: <a href="https://nousresearch.com" target="_blank" rel="noopener"
-C:\Users\sinya\Desktop\RokctAI\ROK\landingpage\style.css:2: Hermes Agent Landing Page
-C:\Users\sinya\Desktop\RokctAI\ROK\nix\checks.nix:10: hermesVenv = pkgs.callPackage ./python.nix {
-C:\Users\sinya\Desktop\RokctAI\ROK\nix\checks.nix:20: ${hermesVenv}/bin/python3 -c '
-C:\Users\sinya\Desktop\RokctAI\ROK\nix\checks.nix:202: ${hermesVenv}/bin/python3 -c '
-C:\Users\sinya\Desktop\RokctAI\ROK\nix\nixosModules.nix:60: else "cat > $out/${name} <<'ROK_DOC_EOF'\n${value}\nHERMES_DOC_EOF"
-C:\Users\sinya\Desktop\RokctAI\ROK\nix\packages.nix:5: hermesVenv = pkgs.callPackage ./python.nix {
-C:\Users\sinya\Desktop\RokctAI\ROK\nix\packages.nix:37: makeWrapper ${hermesVenv}/bin/${name} $out/bin/${name} \
-C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\mlops\hermes-atropos-environments\SKILL.md:3: description: Build, test, and debug Rok Agent RL environments for Atropos training. Covers the HermesAgentBaseEnv interface, reward functions, agent loop integration, evaluation with tools, wandb logging, and the three CLI modes (serve/process/evaluate). Use when creating, reviewing, or fixing RL environments in the rok-agent repo.
-C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\mlops\hermes-atropos-environments\SKILL.md:21: └── HermesAgentBaseEnv (environments/rok_base_env.py)
-C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\mlops\hermes-atropos-environments\SKILL.md:37: | `environments/agent_loop.py` | `HermesAgentLoop` + `AgentResult` dataclass |
-C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\mlops\hermes-atropos-environments\SKILL.md:154: from environments.agent_loop import HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\mlops\hermes-atropos-environments\SKILL.md:168: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\mlops\hermes-atropos-environments\SKILL.md:245: 2. **evaluate() must use HermesAgentLoop, not chat_completion** — Single-turn chat_completion has no tools. The whole point of rok-agent benchmarks is agentic evaluation with tool use.
-C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\mlops\hermes-atropos-environments\SKILL.md:287: class MyEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\mlops\hermes-atropos-environments\references\usage-patterns.md:106: - **Tool usage rate = 0** — evaluate() is using chat_completion instead of HermesAgentLoop
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:1: class HermesAgent < Formula
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:5: homepage "https://hermes-agent.nousresearch.com"
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:8: url "https://github.com/NousResearch/hermes-agent/releases/download/v2026.3.30/hermes_agent-0.6.0.tar.gz"
@@ -226,7 +95,7 @@ C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:19: [string]$HermesHome =
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:20: [string]$InstallDir = "$env:LOCALAPPDATA\hermes\hermes-agent"
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:29: $RepoUrlSsh = "git@github.com:NousResearch/hermes-agent.git"
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:30: $RepoUrlHttps = "https://github.com/NousResearch/hermes-agent.git"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:41: Write-Host "│             ⚕ Hermes Agent Installer                   │" -ForegroundColor Magenta
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:41: Write-Host "│             ⚕ Hermes Agent Installer                    │" -ForegroundColor Magenta
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:220: $managedNode = "$HermesHome\node\node.exe"
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:223: $env:Path = "$HermesHome\node;$env:Path"
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:224: Write-Success "Node.js $version found (Hermes-managed)"
@@ -345,107 +214,3 @@ C:\Users\sinya\Desktop\RokctAI\ROK\scripts\rok-gateway:366: print("Please run ma
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\whatsapp-bridge\allowlist.test.mjs:21: const sessionDir = mkdtempSync(path.join(os.tmpdir(), 'hermes-wa-allowlist-'));
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\whatsapp-bridge\allowlist.test.mjs:35: const sessionDir = mkdtempSync(path.join(os.tmpdir(), 'hermes-wa-allowlist-'));
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\whatsapp-bridge\allowlist.test.mjs:50: const sessionDir = mkdtempSync(path.join(os.tmpdir(), 'hermes-wa-allowlist-'));
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:2: Tests for environments/agent_loop.py — HermesAgentLoop.
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:24: HermesAgentLoop,
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:180: class TestHermesAgentLoop:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:228: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:250: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:274: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:293: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:310: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:330: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:346: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:364: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:382: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:398: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:417: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:441: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop.py:469: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:1: """Integration tests for HermesAgentLoop tool calling.
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:39: from environments.agent_loop import AgentResult, HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:211: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:260: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:302: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:346: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:378: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:410: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:444: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:480: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_tool_calling.py:521: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_vllm.py:1: """Integration tests for HermesAgentLoop with a local vLLM server.
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_vllm.py:38: from environments.agent_loop import AgentResult, HermesAgentLoop
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_vllm.py:174: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_vllm.py:216: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_vllm.py:254: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_vllm.py:294: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_agent_loop_vllm.py:328: agent = HermesAgentLoop(
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_managed_server_tool_support.py:7: 3. HermesAgentBaseEnv wires the selected parser into ServerManager correctly
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_timezone.py:27: class TestHermesTimeNow:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\test_tool_call_parsers.py:57: class TestHermesParser:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\acp\test_mcp_e2e.py:30: from acp_adapter.server import HermesACPAgent
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\acp\test_mcp_e2e.py:46: return HermesACPAgent(session_manager=mock_manager)
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\acp\test_server.py:1: """Tests for acp_adapter.server — HermesACPAgent ACP server."""
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\acp\test_server.py:28: from acp_adapter.server import HermesACPAgent, ROK_VERSION
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\acp\test_server.py:41: """HermesACPAgent backed by a mock session manager."""
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\acp\test_server.py:42: return HermesACPAgent(session_manager=mock_manager)
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\acp\test_server.py:500: acp_agent = HermesACPAgent(session_manager=manager)
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\agent\test_prompt_builder.py:678: class TestFindHermesMd:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\gateway\test_api_server_toolset.py:11: class TestHermesApiServerToolset:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\gateway\test_discord_reactions.py:66: user=SimpleNamespace(id=99999, name="HermesBot"),
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\gateway\test_discord_slash_commands.py:63: user=SimpleNamespace(id=99999, name="HermesBot"),
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\gateway\test_voice_command.py:1944: adapter._client.user = SimpleNamespace(id=99999, name="HermesBot")
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\gateway\test_voice_command.py:1967: bot_member = self._make_member(99999, "HermesBot", is_bot=True)
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\gateway\test_voice_command.py:1981: assert "HermesBot" not in names
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\hermes_cli\test_config.py:24: class TestGetHermesHome:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\hermes_cli\test_config.py:37: class TestEnsureHermesHome:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\hermes_cli\test_env_loader.py:58: "OPENAI_BASE_URL=https://new.example/v1\nHERMES_INFERENCE_PROVIDER=custom\n",
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\hermes_cli\test_gateway_service.py:342: class TestSystemUnitHermesHome:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\hermes_cli\test_gateway_service.py:406: class TestHermesHomeForTargetUser:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\hermes_cli\test_profiles.py:693: # TestGetProfilesRoot / TestGetDefaultHermesHome (internal helpers)
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_code_execution.py:69: class TestHermesToolsGeneration(unittest.TestCase):
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:11: HermesTokenStorage,
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:23: # HermesTokenStorage
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:26: class TestHermesTokenStorage:
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:29: storage = HermesTokenStorage("test-server")
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:53: storage = HermesTokenStorage("test-server")
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:70: storage = HermesTokenStorage("test-server")
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:145: storage = HermesTokenStorage("../../.ssh/config")
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:153: storage = HermesTokenStorage("../../../etc/passwd")
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:160: storage = HermesTokenStorage("my-mcp-server")
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_mcp_oauth.py:165: storage = HermesTokenStorage("server@host:8080/path")
-C:\Users\sinya\Desktop\RokctAI\ROK\tests\tools\test_tirith_security.py:975: class TestHermesHomeIsolation:
-C:\Users\sinya\Desktop\RokctAI\ROK\tools\mcp_oauth.py:58: class HermesTokenStorage:
-C:\Users\sinya\Desktop\RokctAI\ROK\tools\mcp_oauth.py:258: storage = HermesTokenStorage(server_name)
-C:\Users\sinya\Desktop\RokctAI\ROK\tools\mcp_oauth.py:326: HermesTokenStorage(server_name).remove()
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\acp-internals.md:29: -> construct HermesACPAgent
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\acp-internals.md:37: ### `HermesACPAgent`
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:40: class HermesAgentBaseEnv {
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:51: class HermesSweEnv {
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:67: BaseEnv <|-- HermesAgentBaseEnv
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:68: HermesAgentBaseEnv <|-- TerminalTestEnv
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:69: HermesAgentBaseEnv <|-- HermesSweEnv
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:70: HermesAgentBaseEnv <|-- TerminalBench2EvalEnv
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:84: ### HermesAgentBaseEnv
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:89: - **Agent loop integration** — `collect_trajectory()` runs `HermesAgentLoop` and scores the result
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:95: Your environment inherits from `HermesAgentBaseEnv` and implements five methods:
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:109: `HermesAgentLoop` (`environments/agent_loop.py`) is the reusable multi-turn agent engine. It runs the same tool-calling pattern as rok-agent's main loop:
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:276: ### HermesSweEnv
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:352: from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:355: class MyEnvConfig(HermesAgentEnvConfig):
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:358: class MyEnv(HermesAgentBaseEnv):
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:419: ### HermesAgentEnvConfig Fields
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:500: ├── rok_base_env.py          # Abstract base class (HermesAgentBaseEnv)
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\developer-guide\environments.md:501: ├── agent_loop.py               # Multi-turn agent engine (HermesAgentLoop)
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\reference\skills-catalog.md:205: | `rok-atropos-environments` | Build, test, and debug Rok Agent RL environments for Atropos training. Covers the HermesAgentBaseEnv interface, reward functions, agent loop integration, evaluation with tools, wandb logging, and the three CLI modes (serve/process/evaluate). Use when creating, reviewing, or f… | `mlops/training/rok-atropos-environments` |
-C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\user-guide\features\voice-mode.md:192: **Server channels:** The bot only responds when you @mention it (e.g. `@hermesbyt4 hello`). Make sure you select the **bot user** from the mention popup, not the role with the same name.
-C:\Users\sinya\Desktop\RokctAI\ROK\website\src\css\custom.css:2: * Hermes Agent — Custom Docusaurus Theme
-C:\Users\sinya\Desktop\RokctAI\ROK\website\src\css\custom.css:251: .hero--hermes {
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\cli-layout.svg:2: <title id="title">Hermes CLI interface layout</title>
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\cli-layout.svg:3: <desc id="desc">Stylized terminal window showing the Hermes CLI banner, conversation area, and fixed input prompt.</desc>
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\cli-layout.svg:10: <text x="480" y="44" text-anchor="middle" fill="#e8e4dc" font-family="Inter, sans-serif" font-size="18" font-weight="600">Hermes CLI</text>
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\cli-layout.svg:13: <text x="72" y="112" fill="#ffd700" font-family="JetBrains Mono, monospace" font-size="16">HERMES AGENT</text>
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\cli-layout.svg:26: <text x="72" y="350" fill="#7ce38b" font-family="JetBrains Mono, monospace" font-size="15">Hermes: Working tree is clean. Ready for the next task.</text>
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\cli-layout.svg:27: <text x="72" y="380" fill="#9a968e" font-family="JetBrains Mono, monospace" font-size="15">Hermes streams tool progress and responses here.</text>
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\session-recap.svg:2: <title id="title">Hermes session recap panel</title>
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\session-recap.svg:10: <text x="64" y="136" fill="#7ce38b" font-family="JetBrains Mono, monospace" font-size="15">◆ Hermes: Python is a high-level programming language.</text>
-C:\Users\sinya\Desktop\RokctAI\ROK\website\static\img\docs\session-recap.svg:12: <text x="64" y="196" fill="#7ce38b" font-family="JetBrains Mono, monospace" font-size="15">◆ Hermes: [3 tool calls: web_search, web_extract, terminal]</text>

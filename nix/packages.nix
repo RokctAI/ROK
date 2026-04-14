@@ -2,7 +2,7 @@
 { inputs, ... }: {
   perSystem = { pkgs, system, ... }:
     let
-      hermesVenv = pkgs.callPackage ./python.nix {
+      rokVenv = pkgs.callPackage ./python.nix {
         inherit (inputs) uv2nix pyproject-nix pyproject-build-systems;
       };
 
@@ -14,14 +14,14 @@
       };
 
       runtimeDeps = with pkgs; [
-        nodejs_20 ripgrep git openssh ffmpeg
+        nodejs_20 ripgrep git openssh ffmpeg tirith
       ];
 
       runtimePath = pkgs.lib.makeBinPath runtimeDeps;
     in {
       packages.default = pkgs.stdenv.mkDerivation {
-        pname = "rok-agent";
-        version = "0.1.0";
+        pname = "rok";
+        version = (builtins.fromTOML (builtins.readFile ../pyproject.toml)).project.version;
 
         dontUnpack = true;
         dontBuild = true;
@@ -30,21 +30,21 @@
         installPhase = ''
           runHook preInstall
 
-          mkdir -p $out/share/rok-agent $out/bin
-          cp -r ${bundledSkills} $out/share/rok-agent/skills
+          mkdir -p $out/share/rok $out/bin
+          cp -r ${bundledSkills} $out/share/rok/skills
 
           ${pkgs.lib.concatMapStringsSep "\n" (name: ''
-            makeWrapper ${hermesVenv}/bin/${name} $out/bin/${name} \
+            makeWrapper ${rokVenv}/bin/${name} $out/bin/${name} \
               --suffix PATH : "${runtimePath}" \
-              --set ROK_BUNDLED_SKILLS $out/share/rok-agent/skills
-          '') [ "rok" "rok-agent" "rok-acp" ]}
+              --set ROK_BUNDLED_SKILLS $out/share/rok/skills
+          '') [ "rok" "rok" "rok-acp" ]}
 
           runHook postInstall
         '';
 
         meta = with pkgs.lib; {
           description = "AI agent with advanced tool-calling capabilities";
-          homepage = "https://github.com/RokctAI/rok-agent";
+          homepage = "https://github.com/RokctAI/rok";
           mainProgram = "rok";
           license = licenses.mit;
           platforms = platforms.unix;

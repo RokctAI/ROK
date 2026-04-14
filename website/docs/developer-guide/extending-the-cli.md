@@ -6,7 +6,7 @@ description: "Build wrapper CLIs that extend the Rok TUI with custom widgets, ke
 
 # Extending the CLI
 
-Rok exposes protected extension hooks on `RokCLI` so wrapper CLIs can add widgets, keybindings, and layout customizations without overriding the 1000+ line `run()` method. This keeps your extension decoupled from internal changes.
+Rok exposes protected extension hooks on `Rokcli` so wrapper CLIs can add widgets, keybindings, and layout customizations without overriding the 1000+ line `run()` method. This keeps your extension decoupled from internal changes.
 
 ## Extension points
 
@@ -28,12 +28,12 @@ The first three are new protected hooks. The last two already existed.
 #!/usr/bin/env python3
 """my_cli.py — Example wrapper CLI that extends Rok."""
 
-from cli import RokCLI
+from cli import Rokcli
 from prompt_toolkit.layout import FormattedTextControl, Window
 from prompt_toolkit.filters import Condition
 
 
-class MyCLI(RokCLI):
+class MyCLI(Rokcli):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 Run it:
 
 ```bash
-cd ~/.rok/rok-agent
+cd ~/.rok/rok
 source .venv/bin/activate
 python my_cli.py
 ```

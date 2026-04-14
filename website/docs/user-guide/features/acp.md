@@ -75,8 +75,8 @@ Example settings snippet:
 {
   "acpClient.agents": [
     {
-      "name": "rok-agent",
-      "registryDir": "/path/to/rok-agent/acp_registry"
+      "name": "rok",
+      "registryDir": "/path/to/rok/acp_registry"
     }
   ]
 }
@@ -89,7 +89,7 @@ Example settings snippet:
 ```json
 {
   "agent_servers": {
-    "rok-agent": {
+    "rok": {
       "type": "custom",
       "command": "rok",
       "args": ["acp"],
@@ -103,7 +103,7 @@ Example settings snippet:
 Use an ACP-compatible plugin and point it at:
 
 ```text
-/path/to/rok-agent/acp_registry
+/path/to/rok/acp_registry
 ```
 
 ## Registry manifest

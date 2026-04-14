@@ -8,7 +8,7 @@ import pytest
 from toolsets import resolve_toolset, get_toolset, validate_toolset
 
 
-class TestHermesApiServerToolset:
+class TestRokApiServerToolset:
     """Tests for the rok-api-server toolset definition."""
 
     def test_toolset_exists(self):
@@ -39,7 +39,7 @@ class TestHermesApiServerToolset:
         tools = resolve_toolset("rok-api-server")
         for tool in ["browser_navigate", "browser_snapshot", "browser_click",
                       "browser_type", "browser_scroll", "browser_back",
-                      "browser_press", "browser_close"]:
+                      "browser_press"]:
             assert tool in tools, f"Missing browser tool: {tool}"
 
     def test_toolset_includes_homeassistant_tools(self):

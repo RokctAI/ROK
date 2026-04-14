@@ -14,7 +14,7 @@ If you want a practical setup walkthrough with recommended configurations and re
 
 Before using voice features, make sure you have:
 
-1. **Rok Agent installed** — `pip install rok-agent` (see [Installation](/docs/getting-started/installation))
+1. **Rok Agent installed** — `pip install rok` (see [Installation](/docs/getting-started/installation))
 2. **An LLM provider configured** — run `rok model` or set your preferred provider credentials in `~/.rok/.env`
 3. **A working base setup** — run `rok` to verify the agent responds to text before enabling voice
 
@@ -36,19 +36,19 @@ The `~/.rok/` directory and default `config.yaml` are created automatically the 
 
 ```bash
 # CLI voice mode (microphone + audio playback)
-pip install "rok-agent[voice]"
+pip install "rok[voice]"
 
 # Discord + Telegram messaging (includes discord.py[voice] for VC support)
-pip install "rok-agent[messaging]"
+pip install "rok[messaging]"
 
 # Premium TTS (ElevenLabs)
-pip install "rok-agent[tts-premium]"
+pip install "rok[tts-premium]"
 
 # Local TTS (NeuTTS, optional)
 python -m pip install -U neutts[all]
 
 # Everything at once
-pip install "rok-agent[all]"
+pip install "rok[all]"
 ```
 
 | Extra | Packages | Required For |
@@ -189,7 +189,7 @@ The bot supports two interaction modes on Discord:
 
 **DM (recommended for personal use):** Just open a DM with the bot and type — no @mention needed. Voice replies and all commands work the same as in channels.
 
-**Server channels:** The bot only responds when you @mention it (e.g. `@hermesbyt4 hello`). Make sure you select the **bot user** from the mention popup, not the role with the same name.
+**Server channels:** The bot only responds when you @mention it (e.g. `@rokbyt4 hello`). Make sure you select the **bot user** from the mention popup, not the role with the same name.
 
 :::tip
 To disable the mention requirement in server channels, add to `~/.rok/.env`:
@@ -395,7 +395,7 @@ stt:
 
 # Text-to-Speech
 tts:
-  provider: "edge"                 # "edge" (free) | "elevenlabs" | "openai" | "neutts"
+  provider: "edge"                 # "edge" (free) | "elevenlabs" | "openai" | "neutts" | "minimax"
   edge:
     voice: "en-US-AriaNeural"      # 322 voices, 74 languages
   elevenlabs:

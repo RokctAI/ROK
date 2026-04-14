@@ -83,11 +83,12 @@ Project-local plugins under `./.rok/plugins/` are disabled by default. Enable th
 |-----------|-----|
 | Add tools | `ctx.register_tool(name, schema, handler)` |
 | Add hooks | `ctx.register_hook("post_tool_call", callback)` |
+| Add CLI commands | `ctx.register_cli_command(name, help, setup_fn, handler_fn)` — adds `rok <plugin> <subcommand>` |
 | Inject messages | `ctx.inject_message(content, role="user")` — see [Injecting Messages](#injecting-messages) |
 | Ship data files | `Path(__file__).parent / "data" / "file.yaml"` |
 | Bundle skills | Copy `skill.md` to `~/.rok/skills/` at load time |
-| Gate on env vars | `requires_env: [API_KEY]` in plugin.yaml |
-| Distribute via pip | `[project.entry-points."rok_agent.plugins"]` |
+| Gate on env vars | `requires_env: [API_KEY]` in plugin.yaml — prompted during `rok plugins install` |
+| Distribute via pip | `[project.entry-points."rok.plugins"]` |
 
 ## Plugin discovery
 
@@ -95,7 +96,7 @@ Project-local plugins under `./.rok/plugins/` are disabled by default. Enable th
 |--------|------|----------|
 | User | `~/.rok/plugins/` | Personal plugins |
 | Project | `.rok/plugins/` | Project-specific plugins (requires `ROK_ENABLE_PROJECT_PLUGINS=true`) |
-| pip | `rok_agent.plugins` entry_points | Distributed packages |
+| pip | `rok.plugins` entry_points | Distributed packages |
 
 ## Available hooks
 
@@ -103,17 +104,29 @@ Plugins can register callbacks for these lifecycle events. See the **[Event Hook
 
 | Hook | Fires when |
 |------|-----------|
-| `pre_tool_call` | Before any tool executes |
-| `post_tool_call` | After any tool returns |
-| `pre_llm_call` | Once per turn, before the LLM loop — can return `{"context": "..."}` to inject into the system prompt |
-| `post_llm_call` | Once per turn, after the LLM loop completes |
-| `on_session_start` | New session created (first turn only) |
-| `on_session_end` | End of every `run_conversation` call |
+| [`pre_tool_call`](/docs/user-guide/features/hooks#pre_tool_call) | Before any tool executes |
+| [`post_tool_call`](/docs/user-guide/features/hooks#post_tool_call) | After any tool returns |
+| [`pre_llm_call`](/docs/user-guide/features/hooks#pre_llm_call) | Once per turn, before the LLM loop — can return `{"context": "..."}` to [inject context into the user message](/docs/user-guide/features/hooks#pre_llm_call) |
+| [`post_llm_call`](/docs/user-guide/features/hooks#post_llm_call) | Once per turn, after the LLM loop (successful turns only) |
+| [`on_session_start`](/docs/user-guide/features/hooks#on_session_start) | New session created (first turn only) |
+| [`on_session_end`](/docs/user-guide/features/hooks#on_session_end) | End of every `run_conversation` call + CLI exit handler |
+
+## Plugin types
+
+Rok has three kinds of plugins:
+
+| Type | What it does | Selection | Location |
+|------|-------------|-----------|----------|
+| **General plugins** | Add tools, hooks, CLI commands | Multi-select (enable/disable) | `~/.rok/plugins/` |
+| **Memory providers** | Replace or augment built-in memory | Single-select (one active) | `plugins/memory/` |
+| **Context engines** | Replace the built-in context compressor | Single-select (one active) | `plugins/context_engine/` |
+
+Memory providers and context engines are **provider plugins** — only one of each type can be active at a time. General plugins can be enabled in any combination.
 
 ## Managing plugins
 
 ```bash
-rok plugins                  # interactive toggle UI — enable/disable with checkboxes
+rok plugins                  # unified interactive UI
 rok plugins list             # table view with enabled/disabled status
 rok plugins install user/repo  # install from Git
 rok plugins update my-plugin   # pull latest
@@ -122,7 +135,37 @@ rok plugins enable my-plugin   # re-enable a disabled plugin
 rok plugins disable my-plugin  # disable without removing
 ```
 
-Running `rok plugins` with no arguments launches an interactive curses checklist (same UI as `rok tools`) where you can toggle plugins on/off with arrow keys and space.
+### Interactive UI
+
+Running `rok plugins` with no arguments opens a composite interactive screen:
+
+```
+Plugins
+  ↑↓ navigate  SPACE toggle  ENTER configure/confirm  ESC done
+
+  General Plugins
+ → [✓] my-tool-plugin — Custom search tool
+   [ ] webhook-notifier — Event hooks
+
+  Provider Plugins
+     Memory Provider          ▸ honcho
+     Context Engine           ▸ compressor
+```
+
+- **General Plugins section** — checkboxes, toggle with SPACE
+- **Provider Plugins section** — shows current selection. Press ENTER to drill into a radio picker where you choose one active provider.
+
+Provider plugin selections are saved to `config.yaml`:
+
+```yaml
+memory:
+  provider: "honcho"      # empty string = built-in only
+
+context:
+  engine: "compressor"    # default built-in compressor
+```
+
+### Disabling general plugins
 
 Disabled plugins remain installed but are skipped during loading. The disabled list is stored in `config.yaml` under `plugins.disabled`:
 

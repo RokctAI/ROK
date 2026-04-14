@@ -63,8 +63,8 @@ If your skill is specialized, community-contributed, or niche, it's better suite
 ### Clone and install
 
 ```bash
-git clone --recurse-submodules https://github.com/RokctAI/rok-agent.git
-cd rok-agent
+git clone --recurse-submodules https://github.com/RokctAI/rok.git
+cd rok
 
 # Create venv with Python 3.11
 uv venv venv --python 3.11
@@ -114,9 +114,9 @@ pytest tests/ -v
 ## Project Structure
 
 ```
-rok-agent/
+rok/
 ├── run_agent.py              # AIAgent class — core conversation loop, tool dispatch, session persistence
-├── cli.py                    # RokCLI class — interactive TUI, prompt_toolkit integration
+├── cli.py                    # Rokcli class — interactive TUI, prompt_toolkit integration
 ├── model_tools.py            # Tool orchestration (thin layer over tools/registry.py)
 ├── toolsets.py               # Tool groupings and presets (rok-cli, rok-telegram, etc.)
 ├── rok_state.py           # SQLite session database with FTS5 full-text search, session titles
@@ -175,7 +175,7 @@ rok-agent/
 ├── optional-skills/          # Official optional skills (discoverable via hub, not activated by default)
 ├── environments/             # RL training environments (Atropos integration)
 ├── tests/                    # Test suite
-├── website/                  # Documentation site (rok-agent.rokctai.com)
+├── website/                  # Documentation site (rok.rokctai.com)
 │
 ├── cli-config.yaml.example   # Example configuration (copied to ~/.rok/config.yaml)
 └── AGENTS.md                 # Development guide for AI coding assistants
@@ -639,7 +639,7 @@ test(tools): add unit tests for file_operations
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/RokctAI/rok-agent/issues)
+- Use [GitHub Issues](https://github.com/RokctAI/rok/issues)
 - Include: OS, Python version, Rok version (`rok version`), full error traceback
 - Include steps to reproduce
 - Check existing issues before creating duplicates

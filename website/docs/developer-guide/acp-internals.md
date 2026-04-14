@@ -26,7 +26,7 @@ rok acp / rok-acp / python -m acp_adapter
   -> acp_adapter.entry.main()
   -> load ~/.rok/.env
   -> configure stderr logging
-  -> construct HermesACPAgent
+  -> construct RokACPAgent
   -> acp.run_agent(agent)
 ```
 
@@ -34,7 +34,7 @@ Stdout is reserved for ACP JSON-RPC transport. Human-readable logs go to stderr.
 
 ## Major components
 
-### `HermesACPAgent`
+### `RokACPAgent`
 
 `acp_adapter/server.py` implements the ACP agent protocol.
 

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 title: "Use MCP with Rok"
 description: "A practical guide to connecting MCP servers to Rok Agent, filtering their tools, and using them safely in real workflows"
 ---
@@ -42,7 +42,7 @@ If you installed Rok with the standard install script, MCP support is already in
 If you installed without extras and need to add MCP separately:
 
 ```bash
-cd ~/.rok/rok-agent
+cd ~/.rok/rok
 uv pip install -e ".[mcp]"
 ```
 

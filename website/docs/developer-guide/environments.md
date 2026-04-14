@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: "Environments, Benchmarks & Data Generation"
-description: "Building RL training environments, running evaluation benchmarks, and generating SFT data with the Rok-Agent Atropos integration"
+description: "Building RL training environments, running evaluation benchmarks, and generating SFT data with the Rok Atropos integration"
 ---
 
 # Environments, Benchmarks & Data Generation
@@ -37,7 +37,7 @@ classDiagram
       CLI: serve / process / evaluate
     }
 
-    class HermesAgentBaseEnv {
+    class RokBaseEnv {
       Terminal backend configuration
       Tool resolution
       Agent loop engine
@@ -48,7 +48,7 @@ classDiagram
       Stack testing
     }
 
-    class HermesSweEnv {
+    class RokSweEnv {
       SWE training
     }
 
@@ -64,10 +64,10 @@ classDiagram
       Long-horizon benchmark
     }
 
-    BaseEnv <|-- HermesAgentBaseEnv
-    HermesAgentBaseEnv <|-- TerminalTestEnv
-    HermesAgentBaseEnv <|-- HermesSweEnv
-    HermesAgentBaseEnv <|-- TerminalBench2EvalEnv
+    BaseEnv <|-- RokBaseEnv
+    RokBaseEnv <|-- TerminalTestEnv
+    RokBaseEnv <|-- RokSweEnv
+    RokBaseEnv <|-- TerminalBench2EvalEnv
     TerminalBench2EvalEnv <|-- TBLiteEvalEnv
     TerminalBench2EvalEnv <|-- YCBenchEvalEnv
 ```
@@ -81,18 +81,18 @@ The foundation from `atroposlib`. Provides:
 - **CLI interface** — three subcommands: `serve`, `process`, `evaluate`
 - **Eval logging** — `evaluate_log()` saves results to JSON + JSONL
 
-### HermesAgentBaseEnv
+### RokBaseEnv
 
-The rok-agent layer (`environments/rok_base_env.py`). Adds:
+The rok layer (`environments/rok_base_env.py`). Adds:
 - **Terminal backend configuration** — sets `TERMINAL_ENV` for sandboxed execution (local, Docker, Modal, Daytona, SSH, Singularity)
-- **Tool resolution** — `_resolve_tools_for_group()` calls rok-agent's `get_tool_definitions()` to get the right tool schemas based on enabled/disabled toolsets
-- **Agent loop integration** — `collect_trajectory()` runs `HermesAgentLoop` and scores the result
+- **Tool resolution** — `_resolve_tools_for_group()` calls rok's `get_tool_definitions()` to get the right tool schemas based on enabled/disabled toolsets
+- **Agent loop integration** — `collect_trajectory()` runs `RokLoop` and scores the result
 - **Two-phase operation** — Phase 1 (OpenAI server) for eval/SFT, Phase 2 (VLLM ManagedServer) for full RL with logprobs
 - **Async safety patches** — monkey-patches Modal backend to work inside Atropos's event loop
 
 ### Concrete Environments
 
-Your environment inherits from `HermesAgentBaseEnv` and implements five methods:
+Your environment inherits from `RokBaseEnv` and implements five methods:
 
 | Method | Purpose |
 |--------|---------|
@@ -106,7 +106,7 @@ Your environment inherits from `HermesAgentBaseEnv` and implements five methods:
 
 ### Agent Loop
 
-`HermesAgentLoop` (`environments/agent_loop.py`) is the reusable multi-turn agent engine. It runs the same tool-calling pattern as rok-agent's main loop:
+`RokLoop` (`environments/agent_loop.py`) is the reusable multi-turn agent engine. It runs the same tool-calling pattern as rok's main loop:
 
 1. Send messages + tool schemas to the API via `server.chat_completion()`
 2. If the response contains `tool_calls`, dispatch each via `handle_function_call()`
@@ -158,7 +158,7 @@ Available methods:
 | **Transfers** | `upload_file()`, `upload_dir()`, `download_file()`, `download_dir()` |
 | **Web** | `web_search(query)`, `web_extract(urls)` |
 | **Browser** | `browser_navigate(url)`, `browser_snapshot()` |
-| **Generic** | `call_tool(name, args)` — escape hatch for any rok-agent tool |
+| **Generic** | `call_tool(name, args)` — escape hatch for any rok tool |
 | **Cleanup** | `cleanup()` — release all resources |
 
 ### Tool Call Parsers
@@ -241,7 +241,7 @@ TBLite is a thin subclass of TerminalBench2 — only the dataset and timeouts di
 
 ```bash
 # Install yc-bench (optional dependency)
-pip install "rok-agent[yc-bench]"
+pip install "rok[yc-bench]"
 
 # Run evaluation
 bash environments/benchmarks/yc_bench/run_eval.sh
@@ -273,7 +273,7 @@ python environments/terminal_test_env/terminal_test_env.py process \
 python environments/terminal_test_env/terminal_test_env.py serve
 ```
 
-### HermesSweEnv
+### RokSweEnv
 
 SWE-bench style training environment. The model gets a coding task, uses terminal + file + web tools to solve it, and the reward function runs tests in the same Modal sandbox.
 
@@ -349,13 +349,13 @@ Uses ManagedServer for exact token IDs + logprobs via `/generate`. A client-side
 ### Training Environment
 
 ```python
-from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
+from environments.rok_base_env import RokBaseEnv, RokEnvConfig
 from atroposlib.envs.server_handling.server_manager import APIServerConfig
 
-class MyEnvConfig(HermesAgentEnvConfig):
+class MyEnvConfig(RokEnvConfig):
     my_custom_field: str = "default_value"
 
-class MyEnv(HermesAgentBaseEnv):
+class MyEnv(RokBaseEnv):
     name = "my-env"
     env_config_cls = MyEnvConfig
 
@@ -416,7 +416,7 @@ See `environments/benchmarks/yc_bench/yc_bench_env.py` for a clean, well-documen
 
 ## Configuration Reference
 
-### HermesAgentEnvConfig Fields
+### RokEnvConfig Fields
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -477,12 +477,12 @@ python my_env.py evaluate \
 
 ### For Modal-sandboxed benchmarks (TB2, TBLite)
 
-- [Modal](https://modal.com) account and CLI: `pip install "rok-agent[modal]"`
+- [Modal](https://modal.com) account and CLI: `pip install "rok[modal]"`
 - `MODAL_TOKEN_ID` and `MODAL_TOKEN_SECRET` environment variables
 
 ### For YC-Bench
 
-- `pip install "rok-agent[yc-bench]"` (installs the yc-bench CLI + SQLAlchemy)
+- `pip install "rok[yc-bench]"` (installs the yc-bench CLI + SQLAlchemy)
 - No Modal needed — runs with local terminal backend
 
 ### For RL training
@@ -497,8 +497,8 @@ See [RL Training](/user-guide/features/rl-training) for the agent-driven RL work
 
 ```
 environments/
-├── rok_base_env.py          # Abstract base class (HermesAgentBaseEnv)
-├── agent_loop.py               # Multi-turn agent engine (HermesAgentLoop)
+├── rok_base_env.py          # Abstract base class (RokBaseEnv)
+├── agent_loop.py               # Multi-turn agent engine (RokLoop)
 ├── tool_context.py             # Per-rollout tool access for reward functions
 ├── patches.py                  # Async-safety patches for Modal backend
 │

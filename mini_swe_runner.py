@@ -2,12 +2,12 @@
 """
 SWE Runner with Rok Trajectory Format
 
-A runner that uses Rok-Agent's built-in execution environments
-(local, docker, modal) and outputs trajectories in the Rok-Agent format
+A runner that uses Rok's built-in execution environments
+(local, docker, modal) and outputs trajectories in the Rok format
 compatible with batch_runner.py and trajectory_compressor.py.
 
 Features:
-- Uses Rok-Agent's Docker, Modal, or Local environments for command execution
+- Uses Rok's Docker, Modal, or Local environments for command execution
 - Outputs trajectories in Rok format (from/value pairs with <tool_call>/<tool_response> XML)
 - Compatible with the trajectory compression pipeline
 - Supports batch processing from JSONL prompt files
@@ -46,7 +46,7 @@ load_dotenv()
 
 
 # ============================================================================
-# Terminal Tool Definition (matches Rok-Agent format)
+# Terminal Tool Definition (matches Rok format)
 # ============================================================================
 
 TERMINAL_TOOL_DEFINITION = {
@@ -106,7 +106,7 @@ def create_environment(
     **kwargs
 ):
     """
-    Create an execution environment using Rok-Agent's built-in backends.
+    Create an execution environment using Rok's built-in backends.
     
     Args:
         env_type: One of "local", "docker", "modal"
@@ -140,8 +140,8 @@ def create_environment(
 
 class MiniSWERunner:
     """
-    Agent runner that uses Rok-Agent's built-in execution environments
-    and outputs trajectories in Rok-Agent format.
+    Agent runner that uses Rok's built-in execution environments
+    and outputs trajectories in Rok format.
     """
     
     def __init__(

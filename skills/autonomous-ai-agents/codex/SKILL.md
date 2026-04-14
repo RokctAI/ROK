@@ -7,7 +7,7 @@ license: MIT
 metadata:
   rok:
     tags: [Coding-Agent, Codex, OpenAI, Code-Review, Refactoring]
-    related_skills: [claude-code, rok-agent]
+    related_skills: [claude-code, rok]
 ---
 
 # Codex CLI

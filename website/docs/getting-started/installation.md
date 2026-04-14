@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: "Installation"
-description: "Install Rok Agent on Linux, macOS, or WSL2"
+description: "Install Rok Agent on Linux, macOS, WSL2, or Android via Termux"
 ---
 
 # Installation
@@ -15,6 +15,23 @@ Get Rok Agent up and running in under two minutes with the one-line installer, o
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
+
+### Android / Termux
+
+Rok now ships a Termux-aware installer path too:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+```
+
+The installer detects Termux automatically and switches to a tested Android flow:
+- uses Termux `pkg` for system dependencies (`git`, `python`, `nodejs`, `ripgrep`, `ffmpeg`, build tools)
+- creates the virtualenv with `python -m venv`
+- exports `ANDROID_API_LEVEL` automatically for Android wheel builds
+- installs a curated `.[termux]` extra with `pip`
+- skips the untested browser / WhatsApp bootstrap by default
+
+If you want the fully explicit path, follow the dedicated [Termux guide](./termux.md).
 
 :::warning Windows
 Native Windows is **not supported**. Please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and run Rok Agent from there. The install command above works inside WSL2.
@@ -74,8 +91,8 @@ If you prefer full control over the installation process, follow these steps.
 Clone with `--recurse-submodules` to pull the required submodules:
 
 ```bash
-git clone --recurse-submodules https://github.com/RokctAI/rok-agent.git
-cd rok-agent
+git clone --recurse-submodules https://github.com/RokctAI/rok.git
+cd rok
 ```
 
 If you already cloned without `--recurse-submodules`:
@@ -118,13 +135,14 @@ uv pip install -e "."
 | Extra | What it adds | Install command |
 |-------|-------------|-----------------|
 | `all` | Everything below | `uv pip install -e ".[all]"` |
-| `messaging` | Telegram & Discord gateway | `uv pip install -e ".[messaging]"` |
+| `messaging` | Telegram, Discord & Slack gateway | `uv pip install -e ".[messaging]"` |
 | `cron` | Cron expression parsing for scheduled tasks | `uv pip install -e ".[cron]"` |
 | `cli` | Terminal menu UI for setup wizard | `uv pip install -e ".[cli]"` |
 | `modal` | Modal cloud execution backend | `uv pip install -e ".[modal]"` |
 | `tts-premium` | ElevenLabs premium voices | `uv pip install -e ".[tts-premium]"` |
 | `voice` | CLI microphone input + audio playback | `uv pip install -e ".[voice]"` |
 | `pty` | PTY terminal support | `uv pip install -e ".[pty]"` |
+| `termux` | Tested Android / Termux bundle (`cron`, `cli`, `pty`, `mcp`, `honcho`, `acp`) | `python -m pip install -e ".[termux]" -c constraints-termux.txt` |
 | `honcho` | AI-native memory (Honcho integration) | `uv pip install -e ".[honcho]"` |
 | `mcp` | Model Context Protocol support | `uv pip install -e ".[mcp]"` |
 | `homeassistant` | Home Assistant integration | `uv pip install -e ".[homeassistant]"` |
@@ -133,6 +151,10 @@ uv pip install -e "."
 | `dev` | pytest & test utilities | `uv pip install -e ".[dev]"` |
 
 You can combine extras: `uv pip install -e ".[messaging,cron]"`
+
+:::tip Termux users
+`.[all]` is not currently available on Android because the `voice` extra pulls `faster-whisper`, which depends on `ctranslate2` wheels that are not published for Android. Use `.[termux]` for the tested mobile install path, then add individual extras only as needed.
+:::
 
 </details>
 
@@ -230,8 +252,8 @@ For those who just want the commands:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Clone & enter
-git clone --recurse-submodules https://github.com/RokctAI/rok-agent.git
-cd rok-agent
+git clone --recurse-submodules https://github.com/RokctAI/rok.git
+cd rok
 
 # Create venv with Python 3.11
 uv venv venv --python 3.11

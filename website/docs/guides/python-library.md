@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 title: "Using Rok as a Python Library"
 description: "Embed AIAgent in your own Python scripts, web apps, or automation pipelines — no CLI required"
 ---
@@ -15,19 +15,19 @@ Rok isn't just a CLI tool. You can import `AIAgent` directly and use it programm
 Install Rok directly from the repository:
 
 ```bash
-pip install git+https://github.com/RokctAI/rok-agent.git
+pip install git+https://github.com/RokctAI/rok.git
 ```
 
 Or with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv pip install git+https://github.com/RokctAI/rok-agent.git
+uv pip install git+https://github.com/RokctAI/rok.git
 ```
 
 You can also pin it in your `requirements.txt`:
 
 ```text
-rok-agent @ git+https://github.com/RokctAI/rok-agent.git
+rok @ git+https://github.com/RokctAI/rok.git
 ```
 
 :::tip

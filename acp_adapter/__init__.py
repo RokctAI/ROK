@@ -1,1 +1,1 @@
-"""ACP (Agent Communication Protocol) adapter for rok-agent."""
+"""ACP (Agent Communication Protocol) adapter for rok."""

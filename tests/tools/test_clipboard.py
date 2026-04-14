@@ -31,8 +31,11 @@ from rok_cli.clipboard import (
     _wsl_has_image,
     _wayland_save,
     _wayland_has_image,
+    _windows_save,
+    _windows_has_image,
     _convert_to_png,
 )
+from cli import _should_auto_attach_clipboard_image_on_paste
 
 FAKE_PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
 FAKE_BMP = b"BM" + b"\x00" * 100
@@ -48,6 +51,14 @@ class TestSaveClipboardImage:
         with patch("rok_cli.clipboard.sys") as mock_sys:
             mock_sys.platform = "darwin"
             with patch("rok_cli.clipboard._macos_save", return_value=False) as m:
+                save_clipboard_image(dest)
+                m.assert_called_once_with(dest)
+
+    def test_dispatches_to_windows_on_win32(self, tmp_path):
+        dest = tmp_path / "out.png"
+        with patch("rok_cli.clipboard.sys") as mock_sys:
+            mock_sys.platform = "win32"
+            with patch("rok_cli.clipboard._windows_save", return_value=False) as m:
                 save_clipboard_image(dest)
                 m.assert_called_once_with(dest)
 
@@ -194,9 +205,9 @@ class TestMacosOsascript:
 
 class TestIsWsl:
     def setup_method(self):
-        # Reset cached value before each test
-        import rok_cli.clipboard as cb
-        cb._wsl_detected = None
+        # _is_wsl is now rok_constants.is_wsl — reset its cache
+        import rok_constants
+        rok_constants._wsl_detected = None
 
     def test_wsl2_detected(self):
         content = "Linux version 5.15.0 (microsoft-standard-WSL2)"
@@ -218,6 +229,7 @@ class TestIsWsl:
             assert _is_wsl() is False
 
     def test_result_is_cached(self):
+        import rok_constants
         content = "Linux version 5.15.0 (microsoft-standard-WSL2)"
         with patch("builtins.open", mock_open(read_data=content)) as m:
             assert _is_wsl() is True
@@ -497,6 +509,102 @@ class TestLinuxSave:
                     m.assert_called_once_with(dest)
 
 
+# ── Native Windows (PowerShell) ─────────────────────────────────────────
+
+class TestWindowsHasImage:
+    def setup_method(self):
+        import rok_cli.clipboard as cb
+        cb._ps_exe = False  # reset cache
+
+    def test_clipboard_has_image(self):
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(stdout="True\n", returncode=0)
+                assert _windows_has_image() is True
+
+    def test_clipboard_no_image(self):
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(stdout="False\n", returncode=0)
+                assert _windows_has_image() is False
+
+    def test_no_powershell_available(self):
+        with patch("rok_cli.clipboard._get_ps_exe", return_value=None):
+            assert _windows_has_image() is False
+
+    def test_powershell_error(self):
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(stdout="", returncode=1)
+                assert _windows_has_image() is False
+
+    def test_subprocess_exception(self):
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run",
+                       side_effect=subprocess.TimeoutExpired("powershell", 5)):
+                assert _windows_has_image() is False
+
+
+class TestWindowsSave:
+    def setup_method(self):
+        import rok_cli.clipboard as cb
+        cb._ps_exe = False  # reset cache
+
+    def test_successful_extraction(self, tmp_path):
+        dest = tmp_path / "out.png"
+        b64_png = base64.b64encode(FAKE_PNG).decode()
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(stdout=b64_png + "\n", returncode=0)
+                assert _windows_save(dest) is True
+        assert dest.read_bytes() == FAKE_PNG
+
+    def test_no_image_returns_false(self, tmp_path):
+        dest = tmp_path / "out.png"
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(stdout="", returncode=1)
+                assert _windows_save(dest) is False
+        assert not dest.exists()
+
+    def test_empty_output(self, tmp_path):
+        dest = tmp_path / "out.png"
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(stdout="", returncode=0)
+                assert _windows_save(dest) is False
+
+    def test_no_powershell_returns_false(self, tmp_path):
+        dest = tmp_path / "out.png"
+        with patch("rok_cli.clipboard._get_ps_exe", return_value=None):
+            assert _windows_save(dest) is False
+
+    def test_invalid_base64(self, tmp_path):
+        dest = tmp_path / "out.png"
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(stdout="not-valid-base64!!!", returncode=0)
+                assert _windows_save(dest) is False
+
+    def test_timeout(self, tmp_path):
+        dest = tmp_path / "out.png"
+        with patch("rok_cli.clipboard._get_ps_exe", return_value="powershell"):
+            with patch("rok_cli.clipboard.subprocess.run",
+                       side_effect=subprocess.TimeoutExpired("powershell", 15)):
+                assert _windows_save(dest) is False
+
+
+class TestHasClipboardImageWin32:
+    """Verify has_clipboard_image dispatches to _windows_has_image on win32."""
+
+    def test_dispatches_on_win32(self):
+        with patch("rok_cli.clipboard.sys") as mock_sys:
+            mock_sys.platform = "win32"
+            with patch("rok_cli.clipboard._windows_has_image", return_value=True) as m:
+                assert has_clipboard_image() is True
+                m.assert_called_once()
+
+
 # ── BMP conversion ──────────────────────────────────────────────────────
 
 class TestConvertToPng:
@@ -654,7 +762,7 @@ class TestPreprocessImagesWithVision:
 
     @pytest.fixture
     def cli(self):
-        """Minimal RokCLI with mocked internals."""
+        """Minimal Rokcli with mocked internals."""
         with patch("cli.load_cli_config") as mock_cfg:
             mock_cfg.return_value = {
                 "model": {"default": "test/model", "base_url": "http://x", "provider": "auto"},
@@ -669,8 +777,8 @@ class TestPreprocessImagesWithVision:
             }
             with patch.dict("os.environ", {"OPENROUTER_API_KEY": "test-key"}):
                 with patch("cli.CLI_CONFIG", mock_cfg.return_value):
-                    from cli import RokCLI
-                    cli_obj = RokCLI.__new__(RokCLI)
+                    from cli import Rokcli
+                    cli_obj = Rokcli.__new__(Rokcli)
                     # Manually init just enough state
                     cli_obj._attached_images = []
                     cli_obj._image_counter = 0
@@ -767,8 +875,8 @@ class TestTryAttachClipboardImage:
 
     @pytest.fixture
     def cli(self):
-        from cli import RokCLI
-        cli_obj = RokCLI.__new__(RokCLI)
+        from cli import Rokcli
+        cli_obj = Rokcli.__new__(Rokcli)
         cli_obj._attached_images = []
         cli_obj._image_counter = 0
         return cli_obj
@@ -811,6 +919,48 @@ class TestTryAttachClipboardImage:
         assert path.parent == Path(os.environ["ROK_HOME"]) / "images"
         assert path.name.startswith("clip_")
         assert path.suffix == ".png"
+
+
+class TestAutoAttachClipboardImageOnPaste:
+    def test_skips_auto_attach_for_plain_text_paste(self):
+        assert _should_auto_attach_clipboard_image_on_paste("hello world") is False
+
+    def test_skips_auto_attach_for_whitespace_and_text_paste(self):
+        assert _should_auto_attach_clipboard_image_on_paste("  hello world  ") is False
+
+    def test_allows_auto_attach_for_empty_paste(self):
+        assert _should_auto_attach_clipboard_image_on_paste("") is True
+
+    def test_allows_auto_attach_for_whitespace_only_paste(self):
+        assert _should_auto_attach_clipboard_image_on_paste("   \n\t  ") is True
+
+
+class TestVoiceSubmission:
+    @pytest.fixture
+    def cli(self):
+        from cli import Rokcli
+        cli_obj = Rokcli.__new__(Rokcli)
+        cli_obj._attached_images = [Path("/tmp/stale.png")]
+        cli_obj._pending_input = queue.Queue()
+        cli_obj._voice_lock = MagicMock()
+        cli_obj._voice_processing = True
+        cli_obj._voice_recording = True
+        cli_obj._voice_continuous = False
+        cli_obj._no_speech_count = 0
+        cli_obj._voice_recorder = MagicMock()
+        cli_obj._voice_recorder.stop.return_value = "/tmp/fake.wav"
+        cli_obj._app = None
+        return cli_obj
+
+    def test_voice_transcript_clears_stale_attached_images(self, cli):
+        with patch("tools.voice_mode.play_beep"):
+            with patch("tools.voice_mode.transcribe_recording", return_value={"success": True, "transcript": "hello"}):
+                with patch("os.path.isfile", return_value=False):
+                    with patch("cli._cprint"):
+                        cli._voice_stop_and_transcribe()
+
+        assert cli._attached_images == []
+        assert cli._pending_input.get_nowait() == "hello"
 
 
 # ═════════════════════════════════════════════════════════════════════════

@@ -7,7 +7,7 @@ license: MIT
 metadata:
   rok:
     tags: [Migration, OpenClaw, Rok, Memory, Persona, Import]
-    related_skills: [rok-agent]
+    related_skills: [rok]
 ---
 
 # OpenClaw -> Rok Migration

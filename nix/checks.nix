@@ -6,8 +6,8 @@
 { inputs, ... }: {
   perSystem = { pkgs, system, lib, ... }:
     let
-      rok-agent = inputs.self.packages.${system}.default;
-      hermesVenv = pkgs.callPackage ./python.nix {
+      rok = inputs.self.packages.${system}.default;
+      rokVenv = pkgs.callPackage ./python.nix {
         inherit (inputs) uv2nix pyproject-nix pyproject-build-systems;
       };
 
@@ -17,7 +17,7 @@
       configKeys = pkgs.runCommand "rok-config-keys" {} ''
         set -euo pipefail
         export HOME=$TMPDIR
-        ${hermesVenv}/bin/python3 -c '
+        ${rokVenv}/bin/python3 -c '
 import json, sys
 from rok_cli.config import DEFAULT_CONFIG
 
@@ -42,12 +42,12 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         package-contents = pkgs.runCommand "rok-package-contents" { } ''
           set -e
           echo "=== Checking binaries ==="
-          test -x ${rok-agent}/bin/rok || (echo "FAIL: rok binary missing"; exit 1)
-          test -x ${rok-agent}/bin/rok-agent || (echo "FAIL: rok-agent binary missing"; exit 1)
+          test -x ${rok}/bin/rok || (echo "FAIL: rok binary missing"; exit 1)
+          test -x ${rok}/bin/rok || (echo "FAIL: rok binary missing"; exit 1)
           echo "PASS: All binaries present"
 
           echo "=== Checking version ==="
-          ${rok-agent}/bin/rok version 2>&1 | grep -qi "rok" || (echo "FAIL: version check"; exit 1)
+          ${rok}/bin/rok version 2>&1 | grep -qi "rok" || (echo "FAIL: version check"; exit 1)
           echo "PASS: Version check"
 
           echo "=== All checks passed ==="
@@ -59,8 +59,8 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         entry-points-sync = pkgs.runCommand "rok-entry-points-sync" { } ''
           set -e
           echo "=== Checking entry points match pyproject.toml [project.scripts] ==="
-          for bin in rok rok-agent rok-acp; do
-            test -x ${rok-agent}/bin/$bin || (echo "FAIL: $bin binary missing from Nix package"; exit 1)
+          for bin in rok rok rok-acp; do
+            test -x ${rok}/bin/$bin || (echo "FAIL: $bin binary missing from Nix package"; exit 1)
             echo "PASS: $bin present"
           done
 
@@ -74,8 +74,8 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           export HOME=$(mktemp -d)
 
           echo "=== Checking rok --help ==="
-          ${rok-agent}/bin/rok --help 2>&1 | grep -q "gateway" || (echo "FAIL: gateway subcommand missing"; exit 1)
-          ${rok-agent}/bin/rok --help 2>&1 | grep -q "config" || (echo "FAIL: config subcommand missing"; exit 1)
+          ${rok}/bin/rok --help 2>&1 | grep -q "gateway" || (echo "FAIL: gateway subcommand missing"; exit 1)
+          ${rok}/bin/rok --help 2>&1 | grep -q "config" || (echo "FAIL: config subcommand missing"; exit 1)
           echo "PASS: All subcommands accessible"
 
           echo "=== All CLI checks passed ==="
@@ -87,14 +87,14 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         bundled-skills = pkgs.runCommand "rok-bundled-skills" { } ''
           set -e
           echo "=== Checking bundled skills ==="
-          test -d ${rok-agent}/share/rok-agent/skills || (echo "FAIL: skills directory missing"; exit 1)
+          test -d ${rok}/share/rok/skills || (echo "FAIL: skills directory missing"; exit 1)
           echo "PASS: skills directory exists"
 
-          SKILL_COUNT=$(find ${rok-agent}/share/rok-agent/skills -name "SKILL.md" | wc -l)
+          SKILL_COUNT=$(find ${rok}/share/rok/skills -name "SKILL.md" | wc -l)
           test "$SKILL_COUNT" -gt 0 || (echo "FAIL: no SKILL.md files found in skills directory"; exit 1)
           echo "PASS: $SKILL_COUNT bundled skills found"
 
-          grep -q "ROK_BUNDLED_SKILLS" ${rok-agent}/bin/rok || \
+          grep -q "ROK_BUNDLED_SKILLS" ${rok}/bin/rok || \
             (echo "FAIL: ROK_BUNDLED_SKILLS not in wrapper"; exit 1)
           echo "PASS: ROK_BUNDLED_SKILLS set in wrapper"
 
@@ -117,8 +117,8 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           }
 
           echo "=== Checking ROK_MANAGED guards ==="
-          check_blocked "config set" ${rok-agent}/bin/rok config set model foo
-          check_blocked "config edit" ${rok-agent}/bin/rok config edit
+          check_blocked "config set" ${rok}/bin/rok config set model foo
+          check_blocked "config edit" ${rok}/bin/rok config edit
 
           echo "=== All guard checks passed ==="
           mkdir -p $out
@@ -199,7 +199,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             local rok_home="$1"
             export ROK_HOME="$rok_home"
             ${configMergeScript} ${nixSettings} "$rok_home/config.yaml"
-            ${hermesVenv}/bin/python3 -c '
+            ${rokVenv}/bin/python3 -c '
 import json, sys
 from rok_cli.config import load_config
 json.dump(load_config(), sys.stdout, default=str)

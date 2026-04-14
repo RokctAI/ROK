@@ -28,7 +28,7 @@ rok chat --provider openrouter  # Force OpenRouter
 rok chat --toolsets "web,terminal,skills"
 
 # Start with one or more skills preloaded
-rok -s rok-agent-dev,github-auth
+rok -s rok-dev,github-auth
 rok chat -s github-pr-workflow -q "open a draft PR"
 
 # Resume previous sessions
@@ -133,7 +133,7 @@ You can define custom commands that run shell commands instantly without invokin
 quick_commands:
   status:
     type: exec
-    command: systemctl status rok-agent
+    command: systemctl status rok
   gpu:
     type: exec
     command: nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv,noheader
@@ -146,7 +146,7 @@ Then type `/status` or `/gpu` in any chat. See the [Configuration guide](/docs/u
 If you already know which skills you want active for the session, pass them at launch time:
 
 ```bash
-rok -s rok-agent-dev,github-auth
+rok -s rok-dev,github-auth
 rok chat -s github-pr-workflow -s github-auth
 ```
 
@@ -322,7 +322,11 @@ Long conversations are automatically summarized when approaching context limits:
 compression:
   enabled: true
   threshold: 0.50    # Compress at 50% of context limit by default
-  summary_model: "google/gemini-3-flash-preview"  # Model used for summarization
+
+# Summarization model configured under auxiliary:
+auxiliary:
+  compression:
+    model: "google/gemini-3-flash-preview"  # Model used for summarization
 ```
 
 When compression triggers, middle turns are summarized while the first 3 and last 4 turns are always preserved.

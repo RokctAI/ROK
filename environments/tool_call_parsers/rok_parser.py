@@ -2,7 +2,7 @@
 Rok tool call parser.
 
 Format: <tool_call>{"name": "func", "arguments": {...}}</tool_call>
-Based on VLLM's Hermes2ProToolParser.extract_tool_calls()
+Based on VLLM's Rok2ProToolParser.extract_tool_calls()
 """
 
 import json
@@ -19,7 +19,7 @@ from environments.tool_call_parsers import ParseResult, ToolCallParser, register
 
 
 @register_parser("rok")
-class HermesToolCallParser(ToolCallParser):
+class RokToolCallParser(ToolCallParser):
     """
     Parser for Rok-format tool calls.
 
@@ -49,6 +49,8 @@ class HermesToolCallParser(ToolCallParser):
                     continue
 
                 tc_data = json.loads(raw_json)
+                if "name" not in tc_data:
+                    continue
                 tool_calls.append(
                     ChatCompletionMessageToolCall(
                         id=f"call_{uuid.uuid4().hex[:8]}",

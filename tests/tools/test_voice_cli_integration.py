@@ -12,15 +12,15 @@ import pytest
 
 
 def _make_voice_cli(**overrides):
-    """Create a minimal RokCLI with only voice-related attrs initialized.
+    """Create a minimal Rokcli with only voice-related attrs initialized.
 
     Uses ``__new__()`` to bypass ``__init__`` so no config/env/API setup is
     needed.  Only the voice state attributes (from __init__ lines 3749-3758)
     are populated.
     """
-    from cli import RokCLI
+    from cli import Rokcli
 
-    cli = RokCLI.__new__(RokCLI)
+    cli = Rokcli.__new__(Rokcli)
     cli._voice_lock = threading.Lock()
     cli._voice_mode = False
     cli._voice_tts = False
@@ -32,6 +32,7 @@ def _make_voice_cli(**overrides):
     cli._voice_tts_done.set()
     cli._pending_input = queue.Queue()
     cli._app = None
+    cli._attached_images = []
     cli.console = SimpleNamespace(width=80)
     for k, v in overrides.items():
         setattr(cli, k, v)
@@ -591,9 +592,9 @@ class TestDisableVoiceModeStopsTTS:
     def test_disable_voice_mode_calls_stop_playback(self):
         """Source check: _disable_voice_mode must call stop_playback()."""
         import inspect
-        from cli import RokCLI
+        from cli import Rokcli
 
-        source = inspect.getsource(RokCLI._disable_voice_mode)
+        source = inspect.getsource(Rokcli._disable_voice_mode)
         assert "stop_playback" in source, (
             "_disable_voice_mode must call stop_playback()"
         )

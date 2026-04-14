@@ -1,4 +1,4 @@
-"""CLI entry point for the rok-agent ACP adapter.
+"""CLI entry point for the rok ACP adapter.
 
 Loads environment variables from ``~/.rok/.env``, configures logging
 to write to stderr (so stdout is reserved for ACP JSON-RPC transport),
@@ -15,7 +15,6 @@ Usage::
 
 import asyncio
 import logging
-import os
 import sys
 from pathlib import Path
 from rok_constants import get_rok_home
@@ -62,7 +61,7 @@ def main() -> None:
     _load_env()
 
     logger = logging.getLogger(__name__)
-    logger.info("Starting rok-agent ACP adapter")
+    logger.info("Starting rok ACP adapter")
 
     # Ensure the project root is on sys.path so ``from run_agent import AIAgent`` works
     project_root = str(Path(__file__).resolve().parent.parent)
@@ -70,9 +69,9 @@ def main() -> None:
         sys.path.insert(0, project_root)
 
     import acp
-    from .server import HermesACPAgent
+    from .server import RokACPAgent
 
-    agent = HermesACPAgent()
+    agent = RokACPAgent()
     try:
         asyncio.run(acp.run_agent(agent, use_unstable_protocol=True))
     except KeyboardInterrupt:

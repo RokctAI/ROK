@@ -36,6 +36,20 @@ Set your provider with `rok model` or by editing `~/.rok/.env`. See the [Environ
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
 
+### Does it work on Android / Termux?
+
+Yes — Rok now has a tested Termux install path for Android phones.
+
+Quick install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+```
+
+For the fully explicit manual steps, supported extras, and current limitations, see the [Termux guide](../getting-started/termux.md).
+
+Important caveat: the full `.[all]` extra is not currently available on Android because the `voice` extra depends on `faster-whisper` → `ctranslate2`, and `ctranslate2` does not publish Android wheels. Use the tested `.[termux]` extra instead.
+
 ### Is my data sent anywhere?
 
 API calls go **only to the LLM provider you configure** (e.g., OpenRouter, your local Ollama instance). Rok Agent does not collect telemetry, usage data, or analytics. Your conversations, memory, and skills are stored locally in `~/.rok/`.
@@ -70,6 +84,10 @@ This works with Ollama, vLLM, llama.cpp server, SGLang, LocalAI, and others. See
 If you set a custom `num_ctx` in Ollama (e.g., `ollama run --num_ctx 16384`), make sure to set the matching context length in Rok — Ollama's `/api/show` reports the model's *maximum* context, not the effective `num_ctx` you configured.
 :::
 
+:::tip Timeouts with local models
+Rok auto-detects local endpoints and relaxes streaming timeouts (read timeout raised from 120s to 1800s, stale stream detection disabled). If you still hit timeouts on very large contexts, set `ROK_STREAM_READ_TIMEOUT=1800` in your `.env`. See the [Local LLM guide](../guides/local-llm-on-mac.md#timeouts) for details.
+:::
+
 ### How much does it cost?
 
 Rok Agent itself is **free and open-source** (MIT license). You pay only for the LLM API usage from your chosen provider. Local models are completely free to run.
@@ -90,7 +108,7 @@ Both persist across sessions. See [Memory](../user-guide/features/memory.md) and
 Yes. Import the `AIAgent` class and use Rok programmatically:
 
 ```python
-from rok.agent import AIAgent
+from run_agent import AIAgent
 
 agent = AIAgent(model="openrouter/nous/hermes-3-llama-3.1-70b")
 response = agent.chat("Explain quantum computing briefly")
@@ -227,7 +245,7 @@ rok chat --model openrouter/meta-llama/llama-3.1-70b-instruct
 rok chat
 
 # Use a model with a larger context window
-rok chat --model openrouter/google/gemini-2.0-flash-001
+rok chat --model openrouter/google/gemini-3-flash-preview
 ```
 
 If this happens on the first long conversation, Rok may have the wrong context length for your model. Check what it detected:
@@ -348,7 +366,7 @@ Configure in `~/.rok/config.yaml` under your gateway's settings. See the [Messag
 **Solution:**
 ```bash
 # Install messaging dependencies
-pip install "rok-agent[telegram]"   # or [discord], [slack], [whatsapp]
+pip install "rok[telegram]"   # or [discord], [slack], [whatsapp]
 
 # Check for port conflicts
 lsof -i :8080
@@ -356,6 +374,42 @@ lsof -i :8080
 # Verify configuration
 rok config show
 ```
+
+#### WSL: Gateway keeps disconnecting or `rok gateway start` fails
+
+**Cause:** WSL's systemd support is unreliable. Many WSL2 installations don't have systemd enabled, and even when enabled, services may not survive WSL restarts or Windows idle shutdowns.
+
+**Solution:** Use foreground mode instead of the systemd service:
+
+```bash
+# Option 1: Direct foreground (simplest)
+rok gateway run
+
+# Option 2: Persistent via tmux (survives terminal close)
+tmux new -s rok 'rok gateway run'
+# Reattach later: tmux attach -t rok
+
+# Option 3: Background via nohup
+nohup rok gateway run > ~/.rok/logs/gateway.log 2>&1 &
+```
+
+If you want to try systemd anyway, make sure it's enabled:
+
+1. Open `/etc/wsl.conf` (create it if it doesn't exist)
+2. Add:
+   ```ini
+   [boot]
+   systemd=true
+   ```
+3. From PowerShell: `wsl --shutdown`
+4. Reopen your WSL terminal
+5. Verify: `systemctl is-system-running` should say "running" or "degraded"
+
+:::tip Auto-start on Windows boot
+For reliable auto-start, use Windows Task Scheduler to launch WSL + the gateway on login:
+1. Create a task that runs `wsl -d Ubuntu -- bash -lc 'rok gateway run'`
+2. Set it to trigger on user logon
+:::
 
 #### macOS: Node.js / ffmpeg / other tools not found by gateway
 
@@ -432,7 +486,7 @@ rok chat --continue
 **Solution:**
 ```bash
 # Ensure MCP dependencies are installed (already included in standard install)
-cd ~/.rok/rok-agent && uv pip install -e ".[mcp]"
+cd ~/.rok/rok && uv pip install -e ".[mcp]"
 
 # For npm-based servers, ensure Node.js is available
 node --version
@@ -642,10 +696,10 @@ Skills with very long descriptions are truncated to 40 characters in the Telegra
    curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
    ```
 
-2. Copy your entire `~/.rok/` directory **except** the `rok-agent` subdirectory (that's the code repo — the new install has its own):
+2. Copy your entire `~/.rok/` directory **except** the `rok` subdirectory (that's the code repo — the new install has its own):
    ```bash
    # On the source machine
-   rsync -av --exclude='rok-agent' ~/.rok/ newmachine:~/.rok/
+   rsync -av --exclude='rok' ~/.rok/ newmachine:~/.rok/
    ```
 
    Or use profile export/import:
@@ -659,7 +713,7 @@ Skills with very long descriptions are truncated to 40 characters in the Telegra
 
 3. On the new machine, run `rok setup` to verify API keys and provider config are working. Re-authenticate any messaging platforms (especially WhatsApp, which uses QR pairing).
 
-The `~/.rok/` directory contains everything: `config.yaml`, `.env`, `SOUL.md`, `memories/`, `skills/`, `state.db` (sessions), `cron/`, and any custom plugins. The code itself lives in `~/.rok/rok-agent/` and is installed fresh.
+The `~/.rok/` directory contains everything: `config.yaml`, `.env`, `SOUL.md`, `memories/`, `skills/`, `state.db` (sessions), `cron/`, and any custom plugins. The code itself lives in `~/.rok/rok/` and is installed fresh.
 
 ### Permission denied when reloading shell after install
 
@@ -712,6 +766,6 @@ If using OpenRouter, make sure your API key has credits. A 400 from OpenRouter o
 
 If your issue isn't covered here:
 
-1. **Search existing issues:** [GitHub Issues](https://github.com/RokctAI/rok-agent/issues)
-2. **Ask the community:** [Nous Research Discord](https://discord.gg/nousresearch)
+1. **Search existing issues:** [GitHub Issues](https://github.com/RokctAI/rok/issues)
+2. **Ask the community:** [Nous Research Discord](https://discord.gg/rokctai)
 3. **File a bug report:** Include your OS, Python version (`python3 --version`), Rok version (`rok --version`), and the full error message

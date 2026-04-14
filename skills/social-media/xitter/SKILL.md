@@ -117,7 +117,7 @@ chmod 600 ~/.config/x-cli/.env
 
 ```bash
 x-cli user get openai
-x-cli tweet search "from:RokctAI" --max 3
+x-cli tweet search "from:Rokctai" --max 3
 x-cli me mentions --max 5
 ```
 

@@ -2,7 +2,7 @@
 
 Renders any content as colored ASCII character video. Audio, video, images, text, or pure math in, MP4/GIF/PNG sequence out. Full RGB color per character cell, 1080p 24fps default. No GPU.
 
-Built for [Rok Agent](https://github.com/RokctAI/rok-agent). Usable in any coding agent. Canonical source lives here; synced to [`RokctAI/rok-agent/skills/creative/ascii-video`](https://github.com/RokctAI/rok-agent/tree/main/skills/creative/ascii-video) via PR.
+Built for [Rok Agent](https://github.com/RokctAI/rok). Usable in any coding agent. Canonical source lives here; synced to [`Rokctai/rok/skills/creative/ascii-video`](https://github.com/RokctAI/rok/tree/main/skills/creative/ascii-video) via PR.
 
 ## What this is
 

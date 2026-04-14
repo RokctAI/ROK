@@ -23,7 +23,7 @@ If you have ever wanted Rok to use a tool that already exists somewhere else, MC
 1. Install MCP support (already included if you used the standard install script):
 
 ```bash
-cd ~/.rok/rok-agent
+cd ~/.rok/rok
 uv pip install -e ".[mcp]"
 ```
 
@@ -382,7 +382,7 @@ Check:
 
 ```bash
 # Verify MCP deps are installed (already included in standard install)
-cd ~/.rok/rok-agent && uv pip install -e ".[mcp]"
+cd ~/.rok/rok && uv pip install -e ".[mcp]"
 
 node --version
 npx --version
@@ -481,7 +481,7 @@ Or if you installed Rok in a specific location:
 {
   "mcpServers": {
     "rok": {
-      "command": "/home/user/.rok/rok-agent/venv/bin/rok",
+      "command": "/home/user/.rok/rok/venv/bin/rok",
       "args": ["mcp", "serve"]
     }
   }

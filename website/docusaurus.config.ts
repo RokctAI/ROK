@@ -7,11 +7,11 @@ const config: Config = {
   tagline: 'The self-improving AI agent',
   favicon: 'img/favicon.ico',
 
-  url: 'https://rok-agent.rokctai.com',
+  url: 'https://rok.rokctai.com',
   baseUrl: '/docs/',
 
-  organizationName: 'RokctAI',
-  projectName: 'rok-agent',
+  organizationName: 'Rokctai',
+  projectName: 'rok',
 
   onBrokenLinks: 'warn',
 
@@ -49,7 +49,7 @@ const config: Config = {
         docs: {
           routeBasePath: '/',  // Docs at the root of /docs/
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/RokctAI/rok-agent/edit/main/website/',
+          editUrl: 'https://github.com/RokctAI/rok/edit/main/website/',
         },
         blog: false,
         theme: {
@@ -60,7 +60,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/rok-agent-banner.png',
+    image: 'img/rok-banner.png',
     colorMode: {
       defaultMode: 'dark',
       respectPrefersColorScheme: true,
@@ -90,12 +90,12 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://rok-agent.rokctai.com',
+          href: 'https://rok.rokctai.com',
           label: 'Home',
           position: 'right',
         },
         {
-          href: 'https://github.com/RokctAI/rok-agent',
+          href: 'https://github.com/RokctAI/rok',
           label: 'GitHub',
           position: 'right',
         },
@@ -122,14 +122,14 @@ const config: Config = {
           title: 'Community',
           items: [
             { label: 'Discord', href: 'https://discord.gg/NousResearch' },
-            { label: 'GitHub Discussions', href: 'https://github.com/RokctAI/rok-agent/discussions' },
+            { label: 'GitHub Discussions', href: 'https://github.com/RokctAI/rok/discussions' },
             { label: 'Skills Hub', href: 'https://agentskills.io' },
           ],
         },
         {
           title: 'More',
           items: [
-            { label: 'GitHub', href: 'https://github.com/RokctAI/rok-agent' },
+            { label: 'GitHub', href: 'https://github.com/RokctAI/rok' },
             { label: 'Nous Research', href: 'https://rokct.ai' },
           ],
         },

@@ -1,4 +1,4 @@
-"""Shared fixtures for the rok-agent test suite."""
+"""Shared fixtures for the rok test suite."""
 
 import asyncio
 import os
@@ -38,6 +38,8 @@ def _isolate_rok_home(tmp_path, monkeypatch):
     monkeypatch.delenv("ROK_SESSION_CHAT_ID", raising=False)
     monkeypatch.delenv("ROK_SESSION_CHAT_NAME", raising=False)
     monkeypatch.delenv("ROK_GATEWAY_SESSION", raising=False)
+    # Avoid making real calls during tests if this key is set in the env files
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
 
 
 @pytest.fixture()

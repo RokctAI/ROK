@@ -33,15 +33,15 @@ We value contributions in this order:
 | Requirement | Notes |
 |-------------|-------|
 | **Git** | With `--recurse-submodules` support |
-| **Python 3.10+** | uv will install it if missing |
+| **Python 3.11+** | uv will install it if missing |
 | **uv** | Fast Python package manager ([install](https://docs.astral.sh/uv/)) |
 | **Node.js 18+** | Optional — needed for browser tools and WhatsApp bridge |
 
 ### Clone and Install
 
 ```bash
-git clone --recurse-submodules https://github.com/RokctAI/rok-agent.git
-cd rok-agent
+git clone --recurse-submodules https://github.com/RokctAI/rok.git
+cd rok
 
 # Create venv with Python 3.11
 uv venv venv --python 3.11
@@ -90,7 +90,7 @@ pytest tests/ -v
 - **Comments**: Only when explaining non-obvious intent, trade-offs, or API quirks
 - **Error handling**: Catch specific exceptions. Use `logger.warning()`/`logger.error()` with `exc_info=True` for unexpected errors
 - **Cross-platform**: Never assume Unix (see below)
-- **Profile-safe paths**: Never hardcode `~/.rok` — use `get_rok_home()` from `rok_constants` for code paths and `display_rok_home()` for user-facing messages. See [AGENTS.md](https://github.com/RokctAI/rok-agent/blob/main/AGENTS.md#profiles-multi-instance-support) for full rules.
+- **Profile-safe paths**: Never hardcode `~/.rok` — use `get_rok_home()` from `rok_constants` for code paths and `display_rok_home()` for user-facing messages. See [AGENTS.md](https://github.com/RokctAI/rok/blob/main/AGENTS.md#profiles-multi-instance-support) for full rules.
 
 ## Cross-Platform Compatibility
 
@@ -216,7 +216,7 @@ fix(security): prevent shell injection in sudo password piping
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/RokctAI/rok-agent/issues)
+- Use [GitHub Issues](https://github.com/RokctAI/rok/issues)
 - Include: OS, Python version, Rok version (`rok version`), full error traceback
 - Include steps to reproduce
 - Check existing issues before creating duplicates
@@ -230,4 +230,4 @@ fix(security): prevent shell injection in sudo password piping
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the [MIT License](https://github.com/RokctAI/rok-agent/blob/main/LICENSE).
+By contributing, you agree that your contributions will be licensed under the [MIT License](https://github.com/RokctAI/rok/blob/main/LICENSE).

@@ -24,7 +24,8 @@ from pathlib import Path
 
 logger = logging.getLogger("hooks.boot-md")
 
-ROK_HOME = Path(os.environ.get("ROK_HOME", Path.home() / ".rok"))
+from rok_constants import get_rok_home
+ROK_HOME = get_rok_home()
 BOOT_FILE = ROK_HOME / "BOOT.md"
 
 

@@ -1,8 +1,8 @@
 # Terminal Test Environment -- Default Configuration
 #
-# Simple file-creation tasks for validating the full Atropos + rok-agent stack.
+# Simple file-creation tasks for validating the full Atropos + rok stack.
 # Uses Modal terminal backend and OpenRouter (Claude) for inference.
-# API keys loaded from ~/rok-agent/.env
+# API keys loaded from ~/rok/.env
 #
 # Usage:
 #   run-api

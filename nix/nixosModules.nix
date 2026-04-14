@@ -1,4 +1,4 @@
-# nix/nixosModules.nix — NixOS module for rok-agent
+# nix/nixosModules.nix — NixOS module for rok
 #
 # Two modes:
 #   container.enable = false (default) → native systemd service
@@ -17,7 +17,7 @@
 # writable tool prefixes for npm i -g, pip install, uv tool install, etc.
 #
 # Usage:
-#   services.rok-agent = {
+#   services.rok = {
 #     enable = true;
 #     settings.model = "anthropic/claude-sonnet-4";
 #     environmentFiles = [ config.sops.secrets."rok/env".path ];
@@ -27,10 +27,10 @@
   flake.nixosModules.default = { config, lib, pkgs, ... }:
 
   let
-    cfg = config.services.rok-agent;
-    rok-agent = inputs.self.packages.${pkgs.system}.default;
+    cfg = config.services.rok;
+    rok = inputs.self.packages.${pkgs.system}.default;
 
-    # Deep-merge config type (from 0xrsydn/nix-rok-agent)
+    # Deep-merge config type (from 0xrsydn/nix-rok)
     deepConfigType = lib.types.mkOptionType {
       name = "rok-config-attrs";
       description = "Rok YAML config (attrset), merged deeply via lib.recursiveUpdate.";
@@ -57,12 +57,12 @@
         lib.mapAttrsToList (name: value:
           if builtins.isPath value || lib.isStorePath value
           then "cp ${value} $out/${name}"
-          else "cat > $out/${name} <<'ROK_DOC_EOF'\n${value}\nHERMES_DOC_EOF"
+          else "cat > $out/${name} <<'ROK_DOC_EOF'\n${value}\nROK_DOC_EOF"
         ) cfg.documents
       )
     );
 
-    containerName = "rok-agent";
+    containerName = "rok";
     containerDataDir = "/data";     # stateDir mount point inside container
     containerHomeDir = "/home/rok";
 
@@ -187,14 +187,14 @@
       else cfg.workingDirectory;
 
   in {
-    options.services.rok-agent = with lib; {
+    options.services.rok = with lib; {
       enable = mkEnableOption "Rok Agent gateway service";
 
       # ── Package ──────────────────────────────────────────────────────────
       package = mkOption {
         type = types.package;
-        default = rok-agent;
-        description = "The rok-agent package to use.";
+        default = rok;
+        description = "The rok package to use.";
       };
 
       # ── Service identity ─────────────────────────────────────────────────
@@ -464,7 +464,11 @@
       addToSystemPackages = mkOption {
         type = types.bool;
         default = false;
-        description = "Add rok CLI to environment.systemPackages.";
+        description = ''
+          Add the rok CLI to environment.systemPackages and export
+          ROK_HOME system-wide (via environment.variables) so interactive
+          shells share state with the gateway service.
+        '';
       };
 
       # ── OCI Container (opt-in) ──────────────────────────────────────────
@@ -495,6 +499,16 @@
           default = "ubuntu:24.04";
           description = "OCI container image. The container pulls this at runtime via Docker/Podman.";
         };
+
+        hostUsers = mkOption {
+          type = types.listOf types.str;
+          default = [ ];
+          description = ''
+            Interactive users who get a ~/.rok symlink to the service
+            stateDir. These users are automatically added to the rok group.
+          '';
+          example = [ "sidbin" ];
+        };
       };
     };
 
@@ -502,7 +516,7 @@
 
       # ── Merge MCP servers into settings ────────────────────────────────
       (lib.mkIf (cfg.mcpServers != { }) {
-        services.rok-agent.settings.mcp_servers = lib.mapAttrs (_name: srv:
+        services.rok.settings.mcp_servers = lib.mapAttrs (_name: srv:
           # Stdio transport
           lib.optionalAttrs (srv.command != null) { inherit (srv) command args; }
           // lib.optionalAttrs (srv.env != { }) { inherit (srv) env; }
@@ -545,29 +559,70 @@
       })
 
       # ── Host CLI ──────────────────────────────────────────────────────
+      # Add the rok CLI to system PATH and export ROK_HOME system-wide
+      # so interactive shells share state (sessions, skills, cron) with the
+      # gateway service instead of creating a separate ~/.rok/.
       (lib.mkIf cfg.addToSystemPackages {
         environment.systemPackages = [ cfg.package ];
+        environment.variables.ROK_HOME = "${cfg.stateDir}/.rok";
+      })
+
+      # ── Host user group membership ─────────────────────────────────────
+      (lib.mkIf (cfg.container.enable && cfg.container.hostUsers != []) {
+        users.users = lib.genAttrs cfg.container.hostUsers (user: {
+          extraGroups = [ cfg.group ];
+        });
+      })
+
+      # ── Warnings ──────────────────────────────────────────────────────
+      (lib.mkIf (cfg.container.enable && !cfg.addToSystemPackages && cfg.container.hostUsers != []) {
+        warnings = [
+          ''
+            services.rok: container.enable is true and container.hostUsers
+            is set, but addToSystemPackages is false. Without a host-installed rok
+            binary, container routing will not work for interactive users.
+            Set addToSystemPackages = true or ensure rok is on PATH.
+          ''
+        ];
       })
 
       # ── Directories ───────────────────────────────────────────────────
       {
         systemd.tmpfiles.rules = [
-          "d ${cfg.stateDir}                0750 ${cfg.user} ${cfg.group} - -"
-          "d ${cfg.stateDir}/.rok        0750 ${cfg.user} ${cfg.group} - -"
+          "d ${cfg.stateDir}                2770 ${cfg.user} ${cfg.group} - -"
+          "d ${cfg.stateDir}/.rok        2770 ${cfg.user} ${cfg.group} - -"
+          "d ${cfg.stateDir}/.rok/cron   2770 ${cfg.user} ${cfg.group} - -"
+          "d ${cfg.stateDir}/.rok/sessions 2770 ${cfg.user} ${cfg.group} - -"
+          "d ${cfg.stateDir}/.rok/logs   2770 ${cfg.user} ${cfg.group} - -"
+          "d ${cfg.stateDir}/.rok/memories 2770 ${cfg.user} ${cfg.group} - -"
           "d ${cfg.stateDir}/home           0750 ${cfg.user} ${cfg.group} - -"
-          "d ${cfg.workingDirectory}         0750 ${cfg.user} ${cfg.group} - -"
+          "d ${cfg.workingDirectory}         2770 ${cfg.user} ${cfg.group} - -"
         ];
       }
 
       # ── Activation: link config + auth + documents ────────────────────
       {
-        system.activationScripts."rok-agent-setup" = lib.stringAfter [ "users" ] ''
+        system.activationScripts."rok-setup" = lib.stringAfter ([ "users" ] ++ lib.optional (config.system.activationScripts ? setupSecrets) "setupSecrets") ''
           # Ensure directories exist (activation runs before tmpfiles)
           mkdir -p ${cfg.stateDir}/.rok
           mkdir -p ${cfg.stateDir}/home
           mkdir -p ${cfg.workingDirectory}
           chown ${cfg.user}:${cfg.group} ${cfg.stateDir} ${cfg.stateDir}/.rok ${cfg.stateDir}/home ${cfg.workingDirectory}
-          chmod 0750 ${cfg.stateDir} ${cfg.stateDir}/.rok ${cfg.stateDir}/home ${cfg.workingDirectory}
+          chmod 2770 ${cfg.stateDir} ${cfg.stateDir}/.rok ${cfg.workingDirectory}
+          chmod 0750 ${cfg.stateDir}/home
+
+          # Create subdirs, set setgid + group-writable, migrate existing files.
+          # Nix-managed files (config.yaml, .env, .managed) stay 0640/0644.
+          find ${cfg.stateDir}/.rok -maxdepth 1 \
+            \( -name "*.db" -o -name "*.db-wal" -o -name "*.db-shm" -o -name "SOUL.md" \) \
+            -exec chmod g+rw {} + 2>/dev/null || true
+          for _subdir in cron sessions logs memories; do
+            mkdir -p "${cfg.stateDir}/.rok/$_subdir"
+            chown ${cfg.user}:${cfg.group} "${cfg.stateDir}/.rok/$_subdir"
+            chmod 2770 "${cfg.stateDir}/.rok/$_subdir"
+            find "${cfg.stateDir}/.rok/$_subdir" -type f \
+              -exec chmod g+rw {} + 2>/dev/null || true
+          done
 
           # Merge Nix settings into existing config.yaml.
           # Preserves user-added keys (skills, streaming, etc.); Nix keys win.
@@ -585,6 +640,59 @@
           chown ${cfg.user}:${cfg.group} ${cfg.stateDir}/.rok/.managed
           chmod 0644 ${cfg.stateDir}/.rok/.managed
 
+          # Container mode metadata — tells the host CLI to exec into the
+          # container instead of running locally. Removed when container mode
+          # is disabled so the host CLI falls back to native execution.
+          ${if cfg.container.enable then ''
+            cat > ${cfg.stateDir}/.rok/.container-mode <<'ROK_CONTAINER_MODE_EOF'
+# Written by NixOS activation script. Do not edit manually.
+backend=${cfg.container.backend}
+container_name=${containerName}
+exec_user=${cfg.user}
+rok_bin=${containerDataDir}/current-package/bin/rok
+ROK_CONTAINER_MODE_EOF
+            chown ${cfg.user}:${cfg.group} ${cfg.stateDir}/.rok/.container-mode
+            chmod 0644 ${cfg.stateDir}/.rok/.container-mode
+          '' else ''
+            rm -f ${cfg.stateDir}/.rok/.container-mode
+
+            # Remove symlink bridge for hostUsers
+            ${lib.concatStringsSep "\n" (map (user:
+              let
+                userHome = config.users.users.${user}.home;
+                symlinkPath = "${userHome}/.rok";
+              in ''
+                if [ -L "${symlinkPath}" ] && [ "$(readlink "${symlinkPath}")" = "${cfg.stateDir}/.rok" ]; then
+                  rm -f "${symlinkPath}"
+                  echo "rok: removed symlink ${symlinkPath}"
+                fi
+              '') cfg.container.hostUsers)}
+          ''}
+
+          # ── Symlink bridge for interactive users ───────────────────────
+          # Create ~/.rok -> stateDir/.rok for each hostUser so the
+          # host CLI shares state with the container service.
+          # Only runs when container mode is enabled.
+          ${lib.optionalString cfg.container.enable
+            (lib.concatStringsSep "\n" (map (user:
+              let
+                userHome = config.users.users.${user}.home;
+                symlinkPath = "${userHome}/.rok";
+                target = "${cfg.stateDir}/.rok";
+              in ''
+                if [ -d "${symlinkPath}" ] && [ ! -L "${symlinkPath}" ]; then
+                  # Real directory — back it up, then create symlink.
+                  # (ln -sfn cannot atomically replace a directory.)
+                  _backup="${symlinkPath}.bak.$(date +%s)"
+                  echo "rok: backing up existing ${symlinkPath} to $_backup"
+                  mv "${symlinkPath}" "$_backup"
+                fi
+                # For everything else (existing symlink, doesn't exist, etc.)
+                # ln -sfn handles it: replaces symlinks, creates new ones.
+                ln -sfn "${target}" "${symlinkPath}"
+                chown -h ${user}:${cfg.group} "${symlinkPath}"
+              '') cfg.container.hostUsers))}
+
           # Seed auth file if provided
           ${lib.optionalString (cfg.authFile != null) ''
             ${if cfg.authFileForceOverwrite then ''
@@ -601,7 +709,7 @@
           # so this is the single source of truth for both native and container mode.
           ${lib.optionalString (cfg.environment != {} || cfg.environmentFiles != []) ''
             ENV_FILE="${cfg.stateDir}/.rok/.env"
-            install -o ${cfg.user} -g ${cfg.group} -m 0600 /dev/null "$ENV_FILE"
+            install -o ${cfg.user} -g ${cfg.group} -m 0640 /dev/null "$ENV_FILE"
             cat > "$ENV_FILE" <<'ROK_NIX_ENV_EOF'
 ${envFileContent}
 ROK_NIX_ENV_EOF
@@ -624,7 +732,7 @@ ROK_NIX_ENV_EOF
       # MODE A: Native systemd service (default)
       # ══════════════════════════════════════════════════════════════════
       (lib.mkIf (!cfg.container.enable) {
-        systemd.services.rok-agent = {
+        systemd.services.rok = {
           description = "Rok Agent Gateway";
           wantedBy = [ "multi-user.target" ];
           after = [ "network-online.target" ];
@@ -654,6 +762,10 @@ ROK_NIX_ENV_EOF
             Restart = cfg.restart;
             RestartSec = cfg.restartSec;
 
+            # Shared-state: files created by the gateway should be group-writable
+            # so interactive users in the rok group can read/write them.
+            UMask = "0007";
+
             # Hardening
             NoNewPrivileges = true;
             ProtectSystem = "strict";
@@ -678,7 +790,7 @@ ROK_NIX_ENV_EOF
         # Ensure the container runtime is available
         virtualisation.docker.enable = lib.mkDefault (cfg.container.backend == "docker");
 
-        systemd.services.rok-agent = {
+        systemd.services.rok = {
           description = "Rok Agent Gateway (container)";
           wantedBy = [ "multi-user.target" ];
           after = [ "network-online.target" ]

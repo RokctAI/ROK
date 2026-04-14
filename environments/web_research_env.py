@@ -32,7 +32,7 @@ Usage:
 
 Built by: github.com/jackx707
 Inspired by: GroceryMind — production Rok agent doing live web research
-             across German grocery stores (firecrawl + rok-agent)
+             across German grocery stores (firecrawl + rok)
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ from urllib.parse import urlparse
 
 from pydantic import Field
 
-# Ensure rok-agent root is on path
+# Ensure rok root is on path
 _repo_root = Path(__file__).resolve().parent.parent
 if str(_repo_root) not in sys.path:
     sys.path.insert(0, str(_repo_root))
@@ -68,7 +68,7 @@ from atroposlib.envs.base import ScoredDataGroup
 from atroposlib.envs.server_handling.server_manager import APIServerConfig
 from atroposlib.type_definitions import Item
 
-from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
+from environments.rok_base_env import RokBaseEnv, RokEnvConfig
 from environments.agent_loop import AgentResult
 from environments.tool_context import ToolContext
 
@@ -146,7 +146,7 @@ SAMPLE_QUESTIONS = [
 # Configuration
 # ---------------------------------------------------------------------------
 
-class WebResearchEnvConfig(HermesAgentEnvConfig):
+class WebResearchEnvConfig(RokEnvConfig):
     """Configuration for the web research RL environment."""
 
     # Reward weights
@@ -198,7 +198,7 @@ class WebResearchEnvConfig(HermesAgentEnvConfig):
 # Environment
 # ---------------------------------------------------------------------------
 
-class WebResearchEnv(HermesAgentBaseEnv):
+class WebResearchEnv(RokBaseEnv):
     """
     RL environment for training multi-step web research skills.
 
@@ -433,7 +433,7 @@ class WebResearchEnv(HermesAgentBaseEnv):
         """
         import time
         import uuid
-        from environments.agent_loop import HermesAgentLoop
+        from environments.agent_loop import RokLoop
         from environments.tool_context import ToolContext
 
         items = self._eval_items
@@ -463,7 +463,7 @@ class WebResearchEnv(HermesAgentBaseEnv):
                 messages.append({"role": "user", "content": self.format_prompt(item)})
 
                 # Run the full agent loop with tools
-                agent = HermesAgentLoop(
+                agent = RokLoop(
                     server=self.server,
                     tool_schemas=tools,
                     valid_tool_names=valid_names,
@@ -472,6 +472,7 @@ class WebResearchEnv(HermesAgentBaseEnv):
                     temperature=0.0,  # Deterministic for eval
                     max_tokens=self.config.max_token_length,
                     extra_body=self.config.extra_body,
+                    budget_config=self.config.build_budget_config(),
                 )
                 result = await agent.run(messages)
 

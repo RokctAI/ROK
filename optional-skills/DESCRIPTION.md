@@ -2,7 +2,7 @@
 
 Official skills maintained by Nous Research that are **not activated by default**.
 
-These skills ship with the rok-agent repository but are not copied to
+These skills ship with the rok repository but are not copied to
 `~/.rok/skills/` during setup. They are discoverable via the Skills Hub:
 
 ```bash

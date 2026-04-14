@@ -972,7 +972,7 @@ class TestDiskFailureMarker:
 # ROK_HOME isolation
 # ---------------------------------------------------------------------------
 
-class TestHermesHomeIsolation:
+class TestRokHomeIsolation:
     def test_rok_bin_dir_respects_rok_home(self):
         """_rok_bin_dir must use ROK_HOME, not hardcoded ~/.rok."""
         from tools.tirith_security import _rok_bin_dir

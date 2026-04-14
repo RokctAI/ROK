@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 title: "Use SOUL.md with Rok"
 description: "How to use SOUL.md to shape Rok Agent's default voice, what belongs there, and how it differs from AGENTS.md and /personality"
 ---

@@ -54,7 +54,7 @@ class TestHandleUpdateCommand:
         result = await runner._handle_update_command(event)
 
         assert "managed by Homebrew" in result
-        assert "brew upgrade rok-agent" in result
+        assert "brew upgrade rok" in result
 
     @pytest.mark.asyncio
     async def test_no_git_directory(self, tmp_path):
@@ -80,7 +80,7 @@ class TestHandleUpdateCommand:
             # The handler does Path(__file__).parent.parent.resolve()
             # We need to make project_root / '.git' not exist.
             # Since Path(__file__) resolves to the real gateway/run.py,
-            # project_root will be the real rok-agent dir (which HAS .git).
+            # project_root will be the real rok dir (which HAS .git).
             # Patch Path to control this.
             original_path = Path
 
@@ -330,7 +330,7 @@ class TestHandleUpdateCommand:
              patch("subprocess.Popen"):
             result = await runner._handle_update_command(event)
 
-        assert "notify you when it's done" in result
+        assert "stream progress" in result
 
 
 # ---------------------------------------------------------------------------

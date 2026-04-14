@@ -30,7 +30,6 @@ class TestHonchoClientConfigDefaults:
         assert config.session_strategy == "per-directory"
         assert config.recall_mode == "hybrid"
         assert config.session_peer_prefix is False
-        assert config.linked_hosts == []
         assert config.sessions == {}
 
 
@@ -106,7 +105,6 @@ class TestFromGlobalConfig:
                 "rok": {
                     "workspace": "override-ws",
                     "aiPeer": "override-ai",
-                    "linkedHosts": ["cursor"],
                 }
             }
         }))
@@ -116,7 +114,6 @@ class TestFromGlobalConfig:
         # Host block workspace overrides root workspace
         assert config.workspace_id == "override-ws"
         assert config.ai_peer == "override-ai"
-        assert config.linked_hosts == ["cursor"]
         assert config.environment == "staging"
         assert config.peer_name == "alice"
         assert config.enabled is True
@@ -265,10 +262,10 @@ class TestResolveSessionName:
     def test_per_repo_uses_git_root(self):
         config = HonchoClientConfig(session_strategy="per-repo")
         with patch.object(
-            HonchoClientConfig, "_git_repo_name", return_value="rok-agent"
+            HonchoClientConfig, "_git_repo_name", return_value="rok"
         ):
-            result = config.resolve_session_name("/home/user/rok-agent/subdir")
-        assert result == "rok-agent"
+            result = config.resolve_session_name("/home/user/rok/subdir")
+        assert result == "rok"
 
     def test_per_repo_with_peer_prefix(self):
         config = HonchoClientConfig(
@@ -297,41 +294,6 @@ class TestResolveSessionName:
         assert result == "custom-session"
 
 
-class TestGetLinkedWorkspaces:
-    def test_resolves_linked_hosts(self):
-        config = HonchoClientConfig(
-            workspace_id="rok-ws",
-            linked_hosts=["cursor", "windsurf"],
-            raw={
-                "hosts": {
-                    "cursor": {"workspace": "cursor-ws"},
-                    "windsurf": {"workspace": "windsurf-ws"},
-                }
-            },
-        )
-        workspaces = config.get_linked_workspaces()
-        assert "cursor-ws" in workspaces
-        assert "windsurf-ws" in workspaces
-
-    def test_excludes_own_workspace(self):
-        config = HonchoClientConfig(
-            workspace_id="rok-ws",
-            linked_hosts=["other"],
-            raw={"hosts": {"other": {"workspace": "rok-ws"}}},
-        )
-        workspaces = config.get_linked_workspaces()
-        assert workspaces == []
-
-    def test_uses_host_key_as_fallback(self):
-        config = HonchoClientConfig(
-            workspace_id="rok-ws",
-            linked_hosts=["cursor"],
-            raw={"hosts": {"cursor": {}}},  # no workspace field
-        )
-        workspaces = config.get_linked_workspaces()
-        assert "cursor" in workspaces
-
-
 class TestResolveConfigPath:
     def test_prefers_rok_home_when_exists(self, tmp_path):
         rok_home = tmp_path / "rok"
@@ -346,14 +308,22 @@ class TestResolveConfigPath:
     def test_falls_back_to_global_when_no_local(self, tmp_path):
         rok_home = tmp_path / "rok"
         rok_home.mkdir()
-        # No honcho.json in ROK_HOME
+        # No honcho.json in ROK_HOME — also isolate ~/.rok so
+        # the default-profile fallback doesn't hit the real filesystem.
+        fake_home = tmp_path / "fakehome"
+        fake_home.mkdir()
 
-        with patch.dict(os.environ, {"ROK_HOME": str(rok_home)}):
+        with patch.dict(os.environ, {"ROK_HOME": str(rok_home)}), \
+             patch.object(Path, "home", return_value=fake_home):
             result = resolve_config_path()
         assert result == GLOBAL_CONFIG_PATH
 
-    def test_falls_back_to_global_without_rok_home_env(self):
-        with patch.dict(os.environ, {}, clear=False):
+    def test_falls_back_to_global_without_rok_home_env(self, tmp_path):
+        fake_home = tmp_path / "fakehome"
+        fake_home.mkdir()
+
+        with patch.dict(os.environ, {}, clear=False), \
+             patch.object(Path, "home", return_value=fake_home):
             os.environ.pop("ROK_HOME", None)
             result = resolve_config_path()
         assert result == GLOBAL_CONFIG_PATH
@@ -465,6 +435,111 @@ class TestProfileScopedConfig:
             config = HonchoClientConfig.from_global_config(config_path=config_file)
         assert config.host == "rok.dreamer"
         assert config.peer_name == "dreamer-user"
+
+
+class TestObservationModeMigration:
+    """Existing configs without explicit observationMode keep 'unified' default."""
+
+    def test_existing_config_defaults_to_unified(self, tmp_path):
+        """Config with host block but no observationMode → 'unified' (old default)."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "hosts": {"rok": {"enabled": True, "aiPeer": "rok"}},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.observation_mode == "unified"
+
+    def test_new_config_defaults_to_directional(self, tmp_path):
+        """Config with no host block and no credentials → 'directional' (new default)."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({}))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.observation_mode == "directional"
+
+    def test_explicit_directional_respected(self, tmp_path):
+        """Existing config with explicit observationMode → uses what's set."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "hosts": {"rok": {"enabled": True, "observationMode": "directional"}},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.observation_mode == "directional"
+
+    def test_explicit_unified_respected(self, tmp_path):
+        """Existing config with explicit observationMode unified → stays unified."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "observationMode": "unified",
+            "hosts": {"rok": {"enabled": True}},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.observation_mode == "unified"
+
+    def test_granular_observation_overrides_preset(self, tmp_path):
+        """Explicit observation object overrides both preset and migration default."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "hosts": {"rok": {
+                "enabled": True,
+                "observation": {
+                    "user": {"observeMe": True, "observeOthers": False},
+                    "ai": {"observeMe": False, "observeOthers": True},
+                },
+            }},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        # observation_mode falls back to "unified" (migration), but
+        # granular booleans from the observation object win
+        assert cfg.user_observe_me is True
+        assert cfg.user_observe_others is False
+        assert cfg.ai_observe_me is False
+        assert cfg.ai_observe_others is True
+
+
+class TestInitOnSessionStart:
+    """Tests for the initOnSessionStart config field."""
+
+    def test_default_is_false(self):
+        config = HonchoClientConfig()
+        assert config.init_on_session_start is False
+
+    def test_root_level_true(self, tmp_path):
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "initOnSessionStart": True,
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.init_on_session_start is True
+
+    def test_host_block_overrides_root(self, tmp_path):
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "initOnSessionStart": True,
+            "hosts": {"rok": {"initOnSessionStart": False}},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.init_on_session_start is False
+
+    def test_host_block_true_overrides_root_absent(self, tmp_path):
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "hosts": {"rok": {"initOnSessionStart": True}},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.init_on_session_start is True
+
+    def test_absent_everywhere_defaults_false(self, tmp_path):
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({"apiKey": "k"}))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.init_on_session_start is False
 
 
 class TestResetHonchoClient:

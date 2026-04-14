@@ -96,7 +96,7 @@ Text strings used throughout the CLI interface.
 |-----|------|-------------|---------|
 | `tool_prefix` | string | Character prefixed to tool output lines in the CLI | `┊` |
 | `tool_emojis` | dict | Per-tool emoji overrides for spinners and progress (`{tool_name: emoji}`) | `{}` |
-| `banner_logo` | string | Rich-markup ASCII art logo (replaces the default ROK_AGENT banner) | `""` |
+| `banner_logo` | string | Rich-markup ASCII art logo (replaces the default ROK banner) | `""` |
 | `banner_hero` | string | Rich-markup hero art (replaces the default caduceus art) | `""` |
 
 ## Custom skins
@@ -195,6 +195,55 @@ branding:
 
 tool_prefix: "▏"
 ```
+
+## Rok Mod — Visual Skin Editor
+
+[Rok Mod](https://github.com/cocktailpeanut/rok-mod) is a community-built web UI for creating and managing skins visually. Instead of writing YAML by hand, you get a point-and-click editor with live preview.
+
+![Rok Mod skin editor](https://raw.githubusercontent.com/cocktailpeanut/rok-mod/master/nous.png)
+
+**What it does:**
+
+- Lists all built-in and custom skins
+- Opens any skin into a visual editor with all Rok skin fields (colors, spinner, branding, tool prefix, tool emojis)
+- Generates `banner_logo` text art from a text prompt
+- Converts uploaded images (PNG, JPG, GIF, WEBP) into `banner_hero` ASCII art with multiple render styles (braille, ASCII ramp, blocks, dots)
+- Saves directly to `~/.rok/skins/`
+- Activates a skin by updating `~/.rok/config.yaml`
+- Shows the generated YAML and a live preview
+
+### Install
+
+**Option 1 — Pinokio (1-click):**
+
+Find it on [pinokio.computer](https://pinokio.computer) and install with one click.
+
+**Option 2 — npx (quickest from terminal):**
+
+```bash
+npx -y rok-mod
+```
+
+**Option 3 — Manual:**
+
+```bash
+git clone https://github.com/cocktailpeanut/rok-mod.git
+cd rok-mod/app
+npm install
+npm start
+```
+
+### Usage
+
+1. Start the app (via Pinokio or terminal).
+2. Open **Skin Studio**.
+3. Choose a built-in or custom skin to edit.
+4. Generate a logo from text and/or upload an image for hero art. Pick a render style and width.
+5. Edit colors, spinner, branding, and other fields.
+6. Click **Save** to write the skin YAML to `~/.rok/skins/`.
+7. Click **Activate** to set it as the current skin (updates `display.skin` in `config.yaml`).
+
+Rok Mod respects the `ROK_HOME` environment variable, so it works with [profiles](/docs/user-guide/profiles) too.
 
 ## Operational notes
 

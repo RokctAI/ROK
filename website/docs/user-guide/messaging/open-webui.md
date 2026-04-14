@@ -13,7 +13,7 @@ description: "Connect Open WebUI to Rok Agent via the OpenAI-compatible API serv
 ```mermaid
 flowchart LR
     A["Open WebUI<br/>browser UI<br/>port 3000"]
-    B["rok-agent<br/>gateway API server<br/>port 8642"]
+    B["rok<br/>gateway API server<br/>port 8642"]
     A -->|POST /v1/chat/completions| B
     B -->|SSE streaming response| A
 ```
@@ -60,7 +60,7 @@ docker run -d -p 3000:8080 \
 
 ### 4. Open the UI
 
-Go to **http://localhost:3000**. Create your admin account (the first user becomes admin). You should see **rok-agent** in the model dropdown. Start chatting!
+Go to **http://localhost:3000**. Create your admin account (the first user becomes admin). You should see your agent in the model dropdown (named after your profile, or **rok** for the default profile). Start chatting!
 
 ## Docker Compose Setup
 
@@ -106,7 +106,7 @@ If you prefer to configure the connection through the UI instead of environment 
 7. Click the **checkmark** to verify the connection
 8. **Save**
 
-The **rok-agent** model should now appear in the model dropdown.
+Your agent model should now appear in the model dropdown (named after your profile, or **rok** for the default profile).
 
 :::warning
 Environment variables only take effect on Open WebUI's **first launch**. After that, connection settings are stored in its internal database. To change them later, use the Admin UI or delete the Docker volume and start fresh.
@@ -130,7 +130,7 @@ This is the default and requires no extra configuration. Open WebUI sends standa
 To use the Responses API mode:
 
 1. Go to **Admin Settings** → **Connections** → **OpenAI** → **Manage**
-2. Edit your rok-agent connection
+2. Edit your rok connection
 3. Change **API Type** from "Chat Completions" to **"Responses (Experimental)"**
 4. Save
 
@@ -181,7 +181,7 @@ With streaming enabled (the default), you'll see brief inline indicators as tool
 
 - **Check the URL has `/v1` suffix**: `http://host.docker.internal:8642/v1` (not just `:8642`)
 - **Verify the gateway is running**: `curl http://localhost:8642/health` should return `{"status": "ok"}`
-- **Check model listing**: `curl http://localhost:8642/v1/models` should return a list with `rok-agent`
+- **Check model listing**: `curl http://localhost:8642/v1/models` should return a list with `rok`
 - **Docker networking**: From inside Docker, `localhost` means the container, not your host. Use `host.docker.internal` or `--network=host`.
 
 ### Connection test passes but no models load
@@ -195,6 +195,49 @@ Rok Agent may be executing multiple tool calls (reading files, running commands,
 ### "Invalid API key" errors
 
 Make sure your `OPENAI_API_KEY` in Open WebUI matches the `API_SERVER_KEY` in Rok Agent.
+
+## Multi-User Setup with Profiles
+
+To run separate Rok instances per user — each with their own config, memory, and skills — use [profiles](/docs/user-guide/features/profiles). Each profile runs its own API server on a different port and automatically advertises the profile name as the model in Open WebUI.
+
+### 1. Create profiles and configure API servers
+
+```bash
+rok profile create alice
+rok -p alice config set API_SERVER_ENABLED true
+rok -p alice config set API_SERVER_PORT 8643
+rok -p alice config set API_SERVER_KEY alice-secret
+
+rok profile create bob
+rok -p bob config set API_SERVER_ENABLED true
+rok -p bob config set API_SERVER_PORT 8644
+rok -p bob config set API_SERVER_KEY bob-secret
+```
+
+### 2. Start each gateway
+
+```bash
+rok -p alice gateway &
+rok -p bob gateway &
+```
+
+### 3. Add connections in Open WebUI
+
+In **Admin Settings** → **Connections** → **OpenAI API** → **Manage**, add one connection per profile:
+
+| Connection | URL | API Key |
+|-----------|-----|---------|
+| Alice | `http://host.docker.internal:8643/v1` | `alice-secret` |
+| Bob | `http://host.docker.internal:8644/v1` | `bob-secret` |
+
+The model dropdown will show `alice` and `bob` as distinct models. You can assign models to Open WebUI users via the admin panel, giving each user their own isolated Rok agent.
+
+:::tip Custom Model Names
+The model name defaults to the profile name. To override it, set `API_SERVER_MODEL_NAME` in the profile's `.env`:
+```bash
+rok -p alice config set API_SERVER_MODEL_NAME "Alice's Agent"
+```
+:::
 
 ## Linux Docker (no Docker Desktop)
 

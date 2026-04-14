@@ -45,13 +45,27 @@ Already up to date.  (or: Updating abc1234..def5678)
 ✅ Rok Agent updated successfully!
 ```
 
+### Recommended Post-Update Validation
+
+`rok update` handles the main update path, but a quick validation confirms everything landed cleanly:
+
+1. `git status --short` — if the tree is unexpectedly dirty, inspect before continuing
+2. `rok doctor` — checks config, dependencies, and service health
+3. `rok --version` — confirm the version bumped as expected
+4. If you use the gateway: `rok gateway status`
+5. If `doctor` reports npm audit issues: run `npm audit fix` in the flagged directory
+
+:::warning Dirty working tree after update
+If `git status --short` shows unexpected changes after `rok update`, stop and inspect them before continuing. This usually means local modifications were reapplied on top of the updated code, or a dependency step refreshed lockfiles.
+:::
+
 ### Checking your current version
 
 ```bash
 rok version
 ```
 
-Compare against the latest release at the [GitHub releases page](https://github.com/RokctAI/rok-agent/releases) or check for available updates:
+Compare against the latest release at the [GitHub releases page](https://github.com/RokctAI/rok/releases) or check for available updates:
 
 ```bash
 rok update --check
@@ -72,7 +86,7 @@ This pulls the latest code, updates dependencies, and restarts the gateway. The 
 If you installed manually (not via the quick installer):
 
 ```bash
-cd /path/to/rok-agent
+cd /path/to/rok
 export VIRTUAL_ENV="$(pwd)/venv"
 
 # Pull latest code and submodules
@@ -93,7 +107,7 @@ rok config migrate   # Interactively add any missing options
 If an update introduces a problem, you can roll back to a previous version:
 
 ```bash
-cd /path/to/rok-agent
+cd /path/to/rok
 
 # List recent versions
 git log --oneline -10
@@ -125,10 +139,10 @@ If you installed via Nix flake, updates are managed through the Nix package mana
 
 ```bash
 # Update the flake input
-nix flake update rok-agent
+nix flake update rok
 
 # Or rebuild with the latest
-nix profile upgrade rok-agent
+nix profile upgrade rok
 ```
 
 Nix installations are immutable — rollback is handled by Nix's generation system:
@@ -153,7 +167,7 @@ The uninstaller gives you the option to keep your configuration files (`~/.rok/`
 
 ```bash
 rm -f ~/.local/bin/rok
-rm -rf /path/to/rok-agent
+rm -rf /path/to/rok
 rm -rf ~/.rok            # Optional — keep if you plan to reinstall
 ```
 

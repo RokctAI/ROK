@@ -1,10 +1,10 @@
 """
-HermesAgentBaseEnv -- Abstract Base Environment for Rok-Agent + Atropos
+RokBaseEnv -- Abstract Base Environment for Rok + Atropos
 
-Provides the Atropos integration plumbing that all rok-agent environments share:
+Provides the Atropos integration plumbing that all rok environments share:
 - Two-mode operation (OpenAI server for Phase 1, VLLM ManagedServer for Phase 2)
 - Per-group toolset/distribution resolution
-- Agent loop orchestration via HermesAgentLoop
+- Agent loop orchestration via RokLoop
 - ToolContext creation for reward functions
 - ScoredDataGroup construction from ManagedServer state
 
@@ -26,7 +26,7 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-# Ensure the rok-agent repo root is on sys.path so that imports like
+# Ensure the rok repo root is on sys.path so that imports like
 # `from model_tools import ...` and `from environments.X import ...` work
 # regardless of where the script is invoked from.
 _repo_root = Path(__file__).resolve().parent.parent
@@ -36,7 +36,7 @@ if str(_repo_root) not in sys.path:
 from dotenv import load_dotenv
 from pydantic import Field
 
-# Load API keys from rok-agent/.env so all environments can access them
+# Load API keys from rok/.env so all environments can access them
 _env_path = _repo_root / ".env"
 if _env_path.exists():
     load_dotenv(dotenv_path=_env_path)
@@ -60,19 +60,24 @@ from atroposlib.envs.server_handling.server_manager import (
 )
 from atroposlib.type_definitions import Item
 
-from environments.agent_loop import AgentResult, HermesAgentLoop
+from environments.agent_loop import AgentResult, RokLoop
 from environments.tool_context import ToolContext
+from tools.budget_config import (
+    DEFAULT_RESULT_SIZE_CHARS,
+    DEFAULT_TURN_BUDGET_CHARS,
+    DEFAULT_PREVIEW_SIZE_CHARS,
+)
 
-# Import rok-agent toolset infrastructure
+# Import rok toolset infrastructure
 from model_tools import get_tool_definitions
 from toolset_distributions import sample_toolsets_from_distribution
 
 logger = logging.getLogger(__name__)
 
 
-class HermesAgentEnvConfig(BaseEnvConfig):
+class RokEnvConfig(BaseEnvConfig):
     """
-    Configuration for rok-agent Atropos environments.
+    Configuration for rok Atropos environments.
 
     Extends BaseEnvConfig with agent-specific settings for toolsets,
     terminal backend, dataset loading, and tool call parsing.
@@ -160,6 +165,32 @@ class HermesAgentEnvConfig(BaseEnvConfig):
         "Options: rok, mistral, llama3_json, qwen, deepseek_v3, etc.",
     )
 
+    # --- Tool result budget ---
+    # Defaults imported from tools.budget_config (single source of truth).
+    default_result_size_chars: int = Field(
+        default=DEFAULT_RESULT_SIZE_CHARS,
+        description="Default per-tool threshold (chars) for persisting large results "
+        "to sandbox. Results exceeding this are written to /tmp/rok-results/ "
+        "and replaced with a preview. Per-tool registry values take precedence "
+        "unless overridden via tool_result_overrides.",
+    )
+    turn_budget_chars: int = Field(
+        default=DEFAULT_TURN_BUDGET_CHARS,
+        description="Aggregate char budget per assistant turn. If all tool results "
+        "in a single turn exceed this, the largest are persisted to disk first.",
+    )
+    preview_size_chars: int = Field(
+        default=DEFAULT_PREVIEW_SIZE_CHARS,
+        description="Size of the inline preview shown after a tool result is persisted.",
+    )
+    tool_result_overrides: Optional[Dict[str, int]] = Field(
+        default=None,
+        description="Per-tool threshold overrides (chars). Keys are tool names, "
+        "values are char thresholds. Overrides both the default and registry "
+        "per-tool values. Example: {'terminal': 10000, 'search_files': 5000}. "
+        "Note: read_file is pinned to infinity and cannot be overridden.",
+    )
+
     # --- Provider-specific parameters ---
     # Passed as extra_body to the OpenAI client's chat.completions.create() call.
     # Useful for OpenRouter provider preferences, transforms, route settings, etc.
@@ -176,10 +207,20 @@ class HermesAgentEnvConfig(BaseEnvConfig):
         "transforms, and other provider-specific settings.",
     )
 
+    def build_budget_config(self):
+        """Build a BudgetConfig from env config fields."""
+        from tools.budget_config import BudgetConfig
+        return BudgetConfig(
+            default_result_size=self.default_result_size_chars,
+            turn_budget=self.turn_budget_chars,
+            preview_size=self.preview_size_chars,
+            tool_overrides=dict(self.tool_result_overrides) if self.tool_result_overrides else {},
+        )
 
-class HermesAgentBaseEnv(BaseEnv):
+
+class RokBaseEnv(BaseEnv):
     """
-    Abstract base environment for rok-agent Atropos integration.
+    Abstract base environment for rok Atropos integration.
 
     Handles two modes of operation:
     - Phase 1 (OpenAI server type): Uses server.chat_completion() directly.
@@ -199,12 +240,12 @@ class HermesAgentBaseEnv(BaseEnv):
         evaluate()        -- Periodic evaluation
     """
 
-    name: Optional[str] = "rok-agent"
-    env_config_cls = HermesAgentEnvConfig
+    name: Optional[str] = "rok"
+    env_config_cls = RokEnvConfig
 
     def __init__(
         self,
-        config: HermesAgentEnvConfig,
+        config: RokEnvConfig,
         server_configs: Union[ServerBaseline, List[APIServerConfig]],
         slurm=False,
         testing=False,
@@ -481,7 +522,7 @@ class HermesAgentBaseEnv(BaseEnv):
                     tokenizer=self.tokenizer,
                     preserve_think_blocks=bool(self.config.thinking_mode),
                 ) as managed:
-                    agent = HermesAgentLoop(
+                    agent = RokLoop(
                         server=managed,
                         tool_schemas=tools,
                         valid_tool_names=valid_names,
@@ -490,6 +531,7 @@ class HermesAgentBaseEnv(BaseEnv):
                         temperature=self.config.agent_temperature,
                         max_tokens=self.config.max_token_length,
                         extra_body=self.config.extra_body,
+                        budget_config=self.config.build_budget_config(),
                     )
                     result = await agent.run(messages)
             except NotImplementedError:
@@ -498,7 +540,7 @@ class HermesAgentBaseEnv(BaseEnv):
                     "ManagedServer not available (OpenAI server?). "
                     "Falling back to direct server mode."
                 )
-                agent = HermesAgentLoop(
+                agent = RokLoop(
                     server=self.server,
                     tool_schemas=tools,
                     valid_tool_names=valid_names,
@@ -507,11 +549,12 @@ class HermesAgentBaseEnv(BaseEnv):
                     temperature=self.config.agent_temperature,
                     max_tokens=self.config.max_token_length,
                     extra_body=self.config.extra_body,
+                    budget_config=self.config.build_budget_config(),
                 )
                 result = await agent.run(messages)
         else:
             # Phase 1: OpenAI server -- native tool_calls, placeholder tokens
-            agent = HermesAgentLoop(
+            agent = RokLoop(
                 server=self.server,
                 tool_schemas=tools,
                 valid_tool_names=valid_names,
@@ -520,6 +563,7 @@ class HermesAgentBaseEnv(BaseEnv):
                 temperature=self.config.agent_temperature,
                 max_tokens=self.config.max_token_length,
                 extra_body=self.config.extra_body,
+                budget_config=self.config.build_budget_config(),
             )
             result = await agent.run(messages)
 
@@ -645,7 +689,7 @@ class HermesAgentBaseEnv(BaseEnv):
         Score the rollout. Has full access to:
         - item: the original dataset item (ground truth, test commands, etc.)
         - result: AgentResult with full messages, turn count, reasoning, etc.
-        - ctx: ToolContext -- call ANY rok-agent tool (terminal, file, web,
+        - ctx: ToolContext -- call ANY rok tool (terminal, file, web,
                browser, vision...) scoped to this rollout's sandbox. Nothing
                is off-limits.
 

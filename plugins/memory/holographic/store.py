@@ -6,7 +6,6 @@ Single-user Rok memory store plugin.
 import re
 import sqlite3
 import threading
-from datetime import datetime
 from pathlib import Path
 
 try:

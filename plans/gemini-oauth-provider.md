@@ -77,4 +77,4 @@ Add a first-class `gemini` provider that authenticates via Google OAuth, using t
 ## Reference implementations
 - clawdbot: `extensions/google/oauth.flow.ts` (PKCE + localhost server)
 - pi-mono: `packages/ai/src/utils/oauth/google-gemini-cli.ts` (same flow)
-- rok-agent Copilot OAuth: `rok_cli/main.py` `_copilot_device_flow()` (different flow type but same lifecycle pattern)
+- rok Copilot OAuth: `rok_cli/main.py` `_copilot_device_flow()` (different flow type but same lifecycle pattern)

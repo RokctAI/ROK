@@ -37,16 +37,22 @@ rok [global-options] <command> [subcommand/options]
 | `rok gateway` | Run or manage the messaging gateway service. |
 | `rok setup` | Interactive setup wizard for all or part of the configuration. |
 | `rok whatsapp` | Configure and pair the WhatsApp bridge. |
-| `rok login` / `logout` | Authenticate with OAuth-backed providers. |
-| `rok auth` | Manage credential pools — add, list, remove, reset, set strategy. |
+| `rok auth` | Manage credentials — add, list, remove, reset, set strategy. Handles OAuth flows for Codex/Nous/Anthropic. |
+| `rok login` / `logout` | **Deprecated** — use `rok auth` instead. |
 | `rok status` | Show agent, auth, and platform status. |
 | `rok cron` | Inspect and tick the cron scheduler. |
 | `rok webhook` | Manage dynamic webhook subscriptions for event-driven activation. |
 | `rok doctor` | Diagnose config and dependency issues. |
+| `rok dump` | Copy-pasteable setup summary for support/debugging. |
+| `rok debug` | Debug tools — upload logs and system info for support. |
+| `rok backup` | Back up Rok home directory to a zip file. |
+| `rok import` | Restore a Rok backup from a zip file. |
+| `rok logs` | View, tail, and filter agent/gateway/error log files. |
 | `rok config` | Show, edit, migrate, and query configuration files. |
 | `rok pairing` | Approve or revoke messaging pairing codes. |
 | `rok skills` | Browse, install, publish, audit, and configure skills. |
 | `rok honcho` | Manage Honcho cross-session memory integration. |
+| `rok memory` | Configure external memory provider. |
 | `rok acp` | Run Rok as an ACP server for editor integration. |
 | `rok mcp` | Manage MCP server configurations and run Rok as an MCP server. |
 | `rok plugins` | Manage Rok Agent plugins (install, enable, disable, remove). |
@@ -54,6 +60,10 @@ rok [global-options] <command> [subcommand/options]
 | `rok sessions` | Browse, export, prune, rename, and delete sessions. |
 | `rok insights` | Show token/cost/activity analytics. |
 | `rok claw` | OpenClaw migration helpers. |
+| `rok dashboard` | Launch the web dashboard for managing config, API keys, and sessions. |
+| `rok debug` | Debug tools — upload logs and system info for support. |
+| `rok backup` | Back up Rok home directory to a zip file. |
+| `rok import` | Restore a Rok backup from a zip file. |
 | `rok profile` | Manage profiles — multiple isolated Rok instances. |
 | `rok completion` | Print shell completion scripts (bash/zsh). |
 | `rok version` | Show version information. |
@@ -73,16 +83,18 @@ Common options:
 | `-q`, `--query "..."` | One-shot, non-interactive prompt. |
 | `-m`, `--model <model>` | Override the model for this run. |
 | `-t`, `--toolsets <csv>` | Enable a comma-separated set of toolsets. |
-| `--provider <provider>` | Force a provider: `auto`, `openrouter`, `nous`, `openai-codex`, `copilot-acp`, `copilot`, `anthropic`, `huggingface`, `zai`, `kimi-coding`, `minimax`, `minimax-cn`, `kilocode`. |
+| `--provider <provider>` | Force a provider: `auto`, `openrouter`, `nous`, `openai-codex`, `copilot-acp`, `copilot`, `anthropic`, `gemini`, `huggingface`, `zai`, `kimi-coding`, `minimax`, `minimax-cn`, `kilocode`, `xiaomi`. |
 | `-s`, `--skills <name>` | Preload one or more skills for the session (can be repeated or comma-separated). |
 | `-v`, `--verbose` | Verbose output. |
 | `-Q`, `--quiet` | Programmatic mode: suppress banner/spinner/tool previews. |
+| `--image <path>` | Attach a local image to a single query. |
 | `--resume <session>` / `--continue [name]` | Resume a session directly from `chat`. |
 | `--worktree` | Create an isolated git worktree for this run. |
 | `--checkpoints` | Enable filesystem checkpoints before destructive file changes. |
 | `--yolo` | Skip approval prompts. |
 | `--pass-session-id` | Pass the session ID into the system prompt. |
 | `--source <tag>` | Session source tag for filtering (default: `cli`). Use `tool` for third-party integrations that should not appear in user session lists. |
+| `--max-turns <N>` | Maximum tool-calling iterations per conversation turn (default: 90, or `agent.max_turns` in config). |
 
 Examples:
 
@@ -136,19 +148,23 @@ Subcommands:
 
 | Subcommand | Description |
 |------------|-------------|
-| `run` | Run the gateway in the foreground. |
-| `start` | Start the installed gateway service. |
-| `stop` | Stop the service. |
+| `run` | Run the gateway in the foreground. Recommended for WSL, Docker, and Termux. |
+| `start` | Start the installed systemd/launchd background service. |
+| `stop` | Stop the service (or foreground process). |
 | `restart` | Restart the service. |
 | `status` | Show service status. |
-| `install` | Install as a user service (`systemd` on Linux, `launchd` on macOS). |
+| `install` | Install as a systemd (Linux) or launchd (macOS) background service. |
 | `uninstall` | Remove the installed service. |
 | `setup` | Interactive messaging-platform setup. |
+
+:::tip WSL users
+Use `rok gateway run` instead of `rok gateway start` — WSL's systemd support is unreliable. Wrap it in tmux for persistence: `tmux new -s rok 'rok gateway run'`. See [WSL FAQ](/docs/reference/faq#wsl-gateway-keeps-disconnecting-or-rok-gateway-start-fails) for details.
+:::
 
 ## `rok setup`
 
 ```bash
-rok setup [model|terminal|gateway|tools|agent] [--non-interactive] [--reset]
+rok setup [model|tts|terminal|gateway|tools|agent] [--non-interactive] [--reset]
 ```
 
 Use the full wizard or jump into one section:
@@ -176,22 +192,11 @@ rok whatsapp
 
 Runs the WhatsApp pairing/setup flow, including mode selection and QR-code pairing.
 
-## `rok login` / `rok logout`
+## `rok login` / `rok logout` *(Deprecated)*
 
-```bash
-rok login [--provider nous|openai-codex] [--portal-url ...] [--inference-url ...]
-rok logout [--provider nous|openai-codex]
-```
-
-`login` supports:
-- Nous Portal OAuth/device flow
-- OpenAI Codex OAuth/device flow
-
-Useful options for `login`:
-- `--no-browser`
-- `--timeout <seconds>`
-- `--ca-bundle <pem>`
-- `--insecure`
+:::caution
+`rok login` has been removed. Use `rok auth` to manage OAuth credentials, `rok model` to select a provider, or `rok setup` for full interactive setup.
+:::
 
 ## `rok auth`
 
@@ -281,6 +286,214 @@ rok doctor [--fix]
 |--------|-------------|
 | `--fix` | Attempt automatic repairs where possible. |
 
+## `rok dump`
+
+```bash
+rok dump [--show-keys]
+```
+
+Outputs a compact, plain-text summary of your entire Rok setup. Designed to be copy-pasted into Discord, GitHub issues, or Telegram when asking for support — no ANSI colors, no special formatting, just data.
+
+| Option | Description |
+|--------|-------------|
+| `--show-keys` | Show redacted API key prefixes (first and last 4 characters) instead of just `set`/`not set`. |
+
+### What it includes
+
+| Section | Details |
+|---------|---------|
+| **Header** | Rok version, release date, git commit hash |
+| **Environment** | OS, Python version, OpenAI SDK version |
+| **Identity** | Active profile name, ROK_HOME path |
+| **Model** | Configured default model and provider |
+| **Terminal** | Backend type (local, docker, ssh, etc.) |
+| **API keys** | Presence check for all 22 provider/tool API keys |
+| **Features** | Enabled toolsets, MCP server count, memory provider |
+| **Services** | Gateway status, configured messaging platforms |
+| **Workload** | Cron job counts, installed skill count |
+| **Config overrides** | Any config values that differ from defaults |
+
+### Example output
+
+```
+--- rok dump ---
+version:          0.8.0 (2026.4.8) [af4abd2f]
+os:               Linux 6.14.0-37-generic x86_64
+python:           3.11.14
+openai_sdk:       2.24.0
+profile:          default
+rok_home:      ~/.rok
+model:            anthropic/claude-opus-4.6
+provider:         openrouter
+terminal:         local
+
+api_keys:
+  openrouter           set
+  openai               not set
+  anthropic            set
+  nous                 not set
+  firecrawl            set
+  ...
+
+features:
+  toolsets:           all
+  mcp_servers:        0
+  memory_provider:    built-in
+  gateway:            running (systemd)
+  platforms:          telegram, discord
+  cron_jobs:          3 active / 5 total
+  skills:             42
+
+config_overrides:
+  agent.max_turns: 250
+  compression.threshold: 0.85
+  display.streaming: True
+--- end dump ---
+```
+
+### When to use
+
+- Reporting a bug on GitHub — paste the dump into your issue
+- Asking for help in Discord — share it in a code block
+- Comparing your setup to someone else's
+- Quick sanity check when something isn't working
+
+:::tip
+`rok dump` is specifically designed for sharing. For interactive diagnostics, use `rok doctor`. For a visual overview, use `rok status`.
+:::
+
+## `rok debug`
+
+```bash
+rok debug share [options]
+```
+
+Upload a debug report (system info + recent logs) to a paste service and get a shareable URL. Useful for quick support requests — includes everything a helper needs to diagnose your issue.
+
+| Option | Description |
+|--------|-------------|
+| `--lines <N>` | Number of log lines to include per log file (default: 200). |
+| `--expire <days>` | Paste expiry in days (default: 7). |
+| `--local` | Print the report locally instead of uploading. |
+
+The report includes system info (OS, Python version, Rok version), recent agent and gateway logs (512 KB limit per file), and redacted API key status. Keys are always redacted — no secrets are uploaded.
+
+Paste services tried in order: paste.rs, dpaste.com.
+
+### Examples
+
+```bash
+rok debug share              # Upload debug report, print URL
+rok debug share --lines 500  # Include more log lines
+rok debug share --expire 30  # Keep paste for 30 days
+rok debug share --local      # Print report to terminal (no upload)
+```
+
+## `rok backup`
+
+```bash
+rok backup [options]
+```
+
+Create a zip archive of your Rok configuration, skills, sessions, and data. The backup excludes the rok codebase itself.
+
+| Option | Description |
+|--------|-------------|
+| `-o`, `--output <path>` | Output path for the zip file (default: `~/rok-backup-<timestamp>.zip`). |
+| `-q`, `--quick` | Quick snapshot: only critical state files (config.yaml, state.db, .env, auth, cron jobs). Much faster than a full backup. |
+| `-l`, `--label <name>` | Label for the snapshot (only used with `--quick`). |
+
+The backup uses SQLite's `backup()` API for safe copying, so it works correctly even when Rok is running (WAL-mode safe).
+
+### Examples
+
+```bash
+rok backup                           # Full backup to ~/rok-backup-*.zip
+rok backup -o /tmp/rok.zip        # Full backup to specific path
+rok backup --quick                   # Quick state-only snapshot
+rok backup --quick --label "pre-upgrade"  # Quick snapshot with label
+```
+
+## `rok import`
+
+```bash
+rok import <zipfile> [options]
+```
+
+Restore a previously created Rok backup into your Rok home directory.
+
+| Option | Description |
+|--------|-------------|
+| `-f`, `--force` | Overwrite existing files without confirmation. |
+
+## `rok logs`
+
+```bash
+rok logs [log_name] [options]
+```
+
+View, tail, and filter Rok log files. All logs are stored in `~/.rok/logs/` (or `<profile>/logs/` for non-default profiles).
+
+### Log files
+
+| Name | File | What it captures |
+|------|------|-----------------|
+| `agent` (default) | `agent.log` | All agent activity — API calls, tool dispatch, session lifecycle (INFO and above) |
+| `errors` | `errors.log` | Warnings and errors only — a filtered subset of agent.log |
+| `gateway` | `gateway.log` | Messaging gateway activity — platform connections, message dispatch, webhook events |
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `log_name` | Which log to view: `agent` (default), `errors`, `gateway`, or `list` to show available files with sizes. |
+| `-n`, `--lines <N>` | Number of lines to show (default: 50). |
+| `-f`, `--follow` | Follow the log in real time, like `tail -f`. Press Ctrl+C to stop. |
+| `--level <LEVEL>` | Minimum log level to show: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. |
+| `--session <ID>` | Filter lines containing a session ID substring. |
+| `--since <TIME>` | Show lines from a relative time ago: `30m`, `1h`, `2d`, etc. Supports `s` (seconds), `m` (minutes), `h` (hours), `d` (days). |
+| `--component <NAME>` | Filter by component: `gateway`, `agent`, `tools`, `cli`, `cron`. |
+
+### Examples
+
+```bash
+# View the last 50 lines of agent.log (default)
+rok logs
+
+# Follow agent.log in real time
+rok logs -f
+
+# View the last 100 lines of gateway.log
+rok logs gateway -n 100
+
+# Show only warnings and errors from the last hour
+rok logs --level WARNING --since 1h
+
+# Filter by a specific session
+rok logs --session abc123
+
+# Follow errors.log, starting from 30 minutes ago
+rok logs errors --since 30m -f
+
+# List all log files with their sizes
+rok logs list
+```
+
+### Filtering
+
+Filters can be combined. When multiple filters are active, a log line must pass **all** of them to be shown:
+
+```bash
+# WARNING+ lines from the last 2 hours containing session "tg-12345"
+rok logs --level WARNING --since 2h --session tg-12345
+```
+
+Lines without a parseable timestamp are included when `--since` is active (they may be continuation lines from a multi-line log entry). Lines without a detectable level are included when `--level` is active.
+
+### Log rotation
+
+Rok uses Python's `RotatingFileHandler`. Old logs are rotated automatically — look for `agent.log.1`, `agent.log.2`, etc. The `rok logs list` subcommand shows all log files including rotated ones.
+
 ## `rok config`
 
 ```bash
@@ -361,22 +574,46 @@ Notes:
 ## `rok honcho`
 
 ```bash
-rok honcho <subcommand>
+rok honcho [--target-profile NAME] <subcommand>
 ```
+
+Manage Honcho cross-session memory integration. This command is provided by the Honcho memory provider plugin and is only available when `memory.provider` is set to `honcho` in your config.
+
+The `--target-profile` flag lets you manage another profile's Honcho config without switching to it.
 
 Subcommands:
 
 | Subcommand | Description |
 |------------|-------------|
-| `setup` | Interactive Honcho setup wizard. |
-| `status` | Show current Honcho config and connection status. |
+| `setup` | Redirects to `rok memory setup` (unified setup path). |
+| `status [--all]` | Show current Honcho config and connection status. `--all` shows a cross-profile overview. |
+| `peers` | Show peer identities across all profiles. |
 | `sessions` | List known Honcho session mappings. |
-| `map` | Map the current directory to a Honcho session name. |
-| `peer` | Show or update peer names and dialectic reasoning level. |
-| `mode` | Show or set memory mode: `hybrid`, `honcho`, or `local`. |
-| `tokens` | Show or set token budgets for context and dialectic. |
-| `identity` | Seed or show the AI peer identity representation. |
-| `migrate` | Migration guide from openclaw-honcho to Rok Honcho. |
+| `map [name]` | Map the current directory to a Honcho session name. Omit `name` to list current mappings. |
+| `peer` | Show or update peer names and dialectic reasoning level. Options: `--user NAME`, `--ai NAME`, `--reasoning LEVEL`. |
+| `mode [mode]` | Show or set recall mode: `hybrid`, `context`, or `tools`. Omit to show current. |
+| `tokens` | Show or set token budgets for context and dialectic. Options: `--context N`, `--dialectic N`. |
+| `identity [file] [--show]` | Seed or show the AI peer identity representation. |
+| `enable` | Enable Honcho for the active profile. |
+| `disable` | Disable Honcho for the active profile. |
+| `sync` | Sync Honcho config to all existing profiles (creates missing host blocks). |
+| `migrate` | Step-by-step migration guide from openclaw-honcho to Rok Honcho. |
+
+## `rok memory`
+
+```bash
+rok memory <subcommand>
+```
+
+Set up and manage external memory provider plugins. Available providers: honcho, openviking, mem0, hindsight, holographic, retaindb, byterover, supermemory. Only one external provider can be active at a time. Built-in memory (MEMORY.md/USER.md) is always active.
+
+Subcommands:
+
+| Subcommand | Description |
+|------------|-------------|
+| `setup` | Interactive provider selection and configuration. |
+| `status` | Show current memory provider config. |
+| `off` | Disable external provider (built-in only). |
 
 ## `rok acp`
 
@@ -426,11 +663,14 @@ See [MCP Config Reference](./mcp-config-reference.md), [Use MCP with Rok](../gui
 rok plugins [subcommand]
 ```
 
-Manage Rok Agent plugins. Running `rok plugins` with no subcommand launches an interactive curses checklist to enable/disable installed plugins.
+Unified plugin management — general plugins, memory providers, and context engines in one place. Running `rok plugins` with no subcommand opens a composite interactive screen with two sections:
+
+- **General Plugins** — multi-select checkboxes to enable/disable installed plugins
+- **Provider Plugins** — single-select configuration for Memory Provider and Context Engine. Press ENTER on a category to open a radio picker.
 
 | Subcommand | Description |
 |------------|-------------|
-| *(none)* | Interactive toggle UI — enable/disable plugins with arrow keys and space. |
+| *(none)* | Composite interactive UI — general plugin toggles + provider plugin configuration. |
 | `install <identifier> [--force]` | Install a plugin from a Git URL or `owner/repo`. |
 | `update <name>` | Pull latest changes for an installed plugin. |
 | `remove <name>` (aliases: `rm`, `uninstall`) | Remove an installed plugin. |
@@ -438,7 +678,11 @@ Manage Rok Agent plugins. Running `rok plugins` with no subcommand launches an i
 | `disable <name>` | Disable a plugin without removing it. |
 | `list` (alias: `ls`) | List installed plugins with enabled/disabled status. |
 
-Disabled plugins are stored in `config.yaml` under `plugins.disabled` and skipped during loading.
+Provider plugin selections are saved to `config.yaml`:
+- `memory.provider` — active memory provider (empty = built-in only)
+- `context.engine` — active context engine (`"compressor"` = built-in default)
+
+General plugin disabled list is stored in `config.yaml` under `plugins.disabled`.
 
 See [Plugins](../user-guide/features/plugins.md) and [Build a Rok Plugin](../guides/build-a-rok-plugin.md).
 
@@ -489,7 +733,7 @@ rok insights [--days N] [--source platform]
 rok claw migrate [options]
 ```
 
-Migrate your OpenClaw setup to Rok. Reads from `~/.openclaw` (or a custom path) and writes to `~/.rok`. Automatically detects legacy directory names (`~/.clawdbot`, `~/.moldbot`) and config filenames (`clawdbot.json`, `moldbot.json`).
+Migrate your OpenClaw setup to Rok. Reads from `~/.openclaw` (or a custom path) and writes to `~/.rok`. Automatically detects legacy directory names (`~/.clawdbot`, `~/.moltbot`) and config filenames (`clawdbot.json`, `moltbot.json`).
 
 | Option | Description |
 |--------|-------------|
@@ -530,6 +774,28 @@ rok claw migrate --preset user-data --overwrite
 rok claw migrate --source /home/user/old-openclaw
 ```
 
+## `rok dashboard`
+
+```bash
+rok dashboard [options]
+```
+
+Launch the web dashboard — a browser-based UI for managing configuration, API keys, and monitoring sessions. Requires `pip install rok[web]` (FastAPI + Uvicorn). See [Web Dashboard](/docs/user-guide/features/web-dashboard) for full documentation.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--port` | `9119` | Port to run the web server on |
+| `--host` | `127.0.0.1` | Bind address |
+| `--no-open` | — | Don't auto-open the browser |
+
+```bash
+# Default — opens browser to http://127.0.0.1:9119
+rok dashboard
+
+# Custom port, no browser
+rok dashboard --port 8080 --no-open
+```
+
 ## `rok profile`
 
 ```bash
@@ -542,7 +808,7 @@ Manage profiles — multiple isolated Rok instances, each with its own config, s
 |------------|-------------|
 | `list` | List all profiles. |
 | `use <name>` | Set a sticky default profile. |
-| `create <name> [--clone] [--no-alias]` | Create a new profile. `--clone` copies config, `.env`, and `SOUL.md` from the active profile. |
+| `create <name> [--clone] [--clone-all] [--clone-from <source>] [--no-alias]` | Create a new profile. `--clone` copies config, `.env`, and `SOUL.md` from the active profile. `--clone-all` copies all state. `--clone-from` specifies a source profile. |
 | `delete <name> [-y]` | Delete a profile. |
 | `show <name>` | Show profile details (home directory, config, etc.). |
 | `alias <name> [--remove] [--name NAME]` | Manage wrapper scripts for quick profile access. |

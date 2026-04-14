@@ -1,7 +1,7 @@
 """
-Rok-Agent Atropos Environments
+Rok Atropos Environments
 
-Provides a layered integration between rok-agent's tool-calling capabilities
+Provides a layered integration between rok's tool-calling capabilities
 and the Atropos RL training framework.
 
 Core layers:
@@ -19,9 +19,9 @@ Benchmarks (eval-only):
 """
 
 try:
-    from environments.agent_loop import AgentResult, HermesAgentLoop
+    from environments.agent_loop import AgentResult, RokLoop
     from environments.tool_context import ToolContext
-    from environments.rok_base_env import HermesAgentBaseEnv, HermesAgentEnvConfig
+    from environments.rok_base_env import RokBaseEnv, RokEnvConfig
 except ImportError:
     # atroposlib not installed — environments are unavailable but
     # submodules like tool_call_parsers can still be imported directly.
@@ -29,8 +29,8 @@ except ImportError:
 
 __all__ = [
     "AgentResult",
-    "HermesAgentLoop",
+    "RokLoop",
     "ToolContext",
-    "HermesAgentBaseEnv",
-    "HermesAgentEnvConfig",
+    "RokBaseEnv",
+    "RokEnvConfig",
 ]

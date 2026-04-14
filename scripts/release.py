@@ -21,8 +21,6 @@ Usage:
 """
 
 import argparse
-import json
-import os
 import re
 import shutil
 import subprocess
@@ -98,7 +96,7 @@ AUTHOR_MAP = {
     "johnsonblake1@gmail.com": "blakejohnson",
     "bryan@intertwinesys.com": "bryanyoung",
     "christo.mitov@gmail.com": "christomitov",
-    "contact@rokct.ai": "RokctAI",
+    "rok@rokct.ai": "Rokctai",
     "openclaw@sparklab.ai": "openclaw",
     "semihcvlk53@gmail.com": "Himess",
     "erenkar950@gmail.com": "erenkarakus",
@@ -363,7 +361,7 @@ def get_pr_number(subject: str) -> str:
     return None
 
 
-def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/RokctAI/rok-agent",
+def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/RokctAI/rok",
                        prev_tag=None, first_release=False):
     """Generate markdown changelog from categorized commits."""
     lines = []

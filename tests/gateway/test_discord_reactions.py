@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from gateway.config import Platform, PlatformConfig
-from gateway.platforms.base import MessageEvent, MessageType, SendResult
+from gateway.platforms.base import MessageEvent, MessageType, ProcessingOutcome, SendResult
 from gateway.session import SessionSource, build_session_key
 
 
@@ -63,7 +63,7 @@ def adapter():
         tree=FakeTree(),
         get_channel=lambda _id: None,
         fetch_channel=AsyncMock(),
-        user=SimpleNamespace(id=99999, name="HermesBot"),
+        user=SimpleNamespace(id=99999, name="RokBot"),
     )
     return adapter
 
@@ -212,7 +212,7 @@ async def test_reactions_disabled_via_env_zero(adapter, monkeypatch):
 
     event = _make_event("5", raw_message)
     await adapter.on_processing_start(event)
-    await adapter.on_processing_complete(event, success=True)
+    await adapter.on_processing_complete(event, ProcessingOutcome.SUCCESS)
 
     raw_message.add_reaction.assert_not_awaited()
     raw_message.remove_reaction.assert_not_awaited()
@@ -232,3 +232,17 @@ async def test_reactions_enabled_by_default(adapter, monkeypatch):
     await adapter.on_processing_start(event)
 
     raw_message.add_reaction.assert_awaited_once_with("👀")
+
+
+@pytest.mark.asyncio
+async def test_on_processing_complete_cancelled_removes_eyes_without_terminal_reaction(adapter):
+    raw_message = SimpleNamespace(
+        add_reaction=AsyncMock(),
+        remove_reaction=AsyncMock(),
+    )
+
+    event = _make_event("7", raw_message)
+    await adapter.on_processing_complete(event, ProcessingOutcome.CANCELLED)
+
+    raw_message.remove_reaction.assert_awaited_once_with("👀", adapter._client.user)
+    raw_message.add_reaction.assert_not_awaited()
