@@ -11,22 +11,22 @@ echo "Fetching Modal app list..."
 APP_LIST=$(modal app list 2>/dev/null)
 
 if [[ "${1:-}" == "--all" ]]; then
-    echo "Stopping ALL Modal apps..."
-    echo "$APP_LIST" | grep -oE 'ap-[A-Za-z0-9]+' | sort -u | while read app_id; do
-        echo "  Stopping $app_id"
-        modal app stop "$app_id" 2>/dev/null || true
-    done
+  echo "Stopping ALL Modal apps..."
+  echo "$APP_LIST" | grep -oE 'ap-[A-Za-z0-9]+' | sort -u | while read app_id; do
+    echo "  Stopping $app_id"
+    modal app stop "$app_id" 2>/dev/null || true
+  done
 else
-    echo "Stopping rok sandboxes..."
-    APPS=$(echo "$APP_LIST" | grep 'rok' | grep -oE 'ap-[A-Za-z0-9]+' || true)
-    if [[ -z "$APPS" ]]; then
-        echo "  No rok apps found."
-    else
-        echo "$APPS" | while read app_id; do
-            echo "  Stopping $app_id"
-            modal app stop "$app_id" 2>/dev/null || true
-        done
-    fi
+  echo "Stopping rok sandboxes..."
+  APPS=$(echo "$APP_LIST" | grep 'rok' | grep -oE 'ap-[A-Za-z0-9]+' || true)
+  if [[ -z "$APPS" ]]; then
+    echo "  No rok apps found."
+  else
+    echo "$APPS" | while read app_id; do
+      echo "  Stopping $app_id"
+      modal app stop "$app_id" 2>/dev/null || true
+    done
+  fi
 fi
 
 echo ""
