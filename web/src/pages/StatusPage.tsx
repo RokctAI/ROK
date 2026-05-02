@@ -15,13 +15,19 @@ import { timeAgo, isoTimeAgo } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const PLATFORM_STATE_BADGE: Record<string, { variant: "success" | "warning" | "destructive"; label: string }> = {
+const PLATFORM_STATE_BADGE: Record<
+  string,
+  { variant: "success" | "warning" | "destructive"; label: string }
+> = {
   connected: { variant: "success", label: "Connected" },
   disconnected: { variant: "warning", label: "Disconnected" },
   fatal: { variant: "destructive", label: "Error" },
 };
 
-const GATEWAY_STATE_DISPLAY: Record<string, { badge: "success" | "warning" | "destructive" | "outline"; label: string }> = {
+const GATEWAY_STATE_DISPLAY: Record<
+  string,
+  { badge: "success" | "warning" | "destructive" | "outline"; label: string }
+> = {
   running: { badge: "success", label: "Running" },
   starting: { badge: "warning", label: "Starting" },
   startup_failed: { badge: "destructive", label: "Failed" },
@@ -35,7 +41,9 @@ function gatewayValue(status: StatusResponse): string {
 }
 
 function gatewayBadge(status: StatusResponse) {
-  const info = status.gateway_state ? GATEWAY_STATE_DISPLAY[status.gateway_state] : null;
+  const info = status.gateway_state
+    ? GATEWAY_STATE_DISPLAY[status.gateway_state]
+    : null;
   if (info) return info;
   return status.gateway_running
     ? { badge: "success" as const, label: "Running" }
@@ -48,8 +56,14 @@ export default function StatusPage() {
 
   useEffect(() => {
     const load = () => {
-      api.getStatus().then(setStatus).catch(() => {});
-      api.getSessions(50).then((resp) => setSessions(resp.sessions)).catch(() => {});
+      api
+        .getStatus()
+        .then(setStatus)
+        .catch(() => {});
+      api
+        .getSessions(50)
+        .then((resp) => setSessions(resp.sessions))
+        .catch(() => {});
     };
     load();
     const interval = setInterval(load, 5000);
@@ -84,9 +98,14 @@ export default function StatusPage() {
     {
       icon: Activity,
       label: "Active Sessions",
-      value: status.active_sessions > 0 ? `${status.active_sessions} running` : "None",
+      value:
+        status.active_sessions > 0
+          ? `${status.active_sessions} running`
+          : "None",
       badgeText: status.active_sessions > 0 ? "Live" : "Off",
-      badgeVariant: (status.active_sessions > 0 ? "success" : "outline") as "success" | "outline",
+      badgeVariant: (status.active_sessions > 0 ? "success" : "outline") as
+        | "success"
+        | "outline",
     },
   ];
 
@@ -102,14 +121,15 @@ export default function StatusPage() {
       detail: status.gateway_exit_reason ?? undefined,
     });
   }
-  const failedPlatforms = platforms.filter(([, info]) => info.state === "fatal" || info.state === "disconnected");
+  const failedPlatforms = platforms.filter(
+    ([, info]) => info.state === "fatal" || info.state === "disconnected",
+  );
   for (const [name, info] of failedPlatforms) {
     alerts.push({
       message: `${name.charAt(0).toUpperCase() + name.slice(1)} ${info.state === "fatal" ? "error" : "disconnected"}`,
       detail: info.error_message ?? undefined,
     });
   }
-
 
   return (
     <div className="flex flex-col gap-6">
@@ -121,9 +141,13 @@ export default function StatusPage() {
             <div className="flex flex-col gap-2 min-w-0">
               {alerts.map((alert, i) => (
                 <div key={i}>
-                  <p className="text-sm font-medium text-destructive">{alert.message}</p>
+                  <p className="text-sm font-medium text-destructive">
+                    {alert.message}
+                  </p>
                   {alert.detail && (
-                    <p className="text-xs text-destructive/70 mt-0.5">{alert.detail}</p>
+                    <p className="text-xs text-destructive/70 mt-0.5">
+                      {alert.detail}
+                    </p>
                   )}
                 </div>
               ))}
@@ -156,9 +180,7 @@ export default function StatusPage() {
         ))}
       </div>
 
-      {platforms.length > 0 && (
-        <PlatformsCard platforms={platforms} />
-      )}
+      {platforms.length > 0 && <PlatformsCard platforms={platforms} />}
 
       {activeSessions.length > 0 && (
         <Card>
@@ -177,7 +199,9 @@ export default function StatusPage() {
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">{s.title ?? "Untitled"}</span>
+                    <span className="font-medium text-sm">
+                      {s.title ?? "Untitled"}
+                    </span>
 
                     <Badge variant="success" className="text-[10px]">
                       <span className="mr-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
@@ -186,7 +210,8 @@ export default function StatusPage() {
                   </div>
 
                   <span className="text-xs text-muted-foreground">
-                    <span className="font-mono-ui">{s.model ?? "unknown"}</span> · {s.message_count} msgs · {timeAgo(s.last_active)}
+                    <span className="font-mono-ui">{s.model ?? "unknown"}</span>{" "}
+                    · {s.message_count} msgs · {timeAgo(s.last_active)}
                   </span>
                 </div>
               </div>
@@ -211,10 +236,13 @@ export default function StatusPage() {
                 className="flex items-center justify-between border border-border p-3"
               >
                 <div className="flex flex-col gap-1">
-                  <span className="font-medium text-sm">{s.title ?? "Untitled"}</span>
+                  <span className="font-medium text-sm">
+                    {s.title ?? "Untitled"}
+                  </span>
 
                   <span className="text-xs text-muted-foreground">
-                    <span className="font-mono-ui">{s.model ?? "unknown"}</span> · {s.message_count} msgs · {timeAgo(s.last_active)}
+                    <span className="font-mono-ui">{s.model ?? "unknown"}</span>{" "}
+                    · {s.message_count} msgs · {timeAgo(s.last_active)}
                   </span>
 
                   {s.preview && (
@@ -253,7 +281,12 @@ function PlatformsCard({ platforms }: PlatformsCardProps) {
             variant: "outline" as const,
             label: info.state,
           };
-          const IconComponent = info.state === "connected" ? Wifi : info.state === "fatal" ? AlertTriangle : WifiOff;
+          const IconComponent =
+            info.state === "connected"
+              ? Wifi
+              : info.state === "fatal"
+                ? AlertTriangle
+                : WifiOff;
 
           return (
             <div
@@ -261,19 +294,23 @@ function PlatformsCard({ platforms }: PlatformsCardProps) {
               className="flex items-center justify-between border border-border p-3"
             >
               <div className="flex items-center gap-3">
-                <IconComponent className={`h-4 w-4 ${
-                  info.state === "connected"
-                    ? "text-success"
-                    : info.state === "fatal"
-                      ? "text-destructive"
-                      : "text-warning"
-                }`} />
+                <IconComponent
+                  className={`h-4 w-4 ${
+                    info.state === "connected"
+                      ? "text-success"
+                      : info.state === "fatal"
+                        ? "text-destructive"
+                        : "text-warning"
+                  }`}
+                />
 
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-medium capitalize">{name}</span>
 
                   {info.error_message && (
-                    <span className="text-xs text-destructive">{info.error_message}</span>
+                    <span className="text-xs text-destructive">
+                      {info.error_message}
+                    </span>
                   )}
 
                   {info.updated_at && (

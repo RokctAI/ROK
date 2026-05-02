@@ -11,10 +11,17 @@ export function Tabs({
   className?: string;
 }) {
   const [active, setActive] = useState(defaultValue);
-  return <div className={cn("flex flex-col gap-4", className)}>{children(active, setActive)}</div>;
+  return (
+    <div className={cn("flex flex-col gap-4", className)}>
+      {children(active, setActive)}
+    </div>
+  );
 }
 
-export function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function TabsList({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
@@ -32,7 +39,10 @@ export function TabsTrigger({
   onClick,
   className,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { active: boolean; value: string }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  active: boolean;
+  value: string;
+}) {
   return (
     <button
       type="button"

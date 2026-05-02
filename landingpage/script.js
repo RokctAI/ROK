@@ -89,7 +89,7 @@ function toggleSpecs() {
           wrapper.style.maxHeight = "none";
         }
       },
-      { once: true }
+      { once: true },
     );
   }
 }
@@ -125,8 +125,7 @@ function copyText(btn) {
 // --- Scroll-triggered fade-in ---
 function initScrollAnimations() {
   const elements = document.querySelectorAll(
-    ".feature-card, .install-step, " +
-      ".section-header, .terminal-window",
+    ".feature-card, .install-step, " + ".section-header, .terminal-window",
   );
 
   elements.forEach((el) => el.classList.add("fade-in"));

@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 import Layout from "@theme/Layout";
 import skills from "../../data/skills.json";
 import styles from "./styles.module.css";
@@ -92,7 +98,14 @@ const SOURCE_CONFIG: Record<
   },
 };
 
-const SOURCE_ORDER = ["all", "built-in", "optional", "Anthropic", "LobeHub", "Claude Marketplace"];
+const SOURCE_ORDER = [
+  "all",
+  "built-in",
+  "optional",
+  "Anthropic",
+  "LobeHub",
+  "Claude Marketplace",
+];
 
 function highlightMatch(text: string, query: string): React.ReactNode {
   if (!query || !text) return text;
@@ -101,7 +114,9 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className={styles.highlight}>{text.slice(idx, idx + query.length)}</mark>
+      <mark className={styles.highlight}>
+        {text.slice(idx, idx + query.length)}
+      </mark>
       {text.slice(idx + query.length)}
     </>
   );
@@ -155,8 +170,13 @@ function SkillCard({
           </div>
         </div>
 
-        <p className={`${styles.cardDesc} ${expanded ? styles.cardDescFull : ""}`}>
-          {highlightMatch(skill.description || "No description available.", query)}
+        <p
+          className={`${styles.cardDesc} ${expanded ? styles.cardDescFull : ""}`}
+        >
+          {highlightMatch(
+            skill.description || "No description available.",
+            query,
+          )}
         </p>
 
         <div className={styles.cardMeta}>
@@ -172,7 +192,11 @@ function SkillCard({
           </button>
           {skill.platforms?.map((p) => (
             <span key={p} className={styles.platformPill}>
-              {p === "macos" ? "\u{F8FF} macOS" : p === "linux" ? "\u{1F427} Linux" : p}
+              {p === "macos"
+                ? "\u{F8FF} macOS"
+                : p === "linux"
+                  ? "\u{1F427} Linux"
+                  : p}
             </span>
           ))}
         </div>
@@ -217,7 +241,15 @@ function SkillCard({
   );
 }
 
-function StatCard({ value, label, color }: { value: number; label: string; color: string }) {
+function StatCard({
+  value,
+  label,
+  color,
+}: {
+  value: number;
+  label: string;
+  color: string;
+}) {
   return (
     <div className={styles.stat}>
       <span className={styles.statValue} style={{ color }}>
@@ -287,9 +319,16 @@ export default function SkillsDashboard() {
     const q = search.toLowerCase().trim();
     return allSkills.filter((s) => {
       if (sourceFilter !== "all" && s.source !== sourceFilter) return false;
-      if (categoryFilter !== "all" && s.category !== categoryFilter) return false;
+      if (categoryFilter !== "all" && s.category !== categoryFilter)
+        return false;
       if (q) {
-        const haystack = [s.name, s.description, s.categoryLabel, s.author, ...(s.tags || [])]
+        const haystack = [
+          s.name,
+          s.description,
+          s.categoryLabel,
+          s.author,
+          ...(s.tags || []),
+        ]
           .join(" ")
           .toLowerCase();
         return haystack.includes(q);
@@ -306,13 +345,10 @@ export default function SkillsDashboard() {
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
 
-  const handleSourceChange = useCallback(
-    (src: string) => {
-      setSourceFilter(src);
-      setCategoryFilter("all");
-    },
-    []
-  );
+  const handleSourceChange = useCallback((src: string) => {
+    setSourceFilter(src);
+    setCategoryFilter("all");
+  }, []);
 
   const handleCategoryClick = useCallback((cat: string) => {
     setCategoryFilter(cat);
@@ -344,8 +380,8 @@ export default function SkillsDashboard() {
             <h1 className={styles.heroTitle}>Skills Hub</h1>
             <p className={styles.heroSub}>
               Discover, search, and install from{" "}
-              <strong className={styles.heroAccent}>{allSkills.length}</strong> skills
-              across {sources.length - 1} registries
+              <strong className={styles.heroAccent}>{allSkills.length}</strong>{" "}
+              skills across {sources.length - 1} registries
             </p>
 
             <div className={styles.statsRow}>
@@ -362,7 +398,7 @@ export default function SkillsDashboard() {
               <StatCard
                 value={
                   allSkills.filter(
-                    (s) => s.source !== "built-in" && s.source !== "optional"
+                    (s) => s.source !== "built-in" && s.source !== "optional",
                   ).length
                 }
                 label="Community"
@@ -379,7 +415,13 @@ export default function SkillsDashboard() {
 
         <div className={styles.controlsBar}>
           <div className={styles.searchWrap}>
-            <svg className={styles.searchIcon} viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+            <svg
+              className={styles.searchIcon}
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              width="18"
+              height="18"
+            >
               <path
                 fillRule="evenodd"
                 d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
@@ -396,7 +438,12 @@ export default function SkillsDashboard() {
             />
             {search && (
               <button className={styles.clearBtn} onClick={() => setSearch("")}>
-                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  width="16"
+                  height="16"
+                >
                   <path
                     fillRule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -458,11 +505,16 @@ export default function SkillsDashboard() {
             )}
           </button>
 
-          <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
+          <aside
+            className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}
+          >
             <div className={styles.sidebarHeader}>
               <h2 className={styles.sidebarTitle}>Categories</h2>
               {categoryFilter !== "all" && (
-                <button className={styles.sidebarClear} onClick={() => setCategoryFilter("all")}>
+                <button
+                  className={styles.sidebarClear}
+                  onClick={() => setCategoryFilter("all")}
+                >
                   Clear
                 </button>
               )}
@@ -510,14 +562,18 @@ export default function SkillsDashboard() {
                 {sourceFilter !== "all" && (
                   <span className={styles.filterChip}>
                     {SOURCE_CONFIG[sourceFilter]?.label || sourceFilter}
-                    <button onClick={() => setSourceFilter("all")}>&times;</button>
+                    <button onClick={() => setSourceFilter("all")}>
+                      &times;
+                    </button>
                   </span>
                 )}
                 {categoryFilter !== "all" && (
                   <span className={styles.filterChip}>
-                    {categoryEntries.find((c) => c.key === categoryFilter)?.label ||
-                      categoryFilter}
-                    <button onClick={() => setCategoryFilter("all")}>&times;</button>
+                    {categoryEntries.find((c) => c.key === categoryFilter)
+                      ?.label || categoryFilter}
+                    <button onClick={() => setCategoryFilter("all")}>
+                      &times;
+                    </button>
                   </span>
                 )}
                 <button className={styles.clearAllBtn} onClick={clearAll}>
@@ -575,7 +631,10 @@ export default function SkillsDashboard() {
       </div>
 
       {sidebarOpen && (
-        <div className={styles.backdrop} onClick={() => setSidebarOpen(false)} />
+        <div
+          className={styles.backdrop}
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
     </Layout>
   );
