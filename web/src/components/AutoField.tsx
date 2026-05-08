@@ -3,7 +3,13 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
-function FieldHint({ schema, schemaKey }: { schema: Record<string, unknown>; schemaKey: string }) {
+function FieldHint({
+  schema,
+  schemaKey,
+}: {
+  schema: Record<string, unknown>;
+  schemaKey: string;
+}) {
   const keyPath = schemaKey.includes(".") ? schemaKey : "";
   const description = schema.description ? String(schema.description) : "";
 
@@ -11,8 +17,14 @@ function FieldHint({ schema, schemaKey }: { schema: Record<string, unknown>; sch
 
   return (
     <div className="flex flex-col gap-0.5">
-      {keyPath && <span className="text-[10px] font-mono text-muted-foreground/50">{keyPath}</span>}
-      {description && <span className="text-xs text-muted-foreground/70">{description}</span>}
+      {keyPath && (
+        <span className="text-[10px] font-mono text-muted-foreground/50">
+          {keyPath}
+        </span>
+      )}
+      {description && (
+        <span className="text-xs text-muted-foreground/70">{description}</span>
+      )}
     </div>
   );
 }
@@ -24,7 +36,9 @@ export function AutoField({
   onChange,
 }: AutoFieldProps) {
   const rawLabel = schemaKey.split(".").pop() ?? schemaKey;
-  const label = rawLabel.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const label = rawLabel
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
   if (schema.type === "boolean") {
     return (
@@ -44,7 +58,10 @@ export function AutoField({
       <div className="grid gap-1.5">
         <Label className="text-sm">{label}</Label>
         <FieldHint schema={schema} schemaKey={schemaKey} />
-        <Select value={String(value ?? "")} onChange={(e) => onChange(e.target.value)}>
+        <Select
+          value={String(value ?? "")}
+          onChange={(e) => onChange(e.target.value)}
+        >
           {options.map((opt) => (
             <option key={opt} value={opt}>
               {opt || "(none)"}
@@ -138,7 +155,10 @@ export function AutoField({
     <div className="grid gap-1.5">
       <Label className="text-sm">{label}</Label>
       <FieldHint schema={schema} schemaKey={schemaKey} />
-      <Input value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} />
+      <Input
+        value={String(value ?? "")}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </div>
   );
 }

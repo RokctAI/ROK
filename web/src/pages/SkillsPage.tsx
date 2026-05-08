@@ -22,8 +22,8 @@ import { Switch } from "@/components/ui/switch";
 /* ------------------------------------------------------------------ */
 
 interface CategoryGroup {
-  name: string;        // display name
-  key: string;         // raw key (or "__none__")
+  name: string; // display name
+  key: string; // raw key (or "__none__")
   skills: SkillInfo[];
   enabledCount: number;
 }
@@ -54,8 +54,6 @@ function prettyCategory(raw: string | null | undefined): string {
     .join(" ");
 }
 
-
-
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
@@ -68,7 +66,9 @@ export default function SkillsPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [togglingSkills, setTogglingSkills] = useState<Set<string>>(new Set());
   // Start collapsed by default
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string> | "all">("all");
+  const [collapsedCategories, setCollapsedCategories] = useState<
+    Set<string> | "all"
+  >("all");
   const { toast, showToast } = useToast();
 
   useEffect(() => {
@@ -88,12 +88,12 @@ export default function SkillsPage() {
       await api.toggleSkill(skill.name, !skill.enabled);
       setSkills((prev) =>
         prev.map((s) =>
-          s.name === skill.name ? { ...s, enabled: !s.enabled } : s
-        )
+          s.name === skill.name ? { ...s, enabled: !s.enabled } : s,
+        ),
       );
       showToast(
         `${skill.name} ${skill.enabled ? "disabled" : "enabled"}`,
-        "success"
+        "success",
       );
     } catch {
       showToast(`Failed to toggle ${skill.name}`, "error");
@@ -118,7 +118,9 @@ export default function SkillsPage() {
         (s.category ?? "").toLowerCase().includes(lowerSearch);
       const matchesCategory =
         !activeCategory ||
-        (activeCategory === "__none__" ? !s.category : s.category === activeCategory);
+        (activeCategory === "__none__"
+          ? !s.category
+          : s.category === activeCategory);
       return matchesSearch && matchesCategory;
     });
   }, [skills, search, lowerSearch, activeCategory]);
@@ -156,7 +158,11 @@ export default function SkillsPage() {
         if (b[0] === "__none__") return 1;
         return a[0].localeCompare(b[0]);
       })
-      .map(([key, count]) => ({ key, name: prettyCategory(key === "__none__" ? null : key), count }));
+      .map(([key, count]) => ({
+        key,
+        name: prettyCategory(key === "__none__" ? null : key),
+        count,
+      }));
   }, [skills]);
 
   const enabledCount = skills.filter((s) => s.enabled).length;
@@ -167,7 +173,7 @@ export default function SkillsPage() {
         !search ||
         t.name.toLowerCase().includes(lowerSearch) ||
         t.label.toLowerCase().includes(lowerSearch) ||
-        t.description.toLowerCase().includes(lowerSearch)
+        t.description.toLowerCase().includes(lowerSearch),
     );
   }, [toolsets, search, lowerSearch]);
 
@@ -274,7 +280,6 @@ export default function SkillsPage() {
 
       {/* ═══════════════ Skills by Category ═══════════════ */}
       <section className="flex flex-col gap-3">
-
         {filteredSkills.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-sm text-muted-foreground">
@@ -284,83 +289,100 @@ export default function SkillsPage() {
             </CardContent>
           </Card>
         ) : (
-          categoryGroups.map(({ key, name, skills: catSkills, enabledCount: catEnabled }) => {
-            const collapsed = isCollapsed(key);
-            return (
-              <Card key={key}>
-                <CardHeader
-                  className="cursor-pointer select-none py-3 px-4"
-                  onClick={() => toggleCollapse(key)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {collapsed ? (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      )}
-                      <CardTitle className="text-sm font-medium">{name}</CardTitle>
-                      <Badge variant="secondary" className="text-[10px] font-normal">
-                        {catSkills.length} skill{catSkills.length !== 1 ? "s" : ""}
+          categoryGroups.map(
+            ({ key, name, skills: catSkills, enabledCount: catEnabled }) => {
+              const collapsed = isCollapsed(key);
+              return (
+                <Card key={key}>
+                  <CardHeader
+                    className="cursor-pointer select-none py-3 px-4"
+                    onClick={() => toggleCollapse(key)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {collapsed ? (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <CardTitle className="text-sm font-medium">
+                          {name}
+                        </CardTitle>
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] font-normal"
+                        >
+                          {catSkills.length} skill
+                          {catSkills.length !== 1 ? "s" : ""}
+                        </Badge>
+                      </div>
+                      <Badge
+                        variant={
+                          catEnabled === catSkills.length
+                            ? "success"
+                            : "outline"
+                        }
+                        className="text-[10px]"
+                      >
+                        {catEnabled}/{catSkills.length} enabled
                       </Badge>
                     </div>
-                    <Badge
-                      variant={catEnabled === catSkills.length ? "success" : "outline"}
-                      className="text-[10px]"
-                    >
-                      {catEnabled}/{catSkills.length} enabled
-                    </Badge>
-                  </div>
-                </CardHeader>
+                  </CardHeader>
 
-                {collapsed ? (
-                  /* Peek: show first few skill names so collapsed isn't blank */
-                  <div className="px-4 pb-3 flex items-center min-h-[28px]">
-                    <p className="text-xs text-muted-foreground/60 truncate leading-normal">
-                      {catSkills.slice(0, 4).map((s) => s.name).join(", ")}
-                      {catSkills.length > 4 && `, +${catSkills.length - 4} more`}
-                    </p>
-                  </div>
-                ) : (
-                  <CardContent className="pt-0 px-4 pb-3">
-                    <div className="grid gap-1">
-                      {catSkills.map((skill) => (
-                        <div
-                          key={skill.name}
-                          className="group flex items-start gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-muted/40"
-                        >
-                          <div className="pt-0.5 shrink-0">
-                            <Switch
-                              checked={skill.enabled}
-                              onCheckedChange={() => handleToggleSkill(skill)}
-                              disabled={togglingSkills.has(skill.name)}
-                            />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span
-                                className={`font-mono-ui text-sm ${
-                                  skill.enabled
-                                    ? "text-foreground"
-                                    : "text-muted-foreground"
-                                }`}
-                              >
-                                {skill.name}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                              {skill.description || "No description available."}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                  {collapsed ? (
+                    /* Peek: show first few skill names so collapsed isn't blank */
+                    <div className="px-4 pb-3 flex items-center min-h-[28px]">
+                      <p className="text-xs text-muted-foreground/60 truncate leading-normal">
+                        {catSkills
+                          .slice(0, 4)
+                          .map((s) => s.name)
+                          .join(", ")}
+                        {catSkills.length > 4 &&
+                          `, +${catSkills.length - 4} more`}
+                      </p>
                     </div>
-                  </CardContent>
-                )}
-              </Card>
-            );
-          })
+                  ) : (
+                    <CardContent className="pt-0 px-4 pb-3">
+                      <div className="grid gap-1">
+                        {catSkills.map((skill) => (
+                          <div
+                            key={skill.name}
+                            className="group flex items-start gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-muted/40"
+                          >
+                            <div className="pt-0.5 shrink-0">
+                              <Switch
+                                checked={skill.enabled}
+                                onCheckedChange={() => handleToggleSkill(skill)}
+                                disabled={togglingSkills.has(skill.name)}
+                              />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span
+                                  className={`font-mono-ui text-sm ${
+                                    skill.enabled
+                                      ? "text-foreground"
+                                      : "text-muted-foreground"
+                                  }`}
+                                >
+                                  {skill.name}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                                {skill.description ||
+                                  "No description available."}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            },
+          )
         )}
       </section>
 
@@ -381,17 +403,22 @@ export default function SkillsPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredToolsets.map((ts) => {
               // Strip emoji prefix from label for cleaner display
-              const labelText = ts.label.replace(/^[\p{Emoji}\s]+/u, "").trim() || ts.name;
+              const labelText =
+                ts.label.replace(/^[\p{Emoji}\s]+/u, "").trim() || ts.name;
               const emoji = ts.label.match(/^[\p{Emoji}]+/u)?.[0] || "🔧";
 
               return (
                 <Card key={ts.name} className="relative overflow-hidden">
                   <CardContent className="py-4">
                     <div className="flex items-start gap-3">
-                      <div className="text-2xl shrink-0 leading-none mt-0.5">{emoji}</div>
+                      <div className="text-2xl shrink-0 leading-none mt-0.5">
+                        {emoji}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{labelText}</span>
+                          <span className="font-medium text-sm">
+                            {labelText}
+                          </span>
                           <Badge
                             variant={ts.enabled ? "success" : "outline"}
                             className="text-[10px]"
@@ -422,7 +449,9 @@ export default function SkillsPage() {
                         )}
                         {ts.tools.length === 0 && (
                           <span className="text-[10px] text-muted-foreground/60">
-                            {ts.enabled ? `${ts.name} toolset` : "Disabled for CLI"}
+                            {ts.enabled
+                              ? `${ts.name} toolset`
+                              : "Disabled for CLI"}
                           </span>
                         )}
                       </div>
