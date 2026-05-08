@@ -9,20 +9,20 @@ QUERY="$1"
 MAX_RESULTS="${2:-5}"
 
 if [ -z "$QUERY" ]; then
-    echo "Usage: $0 <query> [max_results]"
-    echo ""
-    echo "Examples:"
-    echo "  $0 'python async programming' 5"
-    echo "  $0 'latest AI news' 10"
-    echo ""
-    echo "Requires: pip install ddgs"
-    exit 1
+  echo "Usage: $0 <query> [max_results]"
+  echo ""
+  echo "Examples:"
+  echo "  $0 'python async programming' 5"
+  echo "  $0 'latest AI news' 10"
+  echo ""
+  echo "Requires: pip install ddgs"
+  exit 1
 fi
 
 # Check if ddgs is available
-if ! command -v ddgs &> /dev/null; then
-    echo "Error: ddgs not found. Install with: pip install ddgs"
-    exit 1
+if ! command -v ddgs &>/dev/null; then
+  echo "Error: ddgs not found. Install with: pip install ddgs"
+  exit 1
 fi
 
 ddgs text -k "$QUERY" -m "$MAX_RESULTS"

@@ -35,13 +35,34 @@ shift 2
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --width) WIDTH="$2"; shift 2 ;;
-    --height) HEIGHT="$2"; shift 2 ;;
-    --fps) FPS="$2"; shift 2 ;;
-    --duration) DURATION="$2"; shift 2 ;;
-    --quality) CRF="$2"; shift 2 ;;
-    --frames-only) FRAMES_ONLY=true; shift ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
+  --width)
+    WIDTH="$2"
+    shift 2
+    ;;
+  --height)
+    HEIGHT="$2"
+    shift 2
+    ;;
+  --fps)
+    FPS="$2"
+    shift 2
+    ;;
+  --duration)
+    DURATION="$2"
+    shift 2
+    ;;
+  --quality)
+    CRF="$2"
+    shift 2
+    ;;
+  --frames-only)
+    FRAMES_ONLY=true
+    shift
+    ;;
+  *)
+    echo "Unknown option: $1"
+    exit 1
+    ;;
   esac
 done
 
@@ -60,9 +81,15 @@ echo "Frame dir:  $FRAME_DIR"
 echo ""
 
 # Check dependencies
-command -v node >/dev/null 2>&1 || { echo "Error: Node.js required"; exit 1; }
+command -v node >/dev/null 2>&1 || {
+  echo "Error: Node.js required"
+  exit 1
+}
 if [ "$FRAMES_ONLY" = false ]; then
-  command -v ffmpeg >/dev/null 2>&1 || { echo "Error: ffmpeg required for MP4"; exit 1; }
+  command -v ffmpeg >/dev/null 2>&1 || {
+    echo "Error: ffmpeg required for MP4"
+    exit 1
+  }
 fi
 
 # Step 1: Capture frames via Puppeteer
