@@ -1,31 +1,34 @@
-import path from 'path';
-import { existsSync, readFileSync } from 'fs';
+import path from "path";
+import { existsSync, readFileSync } from "fs";
 
 export function normalizeWhatsAppIdentifier(value) {
-  return String(value || '')
+  return String(value || "")
     .trim()
-    .replace(/:.*@/, '@')
-    .replace(/@.*/, '')
-    .replace(/^\+/, '');
+    .replace(/:.*@/, "@")
+    .replace(/@.*/, "")
+    .replace(/^\+/, "");
 }
 
 export function parseAllowedUsers(rawValue) {
   return new Set(
-    String(rawValue || '')
-      .split(',')
+    String(rawValue || "")
+      .split(",")
       .map((value) => normalizeWhatsAppIdentifier(value))
-      .filter(Boolean)
+      .filter(Boolean),
   );
 }
 
-function readMappingFile(sessionDir, identifier, suffix = '') {
-  const filePath = path.join(sessionDir, `lid-mapping-${identifier}${suffix}.json`);
+function readMappingFile(sessionDir, identifier, suffix = "") {
+  const filePath = path.join(
+    sessionDir,
+    `lid-mapping-${identifier}${suffix}.json`,
+  );
   if (!existsSync(filePath)) {
     return null;
   }
 
   try {
-    const parsed = JSON.parse(readFileSync(filePath, 'utf8'));
+    const parsed = JSON.parse(readFileSync(filePath, "utf8"));
     const normalized = normalizeWhatsAppIdentifier(parsed);
     return normalized || null;
   } catch {
@@ -52,7 +55,7 @@ export function expandWhatsAppIdentifiers(identifier, sessionDir) {
 
     resolved.add(current);
 
-    for (const suffix of ['', '_reverse']) {
+    for (const suffix of ["", "_reverse"]) {
       const mapped = readMappingFile(sessionDir, current, suffix);
       if (mapped && !resolved.has(mapped)) {
         queue.push(mapped);
@@ -69,7 +72,7 @@ export function matchesAllowedUser(senderId, allowedUsers, sessionDir) {
   }
 
   // "*" means allow everyone (consistent with SIGNAL_GROUP_ALLOWED_USERS)
-  if (allowedUsers.has('*')) {
+  if (allowedUsers.has("*")) {
     return true;
   }
 

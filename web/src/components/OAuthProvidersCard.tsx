@@ -1,7 +1,22 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { ShieldCheck, ShieldOff, Copy, ExternalLink, RefreshCw, LogOut, Terminal, LogIn } from "lucide-react";
+import {
+  ShieldCheck,
+  ShieldOff,
+  Copy,
+  ExternalLink,
+  RefreshCw,
+  LogOut,
+  Terminal,
+  LogIn,
+} from "lucide-react";
 import { api, type OAuthProvider } from "@/lib/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OAuthLoginModal } from "@/components/OAuthLoginModal";
@@ -76,14 +91,21 @@ export function OAuthProvidersCard({ onError, onSuccess }: Props) {
       await navigator.clipboard.writeText(provider.cli_command);
       setCopiedId(provider.id);
       onSuccess?.(`Copied: ${provider.cli_command}`);
-      setTimeout(() => setCopiedId((v) => (v === provider.id ? null : v)), 1500);
+      setTimeout(
+        () => setCopiedId((v) => (v === provider.id ? null : v)),
+        1500,
+      );
     } catch {
       onError?.("Clipboard write failed — copy the command manually");
     }
   };
 
   const handleDisconnect = async (provider: OAuthProvider) => {
-    if (!confirm(`Disconnect ${provider.name}? You'll need to log in again to use this provider.`)) {
+    if (
+      !confirm(
+        `Disconnect ${provider.name}? You'll need to log in again to use this provider.`,
+      )
+    ) {
       return;
     }
     setBusyId(provider.id);
@@ -98,7 +120,8 @@ export function OAuthProvidersCard({ onError, onSuccess }: Props) {
     }
   };
 
-  const connectedCount = providers?.filter((p) => p.status.logged_in).length ?? 0;
+  const connectedCount =
+    providers?.filter((p) => p.status.logged_in).length ?? 0;
   const totalCount = providers?.length ?? 0;
 
   return (
@@ -116,13 +139,16 @@ export function OAuthProvidersCard({ onError, onSuccess }: Props) {
             disabled={loading}
             className="text-xs"
           >
-            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
         </div>
         <CardDescription>
-          {connectedCount} of {totalCount} OAuth providers connected. Login flows currently
-          run via the CLI; click <em>Copy command</em> and paste into a terminal to set up.
+          {connectedCount} of {totalCount} OAuth providers connected. Login
+          flows currently run via the CLI; click <em>Copy command</em> and paste
+          into a terminal to set up.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -155,7 +181,10 @@ export function OAuthProvidersCard({ onError, onSuccess }: Props) {
                   <div className="flex flex-col min-w-0 gap-0.5">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium text-sm">{p.name}</span>
-                      <Badge variant="outline" className="text-[11px] uppercase tracking-wide">
+                      <Badge
+                        variant="outline"
+                        className="text-[11px] uppercase tracking-wide"
+                      >
                         {FLOW_LABELS[p.flow]}
                       </Badge>
                       {p.status.logged_in && (
@@ -177,10 +206,13 @@ export function OAuthProvidersCard({ onError, onSuccess }: Props) {
                     {p.status.logged_in && p.status.token_preview && (
                       <code className="text-xs text-muted-foreground font-mono-ui truncate">
                         token{" "}
-                        <span className="text-foreground">{p.status.token_preview}</span>
+                        <span className="text-foreground">
+                          {p.status.token_preview}
+                        </span>
                         {p.status.source_label && (
                           <span className="text-muted-foreground/70">
-                            {" "}· {p.status.source_label}
+                            {" "}
+                            · {p.status.source_label}
                           </span>
                         )}
                       </code>
@@ -279,7 +311,7 @@ export function OAuthProvidersCard({ onError, onSuccess }: Props) {
           provider={loginFor}
           onClose={() => {
             setLoginFor(null);
-            refresh();  // always refresh on close so token preview updates after login
+            refresh(); // always refresh on close so token preview updates after login
           }}
           onSuccess={(msg) => onSuccess?.(msg)}
           onError={(msg) => onError?.(msg)}

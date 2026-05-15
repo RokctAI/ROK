@@ -5,7 +5,13 @@ import { useMemo } from "react";
  * Handles: code blocks, inline code, bold, italic, headers, links, lists, horizontal rules.
  * NOT a full CommonMark parser — optimized for typical assistant message patterns.
  */
-export function Markdown({ content, highlightTerms }: { content: string; highlightTerms?: string[] }) {
+export function Markdown({
+  content,
+  highlightTerms,
+}: {
+  content: string;
+  highlightTerms?: string[];
+}) {
   const blocks = useMemo(() => parseBlocks(content), [content]);
 
   return (
@@ -58,7 +64,11 @@ function parseBlocks(text: string): BlockNode[] {
     // Heading
     const headingMatch = line.match(/^(#{1,4})\s+(.+)/);
     if (headingMatch) {
-      blocks.push({ type: "heading", level: headingMatch[1].length, content: headingMatch[2] });
+      blocks.push({
+        type: "heading",
+        level: headingMatch[1].length,
+        content: headingMatch[2],
+      });
       i++;
       continue;
     }
@@ -124,7 +134,13 @@ function parseBlocks(text: string): BlockNode[] {
 /*  Block renderer                                                     */
 /* ------------------------------------------------------------------ */
 
-function Block({ block, highlightTerms }: { block: BlockNode; highlightTerms?: string[] }) {
+function Block({
+  block,
+  highlightTerms,
+}: {
+  block: BlockNode;
+  highlightTerms?: string[];
+}) {
   switch (block.type) {
     case "code":
       return (
@@ -141,7 +157,11 @@ function Block({ block, highlightTerms }: { block: BlockNode; highlightTerms?: s
         h3: "text-sm font-semibold",
         h4: "text-sm font-medium",
       };
-      return <Tag className={sizes[Tag]}><InlineContent text={block.content} highlightTerms={highlightTerms} /></Tag>;
+      return (
+        <Tag className={sizes[Tag]}>
+          <InlineContent text={block.content} highlightTerms={highlightTerms} />
+        </Tag>
+      );
     }
 
     case "hr":
@@ -150,16 +170,24 @@ function Block({ block, highlightTerms }: { block: BlockNode; highlightTerms?: s
     case "list": {
       const Tag = block.ordered ? "ol" : "ul";
       return (
-        <Tag className={`space-y-0.5 ${block.ordered ? "list-decimal" : "list-disc"} pl-5 text-sm`}>
+        <Tag
+          className={`space-y-0.5 ${block.ordered ? "list-decimal" : "list-disc"} pl-5 text-sm`}
+        >
           {block.items.map((item, i) => (
-            <li key={i}><InlineContent text={item} highlightTerms={highlightTerms} /></li>
+            <li key={i}>
+              <InlineContent text={item} highlightTerms={highlightTerms} />
+            </li>
           ))}
         </Tag>
       );
     }
 
     case "paragraph":
-      return <p><InlineContent text={block.content} highlightTerms={highlightTerms} /></p>;
+      return (
+        <p>
+          <InlineContent text={block.content} highlightTerms={highlightTerms} />
+        </p>
+      );
   }
 }
 
@@ -178,7 +206,8 @@ type InlineNode =
 function parseInline(text: string): InlineNode[] {
   const nodes: InlineNode[] = [];
   // Pattern priority: code > link > bold > italic > bare URL > line break
-  const pattern = /(`[^`]+`)|(\[([^\]]+)\]\(([^)]+)\))|(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(\bhttps?:\/\/[^\s<>)\]]+)|(\n)/g;
+  const pattern =
+    /(`[^`]+`)|(\[([^\]]+)\]\(([^)]+)\))|(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(\bhttps?:\/\/[^\s<>)\]]+)|(\n)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -217,7 +246,13 @@ function parseInline(text: string): InlineNode[] {
   return nodes;
 }
 
-function InlineContent({ text, highlightTerms }: { text: string; highlightTerms?: string[] }) {
+function InlineContent({
+  text,
+  highlightTerms,
+}: {
+  text: string;
+  highlightTerms?: string[];
+}) {
   const nodes = useMemo(() => parseInline(text), [text]);
 
   return (
@@ -225,17 +260,34 @@ function InlineContent({ text, highlightTerms }: { text: string; highlightTerms?
       {nodes.map((node, i) => {
         switch (node.type) {
           case "text":
-            return <HighlightedText key={i} text={node.content} terms={highlightTerms} />;
+            return (
+              <HighlightedText
+                key={i}
+                text={node.content}
+                terms={highlightTerms}
+              />
+            );
           case "code":
             return (
-              <code key={i} className="rounded bg-secondary/60 px-1.5 py-0.5 text-xs font-mono text-primary/90">
+              <code
+                key={i}
+                className="rounded bg-secondary/60 px-1.5 py-0.5 text-xs font-mono text-primary/90"
+              >
                 {node.content}
               </code>
             );
           case "bold":
-            return <strong key={i} className="font-semibold"><HighlightedText text={node.content} terms={highlightTerms} /></strong>;
+            return (
+              <strong key={i} className="font-semibold">
+                <HighlightedText text={node.content} terms={highlightTerms} />
+              </strong>
+            );
           case "italic":
-            return <em key={i}><HighlightedText text={node.content} terms={highlightTerms} /></em>;
+            return (
+              <em key={i}>
+                <HighlightedText text={node.content} terms={highlightTerms} />
+              </em>
+            );
           case "link":
             return (
               <a
@@ -269,10 +321,15 @@ function HighlightedText({ text, terms }: { text: string; terms?: string[] }) {
     <>
       {parts.map((part, i) =>
         regex.test(part) ? (
-          <mark key={i} className="bg-warning/30 text-warning rounded-sm px-0.5">{part}</mark>
+          <mark
+            key={i}
+            className="bg-warning/30 text-warning rounded-sm px-0.5"
+          >
+            {part}
+          </mark>
         ) : (
           <span key={i}>{part}</span>
-        )
+        ),
       )}
     </>
   );

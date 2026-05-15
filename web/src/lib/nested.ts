@@ -1,4 +1,7 @@
-export function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+export function getNestedValue(
+  obj: Record<string, unknown>,
+  path: string,
+): unknown {
   const parts = path.split(".");
   let cur: unknown = obj;
   for (const p of parts) {
@@ -8,7 +11,11 @@ export function getNestedValue(obj: Record<string, unknown>, path: string): unkn
   return cur;
 }
 
-export function setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
+export function setNestedValue(
+  obj: Record<string, unknown>,
+  path: string,
+  value: unknown,
+): Record<string, unknown> {
   const clone = structuredClone(obj);
   const parts = path.split(".");
   let cur: Record<string, unknown> = clone;

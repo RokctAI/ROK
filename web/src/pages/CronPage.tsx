@@ -80,7 +80,10 @@ export default function CronPage() {
       const isPaused = job.state === "paused";
       if (isPaused) {
         await api.resumeCronJob(job.id);
-        showToast(`Resumed "${job.name || job.prompt.slice(0, 30)}"`, "success");
+        showToast(
+          `Resumed "${job.name || job.prompt.slice(0, 30)}"`,
+          "success",
+        );
       } else {
         await api.pauseCronJob(job.id);
         showToast(`Paused "${job.name || job.prompt.slice(0, 30)}"`, "success");
@@ -94,7 +97,10 @@ export default function CronPage() {
   const handleTrigger = async (job: CronJob) => {
     try {
       await api.triggerCronJob(job.id);
-      showToast(`Triggered "${job.name || job.prompt.slice(0, 30)}"`, "success");
+      showToast(
+        `Triggered "${job.name || job.prompt.slice(0, 30)}"`,
+        "success",
+      );
       loadJobs();
     } catch (e) {
       showToast(`Trigger failed: ${e}`, "error");
@@ -156,7 +162,9 @@ export default function CronPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="cron-schedule">Schedule (cron expression)</Label>
+                <Label htmlFor="cron-schedule">
+                  Schedule (cron expression)
+                </Label>
                 <Input
                   id="cron-schedule"
                   placeholder="0 9 * * *"
@@ -181,7 +189,11 @@ export default function CronPage() {
               </div>
 
               <div className="flex items-end">
-                <Button onClick={handleCreate} disabled={creating} className="w-full">
+                <Button
+                  onClick={handleCreate}
+                  disabled={creating}
+                  className="w-full"
+                >
                   <Plus className="h-3 w-3" />
                   {creating ? "Creating..." : "Create"}
                 </Button>
@@ -213,7 +225,9 @@ export default function CronPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium text-sm truncate">
-                    {job.name || job.prompt.slice(0, 60) + (job.prompt.length > 60 ? "..." : "")}
+                    {job.name ||
+                      job.prompt.slice(0, 60) +
+                        (job.prompt.length > 60 ? "..." : "")}
                   </span>
                   <Badge variant={STATUS_VARIANT[job.state] ?? "secondary"}>
                     {job.state}
@@ -224,7 +238,8 @@ export default function CronPage() {
                 </div>
                 {job.name && (
                   <p className="text-xs text-muted-foreground truncate mb-1">
-                    {job.prompt.slice(0, 100)}{job.prompt.length > 100 ? "..." : ""}
+                    {job.prompt.slice(0, 100)}
+                    {job.prompt.length > 100 ? "..." : ""}
                   </p>
                 )}
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -233,7 +248,9 @@ export default function CronPage() {
                   <span>Next: {formatTime(job.next_run_at)}</span>
                 </div>
                 {job.last_error && (
-                  <p className="text-xs text-destructive mt-1">{job.last_error}</p>
+                  <p className="text-xs text-destructive mt-1">
+                    {job.last_error}
+                  </p>
                 )}
               </div>
 
@@ -243,7 +260,9 @@ export default function CronPage() {
                   variant="ghost"
                   size="icon"
                   title={job.state === "paused" ? "Resume" : "Pause"}
-                  aria-label={job.state === "paused" ? "Resume job" : "Pause job"}
+                  aria-label={
+                    job.state === "paused" ? "Resume job" : "Pause job"
+                  }
                   onClick={() => handlePauseResume(job)}
                 >
                   {job.state === "paused" ? (

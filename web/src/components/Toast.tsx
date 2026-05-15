@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-export function Toast({ toast }: { toast: { message: string; type: "success" | "error" } | null }) {
+export function Toast({
+  toast,
+}: {
+  toast: { message: string; type: "success" | "error" } | null;
+}) {
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState(toast);
 
@@ -30,7 +34,9 @@ export function Toast({ toast }: { toast: { message: string; type: "success" | "
           : "bg-destructive/15 text-destructive border-destructive/30"
       }`}
       style={{
-        animation: visible ? "toast-in 200ms ease-out forwards" : "toast-out 200ms ease-in forwards",
+        animation: visible
+          ? "toast-in 200ms ease-out forwards"
+          : "toast-out 200ms ease-in forwards",
       }}
     >
       {current.message}

@@ -23,26 +23,39 @@ async function getSessionToken(): Promise<string> {
 export const api = {
   getStatus: () => fetchJSON<StatusResponse>("/api/status"),
   getSessions: (limit = 20, offset = 0) =>
-    fetchJSON<PaginatedSessions>(`/api/sessions?limit=${limit}&offset=${offset}`),
+    fetchJSON<PaginatedSessions>(
+      `/api/sessions?limit=${limit}&offset=${offset}`,
+    ),
   getSessionMessages: (id: string) =>
-    fetchJSON<SessionMessagesResponse>(`/api/sessions/${encodeURIComponent(id)}/messages`),
+    fetchJSON<SessionMessagesResponse>(
+      `/api/sessions/${encodeURIComponent(id)}/messages`,
+    ),
   deleteSession: (id: string) =>
     fetchJSON<{ ok: boolean }>(`/api/sessions/${encodeURIComponent(id)}`, {
       method: "DELETE",
     }),
-  getLogs: (params: { file?: string; lines?: number; level?: string; component?: string }) => {
+  getLogs: (params: {
+    file?: string;
+    lines?: number;
+    level?: string;
+    component?: string;
+  }) => {
     const qs = new URLSearchParams();
     if (params.file) qs.set("file", params.file);
     if (params.lines) qs.set("lines", String(params.lines));
     if (params.level && params.level !== "ALL") qs.set("level", params.level);
-    if (params.component && params.component !== "all") qs.set("component", params.component);
+    if (params.component && params.component !== "all")
+      qs.set("component", params.component);
     return fetchJSON<LogsResponse>(`/api/logs?${qs.toString()}`);
   },
   getAnalytics: (days: number) =>
     fetchJSON<AnalyticsResponse>(`/api/analytics/usage?days=${days}`),
   getConfig: () => fetchJSON<Record<string, unknown>>("/api/config"),
   getDefaults: () => fetchJSON<Record<string, unknown>>("/api/config/defaults"),
-  getSchema: () => fetchJSON<{ fields: Record<string, unknown>; category_order: string[] }>("/api/config/schema"),
+  getSchema: () =>
+    fetchJSON<{ fields: Record<string, unknown>; category_order: string[] }>(
+      "/api/config/schema",
+    ),
   saveConfig: (config: Record<string, unknown>) =>
     fetchJSON<{ ok: boolean }>("/api/config", {
       method: "PUT",
@@ -83,18 +96,29 @@ export const api = {
 
   // Cron jobs
   getCronJobs: () => fetchJSON<CronJob[]>("/api/cron/jobs"),
-  createCronJob: (job: { prompt: string; schedule: string; name?: string; deliver?: string }) =>
+  createCronJob: (job: {
+    prompt: string;
+    schedule: string;
+    name?: string;
+    deliver?: string;
+  }) =>
     fetchJSON<CronJob>("/api/cron/jobs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(job),
     }),
   pauseCronJob: (id: string) =>
-    fetchJSON<{ ok: boolean }>(`/api/cron/jobs/${id}/pause`, { method: "POST" }),
+    fetchJSON<{ ok: boolean }>(`/api/cron/jobs/${id}/pause`, {
+      method: "POST",
+    }),
   resumeCronJob: (id: string) =>
-    fetchJSON<{ ok: boolean }>(`/api/cron/jobs/${id}/resume`, { method: "POST" }),
+    fetchJSON<{ ok: boolean }>(`/api/cron/jobs/${id}/resume`, {
+      method: "POST",
+    }),
   triggerCronJob: (id: string) =>
-    fetchJSON<{ ok: boolean }>(`/api/cron/jobs/${id}/trigger`, { method: "POST" }),
+    fetchJSON<{ ok: boolean }>(`/api/cron/jobs/${id}/trigger`, {
+      method: "POST",
+    }),
   deleteCronJob: (id: string) =>
     fetchJSON<{ ok: boolean }>(`/api/cron/jobs/${id}`, { method: "DELETE" }),
 
@@ -110,7 +134,9 @@ export const api = {
 
   // Session search (FTS5)
   searchSessions: (q: string) =>
-    fetchJSON<SessionSearchResponse>(`/api/sessions/search?q=${encodeURIComponent(q)}`),
+    fetchJSON<SessionSearchResponse>(
+      `/api/sessions/search?q=${encodeURIComponent(q)}`,
+    ),
 
   // OAuth provider management
   getOAuthProviders: () =>
@@ -139,7 +165,11 @@ export const api = {
       },
     );
   },
-  submitOAuthCode: async (providerId: string, sessionId: string, code: string) => {
+  submitOAuthCode: async (
+    providerId: string,
+    sessionId: string,
+    code: string,
+  ) => {
     const token = await getSessionToken();
     return fetchJSON<OAuthSubmitResponse>(
       `/api/providers/oauth/${encodeURIComponent(providerId)}/submit`,

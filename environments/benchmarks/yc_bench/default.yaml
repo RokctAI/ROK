@@ -23,12 +23,12 @@ env:
   terminal_timeout: 60
   presets: ["fast_test", "medium", "hard"]
   seeds: [1, 2, 3]
-  run_timeout: 3600          # 60 min wall-clock per run, auto-FAIL if exceeded
-  survival_weight: 0.5       # weight of binary survival in composite score
-  funds_weight: 0.5          # weight of normalised final funds in composite score
+  run_timeout: 3600 # 60 min wall-clock per run, auto-FAIL if exceeded
+  survival_weight: 0.5 # weight of binary survival in composite score
+  funds_weight: 0.5 # weight of normalised final funds in composite score
   db_dir: "/tmp/yc_bench_dbs"
   company_name: "BenchCo"
-  start_date: "01/01/2025"   # MM/DD/YYYY (yc-bench convention)
+  start_date: "01/01/2025" # MM/DD/YYYY (yc-bench convention)
   tokenizer_name: "NousResearch/Hermes-3-Llama-3.1-8B"
   use_wandb: true
   wandb_name: "yc-bench"
