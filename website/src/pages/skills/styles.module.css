@@ -1,10 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 
 .page {
-  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "DM Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   min-height: 100vh;
 }
-
 
 .hero {
   position: relative;
@@ -97,7 +100,6 @@
   color: var(--ifm-font-color-secondary, #9a968e);
 }
 
-
 .controlsBar {
   position: sticky;
   top: 60px; /* below Docusaurus navbar */
@@ -140,7 +142,9 @@
   background: rgba(15, 15, 24, 0.6);
   color: var(--ifm-font-color-base, #e8e4dc);
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .searchInput:focus {
@@ -219,7 +223,6 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-
 .layout {
   display: grid;
   grid-template-columns: 260px 1fr;
@@ -228,7 +231,6 @@
   margin: 0 auto;
   min-height: 60vh;
 }
-
 
 .sidebar {
   position: sticky;
@@ -341,7 +343,6 @@
   display: none;
 }
 
-
 .main {
   padding: 1.25rem 1.5rem 3rem;
   min-width: 0;
@@ -408,13 +409,11 @@
   color: #ffd700;
 }
 
-
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 0.75rem;
 }
-
 
 @keyframes cardIn {
   from {
@@ -433,7 +432,10 @@
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
   animation: cardIn 0.35s ease both;
 }
 
@@ -443,13 +445,17 @@
 
 .card:hover {
   border-color: rgba(255, 215, 0, 0.15);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 215, 0, 0.05);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 215, 0, 0.05);
   transform: translateY(-1px);
 }
 
 .cardExpanded {
   border-color: rgba(255, 215, 0, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 215, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 215, 0, 0.08);
 }
 
 .cardAccent {
@@ -567,7 +573,6 @@
   border: 1px solid rgba(96, 165, 250, 0.1);
 }
 
-
 .cardDetail {
   margin-top: 0.75rem;
   padding-top: 0.7rem;
@@ -645,7 +650,6 @@
   padding: 0 1px;
 }
 
-
 .loadMoreWrap {
   display: flex;
   justify-content: center;
@@ -670,7 +674,6 @@
   border-color: rgba(255, 215, 0, 0.35);
   color: #ffd700;
 }
-
 
 .empty {
   display: flex;
@@ -716,7 +719,6 @@
   background: rgba(255, 215, 0, 0.08);
 }
 
-
 .backdrop {
   display: none;
 }
@@ -728,7 +730,6 @@
   background: rgba(255, 215, 0, 0.1);
   color: rgba(255, 215, 0, 0.8);
 }
-
 
 @media (max-width: 900px) {
   .layout {

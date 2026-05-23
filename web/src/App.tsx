@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { Activity, BarChart3, Clock, FileText, KeyRound, MessageSquare, Package, Settings } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Clock,
+  FileText,
+  KeyRound,
+  MessageSquare,
+  Package,
+  Settings,
+} from "lucide-react";
 import StatusPage from "@/pages/StatusPage";
 import ConfigPage from "@/pages/ConfigPage";
 import EnvPage from "@/pages/EnvPage";
@@ -62,7 +71,9 @@ export default function App() {
           {/* Brand */}
           <div className="flex items-center border-r border-border px-5 shrink-0">
             <span className="font-collapse text-xl font-bold tracking-wider uppercase blend-lighter">
-              Rok<br className="hidden sm:inline" /><span className="sm:hidden"> </span>Agent
+              Rok
+              <br className="hidden sm:inline" />
+              <span className="sm:hidden"> </span>Agent
             </span>
           </div>
 

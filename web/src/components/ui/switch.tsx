@@ -29,7 +29,9 @@ export function Switch({
       <span
         className={cn(
           "pointer-events-none block h-3.5 w-3.5 transition-transform",
-          checked ? "translate-x-4 bg-foreground" : "translate-x-0.5 bg-muted-foreground",
+          checked
+            ? "translate-x-4 bg-foreground"
+            : "translate-x-0.5 bg-muted-foreground",
         )}
       />
     </button>

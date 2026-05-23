@@ -34,9 +34,21 @@ interface Props {
   onError: (msg: string) => void;
 }
 
-type Phase = "idle" | "starting" | "awaiting_user" | "submitting" | "polling" | "approved" | "error";
+type Phase =
+  | "idle"
+  | "starting"
+  | "awaiting_user"
+  | "submitting"
+  | "polling"
+  | "approved"
+  | "error";
 
-export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props) {
+export function OAuthLoginModal({
+  provider,
+  onClose,
+  onSuccess,
+  onError,
+}: Props) {
   const [phase, setPhase] = useState<Phase>("starting");
   const [start, setStart] = useState<OAuthStartResponse | null>(null);
   const [pkceCode, setPkceCode] = useState("");
@@ -106,13 +118,15 @@ export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props
         if (!isMounted.current) return;
         if (resp.status === "approved") {
           setPhase("approved");
-          if (pollTimer.current !== null) window.clearInterval(pollTimer.current);
+          if (pollTimer.current !== null)
+            window.clearInterval(pollTimer.current);
           onSuccess(`${provider.name} connected`);
           window.setTimeout(() => isMounted.current && onClose(), 1500);
         } else if (resp.status !== "pending") {
           setPhase("error");
           setErrorMsg(resp.error_message || `Login ${resp.status}`);
-          if (pollTimer.current !== null) window.clearInterval(pollTimer.current);
+          if (pollTimer.current !== null)
+            window.clearInterval(pollTimer.current);
         }
       } catch (e) {
         // 404 = session expired/cleaned up; treat as error
@@ -133,7 +147,11 @@ export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props
     setPhase("submitting");
     setErrorMsg(null);
     try {
-      const resp = await api.submitOAuthCode(provider.id, start.session_id, pkceCode.trim());
+      const resp = await api.submitOAuthCode(
+        provider.id,
+        start.session_id,
+        pkceCode.trim(),
+      );
       if (!isMounted.current) return;
       if (resp.ok && resp.status === "approved") {
         setPhase("approved");
@@ -203,14 +221,19 @@ export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props
         </button>
         <div className="p-6 flex flex-col gap-4">
           <div>
-            <h2 id="oauth-modal-title" className="font-display text-base tracking-wider uppercase">
+            <h2
+              id="oauth-modal-title"
+              className="font-display text-base tracking-wider uppercase"
+            >
               Connect {provider.name}
             </h2>
-            {secondsLeft !== null && phase !== "approved" && phase !== "error" && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Session expires in {fmtTime(secondsLeft)}
-              </p>
-            )}
+            {secondsLeft !== null &&
+              phase !== "approved" &&
+              phase !== "error" && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Session expires in {fmtTime(secondsLeft)}
+                </p>
+              )}
           </div>
 
           {/* ── starting ───────────────────────────────────── */}
@@ -226,10 +249,18 @@ export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props
             <>
               <ol className="text-sm space-y-2 list-decimal list-inside text-muted-foreground">
                 <li>
-                  A new tab opened to <code className="text-foreground">claude.ai</code>. Sign in
-                  and click <strong className="text-foreground">Authorize</strong>.
+                  A new tab opened to{" "}
+                  <code className="text-foreground">claude.ai</code>. Sign in
+                  and click{" "}
+                  <strong className="text-foreground">Authorize</strong>.
                 </li>
-                <li>Copy the <strong className="text-foreground">authorization code</strong> shown after authorizing.</li>
+                <li>
+                  Copy the{" "}
+                  <strong className="text-foreground">
+                    authorization code
+                  </strong>{" "}
+                  shown after authorizing.
+                </li>
                 <li>Paste it below and submit.</li>
               </ol>
               <div className="flex flex-col gap-2">
@@ -242,7 +273,10 @@ export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props
                 />
                 <div className="flex items-center gap-2 justify-between">
                   <a
-                    href={(start as Extract<OAuthStartResponse, { flow: "pkce" }>).auth_url}
+                    href={
+                      (start as Extract<OAuthStartResponse, { flow: "pkce" }>)
+                        .auth_url
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
@@ -250,7 +284,11 @@ export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props
                     <ExternalLink className="h-3 w-3" />
                     Re-open auth page
                   </a>
-                  <Button onClick={handleSubmitPkceCode} disabled={!pkceCode.trim()} size="sm">
+                  <Button
+                    onClick={handleSubmitPkceCode}
+                    disabled={!pkceCode.trim()}
+                    size="sm"
+                  >
                     Submit code
                   </Button>
                 </div>
@@ -274,23 +312,46 @@ export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props
               </p>
               <div className="flex items-center justify-between gap-2 border border-border bg-secondary/30 p-4">
                 <code className="font-mono-ui text-2xl tracking-widest text-foreground">
-                  {(start as Extract<OAuthStartResponse, { flow: "device_code" }>).user_code}
+                  {
+                    (
+                      start as Extract<
+                        OAuthStartResponse,
+                        { flow: "device_code" }
+                      >
+                    ).user_code
+                  }
                 </code>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() =>
                     handleCopyUserCode(
-                      (start as Extract<OAuthStartResponse, { flow: "device_code" }>).user_code,
+                      (
+                        start as Extract<
+                          OAuthStartResponse,
+                          { flow: "device_code" }
+                        >
+                      ).user_code,
                     )
                   }
                   className="text-xs"
                 >
-                  {codeCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  {codeCopied ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
                 </Button>
               </div>
               <a
-                href={(start as Extract<OAuthStartResponse, { flow: "device_code" }>).verification_url}
+                href={
+                  (
+                    start as Extract<
+                      OAuthStartResponse,
+                      { flow: "device_code" }
+                    >
+                  ).verification_url
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
@@ -336,21 +397,36 @@ export function OAuthLoginModal({ provider, onClose, onSuccess, onError }: Props
                     setPhase("starting");
                     // Re-trigger the start effect by remounting (caller should re-key us)
                     // Simpler: just kick off a new start manually
-                    api.startOAuthLogin(provider.id).then((resp) => {
-                      if (!isMounted.current) return;
-                      setStart(resp);
-                      setSecondsLeft(resp.expires_in);
-                      setPhase(resp.flow === "device_code" ? "polling" : "awaiting_user");
-                      if (resp.flow === "pkce") {
-                        window.open(resp.auth_url, "_blank", "noopener,noreferrer");
-                      } else {
-                        window.open(resp.verification_url, "_blank", "noopener,noreferrer");
-                      }
-                    }).catch((e) => {
-                      if (!isMounted.current) return;
-                      setPhase("error");
-                      setErrorMsg(`Retry failed: ${e}`);
-                    });
+                    api
+                      .startOAuthLogin(provider.id)
+                      .then((resp) => {
+                        if (!isMounted.current) return;
+                        setStart(resp);
+                        setSecondsLeft(resp.expires_in);
+                        setPhase(
+                          resp.flow === "device_code"
+                            ? "polling"
+                            : "awaiting_user",
+                        );
+                        if (resp.flow === "pkce") {
+                          window.open(
+                            resp.auth_url,
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
+                        } else {
+                          window.open(
+                            resp.verification_url,
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
+                        }
+                      })
+                      .catch((e) => {
+                        if (!isMounted.current) return;
+                        setPhase("error");
+                        setErrorMsg(`Retry failed: ${e}`);
+                      });
                   }}
                 >
                   Retry

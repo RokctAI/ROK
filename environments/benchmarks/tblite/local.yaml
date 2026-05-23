@@ -23,7 +23,7 @@ env:
   dataset_name: "NousResearch/openthoughts-tblite"
   test_timeout: 600
   task_timeout: 1200
-  eval_concurrency: 8          # max 8 tasks at once
+  eval_concurrency: 8 # max 8 tasks at once
   tokenizer_name: "NousResearch/Hermes-3-Llama-3.1-8B"
   use_wandb: false
   wandb_name: "openthoughts-tblite-local"

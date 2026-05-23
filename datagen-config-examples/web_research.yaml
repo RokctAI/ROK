@@ -42,5 +42,5 @@ compression:
   target_max_tokens: 16000
 
 # Eval settings
-eval_every: 100       # Run eval every N trajectories
-eval_size: 25         # Number of held-out questions per eval run
+eval_every: 100 # Run eval every N trajectories
+eval_size: 25 # Number of held-out questions per eval run

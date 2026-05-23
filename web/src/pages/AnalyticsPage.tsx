@@ -1,12 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-  BarChart3,
-  Cpu,
-  Hash,
-  TrendingUp,
-} from "lucide-react";
+import { BarChart3, Cpu, Hash, TrendingUp } from "lucide-react";
 import { api } from "@/lib/api";
-import type { AnalyticsResponse, AnalyticsDailyEntry, AnalyticsModelEntry } from "@/lib/api";
+import type {
+  AnalyticsResponse,
+  AnalyticsDailyEntry,
+  AnalyticsModelEntry,
+} from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -61,7 +60,10 @@ function SummaryCard({
 function TokenBarChart({ daily }: { daily: AnalyticsDailyEntry[] }) {
   if (daily.length === 0) return null;
 
-  const maxTokens = Math.max(...daily.map((d) => d.input_tokens + d.output_tokens), 1);
+  const maxTokens = Math.max(
+    ...daily.map((d) => d.input_tokens + d.output_tokens),
+    1,
+  );
 
   return (
     <Card>
@@ -70,7 +72,7 @@ function TokenBarChart({ daily }: { daily: AnalyticsDailyEntry[] }) {
           <BarChart3 className="h-5 w-5 text-muted-foreground" />
           <CardTitle className="text-base">Daily Token Usage</CardTitle>
         </div>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-sm bg-[#ffe6cb]" />
             Input
@@ -82,11 +84,18 @@ function TokenBarChart({ daily }: { daily: AnalyticsDailyEntry[] }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex items-end gap-[2px]" style={{ height: CHART_HEIGHT_PX }}>
+        <div
+          className="flex items-end gap-[2px]"
+          style={{ height: CHART_HEIGHT_PX }}
+        >
           {daily.map((d) => {
             const total = d.input_tokens + d.output_tokens;
-            const inputH = Math.round((d.input_tokens / maxTokens) * CHART_HEIGHT_PX);
-            const outputH = Math.round((d.output_tokens / maxTokens) * CHART_HEIGHT_PX);
+            const inputH = Math.round(
+              (d.input_tokens / maxTokens) * CHART_HEIGHT_PX,
+            );
+            const outputH = Math.round(
+              (d.output_tokens / maxTokens) * CHART_HEIGHT_PX,
+            );
             return (
               <div
                 key={d.day}
@@ -110,7 +119,9 @@ function TokenBarChart({ daily }: { daily: AnalyticsDailyEntry[] }) {
                 {/* Output bar */}
                 <div
                   className="w-full bg-emerald-500/70"
-                  style={{ height: Math.max(outputH, d.output_tokens > 0 ? 1 : 0) }}
+                  style={{
+                    height: Math.max(outputH, d.output_tokens > 0 ? 1 : 0),
+                  }}
                 />
               </div>
             );
@@ -122,7 +133,9 @@ function TokenBarChart({ daily }: { daily: AnalyticsDailyEntry[] }) {
           {daily.length > 2 && (
             <span>{formatDate(daily[Math.floor(daily.length / 2)].day)}</span>
           )}
-          <span>{daily.length > 1 ? formatDate(daily[daily.length - 1].day) : ""}</span>
+          <span>
+            {daily.length > 1 ? formatDate(daily[daily.length - 1].day) : ""}
+          </span>
         </div>
       </CardContent>
     </Card>
@@ -156,14 +169,25 @@ function DailyTable({ daily }: { daily: AnalyticsDailyEntry[] }) {
             <tbody>
               {sorted.map((d) => {
                 return (
-                  <tr key={d.day} className="border-b border-border/50 hover:bg-secondary/20 transition-colors">
-                    <td className="py-2 pr-4 font-medium">{formatDate(d.day)}</td>
-                    <td className="text-right py-2 px-4 text-muted-foreground">{d.sessions}</td>
+                  <tr
+                    key={d.day}
+                    className="border-b border-border/50 hover:bg-secondary/20 transition-colors"
+                  >
+                    <td className="py-2 pr-4 font-medium">
+                      {formatDate(d.day)}
+                    </td>
+                    <td className="text-right py-2 px-4 text-muted-foreground">
+                      {d.sessions}
+                    </td>
                     <td className="text-right py-2 px-4">
-                      <span className="text-[#ffe6cb]">{formatTokens(d.input_tokens)}</span>
+                      <span className="text-[#ffe6cb]">
+                        {formatTokens(d.input_tokens)}
+                      </span>
                     </td>
                     <td className="text-right py-2 pl-4">
-                      <span className="text-emerald-400">{formatTokens(d.output_tokens)}</span>
+                      <span className="text-emerald-400">
+                        {formatTokens(d.output_tokens)}
+                      </span>
                     </td>
                   </tr>
                 );
@@ -180,7 +204,8 @@ function ModelTable({ models }: { models: AnalyticsModelEntry[] }) {
   if (models.length === 0) return null;
 
   const sorted = [...models].sort(
-    (a, b) => b.input_tokens + b.output_tokens - (a.input_tokens + a.output_tokens),
+    (a, b) =>
+      b.input_tokens + b.output_tokens - (a.input_tokens + a.output_tokens),
   );
 
   return (
@@ -203,15 +228,24 @@ function ModelTable({ models }: { models: AnalyticsModelEntry[] }) {
             </thead>
             <tbody>
               {sorted.map((m) => (
-                <tr key={m.model} className="border-b border-border/50 hover:bg-secondary/20 transition-colors">
+                <tr
+                  key={m.model}
+                  className="border-b border-border/50 hover:bg-secondary/20 transition-colors"
+                >
                   <td className="py-2 pr-4">
                     <span className="font-mono-ui text-xs">{m.model}</span>
                   </td>
-                  <td className="text-right py-2 px-4 text-muted-foreground">{m.sessions}</td>
+                  <td className="text-right py-2 px-4 text-muted-foreground">
+                    {m.sessions}
+                  </td>
                   <td className="text-right py-2 pl-4">
-                    <span className="text-[#ffe6cb]">{formatTokens(m.input_tokens)}</span>
+                    <span className="text-[#ffe6cb]">
+                      {formatTokens(m.input_tokens)}
+                    </span>
                     {" / "}
-                    <span className="text-emerald-400">{formatTokens(m.output_tokens)}</span>
+                    <span className="text-emerald-400">
+                      {formatTokens(m.output_tokens)}
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -247,7 +281,9 @@ export default function AnalyticsPage() {
     <div className="flex flex-col gap-6">
       {/* Period selector */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground font-medium">Period:</span>
+        <span className="text-sm text-muted-foreground font-medium">
+          Period:
+        </span>
         {PERIODS.map((p) => (
           <Button
             key={p.label}
@@ -282,7 +318,9 @@ export default function AnalyticsPage() {
             <SummaryCard
               icon={Hash}
               label="Total Tokens"
-              value={formatTokens(data.totals.total_input + data.totals.total_output)}
+              value={formatTokens(
+                data.totals.total_input + data.totals.total_output,
+              )}
               sub={`${formatTokens(data.totals.total_input)} in / ${formatTokens(data.totals.total_output)} out`}
             />
             <SummaryCard
@@ -313,8 +351,12 @@ export default function AnalyticsPage() {
           <CardContent className="py-12">
             <div className="flex flex-col items-center text-muted-foreground">
               <BarChart3 className="h-8 w-8 mb-3 opacity-40" />
-              <p className="text-sm font-medium">No usage data for this period</p>
-              <p className="text-xs mt-1 text-muted-foreground/60">Start a session to see analytics here</p>
+              <p className="text-sm font-medium">
+                No usage data for this period
+              </p>
+              <p className="text-xs mt-1 text-muted-foreground/60">
+                Start a session to see analytics here
+              </p>
             </div>
           </CardContent>
         </Card>

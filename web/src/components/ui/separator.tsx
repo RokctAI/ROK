@@ -4,7 +4,9 @@ export function Separator({
   className,
   orientation = "horizontal",
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & { orientation?: "horizontal" | "vertical" }) {
+}: React.HTMLAttributes<HTMLDivElement> & {
+  orientation?: "horizontal" | "vertical";
+}) {
   return (
     <div
       role="separator"
