@@ -14,13 +14,13 @@ def test_top_level_skills_flag_defaults_to_chat(monkeypatch):
     monkeypatch.setattr(
         sys,
         "argv",
-        ["rok", "-s", "rok-dev,github-auth"],
+        ["rok", "-s", "rok-agent-dev,github-auth"],
     )
 
     main_mod.main()
 
     assert captured == {
-        "skills": ["rok-dev,github-auth"],
+        "skills": ["rok-agent-dev,github-auth"],
         "command": None,
     }
 
@@ -88,7 +88,7 @@ def test_continue_worktree_and_skills_flags_work_together(monkeypatch):
     monkeypatch.setattr(
         sys,
         "argv",
-        ["rok", "-c", "-w", "-s", "rok-dev"],
+        ["rok", "-c", "-w", "-s", "rok-agent-dev"],
     )
 
     main_mod.main()
@@ -96,6 +96,6 @@ def test_continue_worktree_and_skills_flags_work_together(monkeypatch):
     assert captured == {
         "continue_last": True,
         "worktree": True,
-        "skills": ["rok-dev"],
+        "skills": ["rok-agent-dev"],
         "command": "chat",
     }

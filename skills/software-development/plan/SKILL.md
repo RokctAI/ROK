@@ -1,9 +1,10 @@
 ---
 name: plan
-description: Plan mode for Rok — inspect context, write a markdown plan into the active workspace's `.rok/plans/` directory, and do not execute the work.
+description: "Plan mode: write markdown plan to .rok/plans/, no exec."
 version: 1.0.0
 author: Rok Agent
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [planning, plan-mode, implementation, workflow]

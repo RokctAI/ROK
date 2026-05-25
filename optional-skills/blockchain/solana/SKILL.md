@@ -4,6 +4,7 @@ description: Query Solana blockchain data with USD pricing — wallet balances, 
 version: 0.2.0
 author: Deniz Alagoz (gizdusum), enhanced by Rok Agent
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [Solana, Blockchain, Crypto, Web3, RPC, DeFi, NFT]

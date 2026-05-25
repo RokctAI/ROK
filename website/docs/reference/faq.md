@@ -18,9 +18,9 @@ Rok Agent works with any OpenAI-compatible API. Supported providers include:
 
 - **[OpenRouter](https://openrouter.ai/)** — access hundreds of models through one API key (recommended for flexibility)
 - **Nous Portal** — Nous Research's own inference endpoint
-- **OpenAI** — GPT-4o, o1, o3, etc.
-- **Anthropic** — Claude models (via OpenRouter or compatible proxy)
-- **Google** — Gemini models (via OpenRouter or compatible proxy)
+- **OpenAI** — GPT-5.4, GPT-5-codex, GPT-4.1, GPT-4o, etc.
+- **Anthropic** — Claude models (direct API, OAuth via `rok login anthropic`, OpenRouter, or any compatible proxy)
+- **Google** — Gemini models (direct API via `gemini` provider, the `google-gemini-cli` OAuth provider, OpenRouter, or compatible proxy)
 - **z.ai / ZhipuAI** — GLM models
 - **Kimi / Moonshot AI** — Kimi models
 - **MiniMax** — global and China endpoints
@@ -35,6 +35,24 @@ Set your provider with `rok model` or by editing `~/.rok/.env`. See the [Environ
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
+
+### I run Rok in WSL2. What's the best way to control my normal Windows Chrome?
+
+Prefer an MCP bridge over `/browser connect`.
+
+Recommended pattern:
+
+- run Rok inside WSL2
+- keep using your normal signed-in Chrome on Windows
+- add `chrome-devtools-mcp` as an MCP server through `cmd.exe` or `powershell.exe`
+- let Rok use the resulting MCP browser tools
+
+This is more reliable than trying to force Rok core browser transport to attach directly across the WSL2/Windows boundary.
+
+See:
+
+- [Use MCP with Rok](../guides/use-mcp-with-rok.md#wsl2-bridge-rok-in-wsl-to-windows-chrome)
+- [Browser Automation](../user-guide/features/browser.md#wsl2--windows-chrome-prefer-mcp-over-browser-connect)
 
 ### Does it work on Android / Termux?
 
@@ -110,7 +128,7 @@ Yes. Import the `AIAgent` class and use Rok programmatically:
 ```python
 from run_agent import AIAgent
 
-agent = AIAgent(model="openrouter/nous/hermes-3-llama-3.1-70b")
+agent = AIAgent(model="anthropic/claude-opus-4.7")
 response = agent.chat("Explain quantum computing briefly")
 ```
 
@@ -160,6 +178,33 @@ brew install python@3.12      # macOS
 
 The installer handles this automatically — if you see this error during manual installation, upgrade Python first.
 
+#### Terminal commands say `node: command not found` (or `nvm`, `pyenv`, `asdf`, …)
+
+**Cause:** Rok builds a per-session environment snapshot by running `bash -l` once at startup. A bash login shell reads `/etc/profile`, `~/.bash_profile`, and `~/.profile`, but **does not source `~/.bashrc`** — so tools that install themselves there (`nvm`, `asdf`, `pyenv`, `cargo`, custom `PATH` exports) stay invisible to the snapshot. This most commonly happens when Rok runs under systemd or in a minimal shell where nothing has pre-loaded the interactive shell profile.
+
+**Solution:** Rok auto-sources `~/.bashrc` by default. If that's not enough — e.g. you're a zsh user whose PATH lives in `~/.zshrc`, or you init `nvm` from a standalone file — list the extra files to source in `~/.rok/config.yaml`:
+
+```yaml
+terminal:
+  shell_init_files:
+    - ~/.zshrc                     # zsh users: pulls zsh-managed PATH into the bash snapshot
+    - ~/.nvm/nvm.sh                # direct nvm init (works regardless of shell)
+    - /etc/profile.d/cargo.sh      # system-wide rc files
+  # When this list is set, the default ~/.bashrc auto-source is NOT added —
+  # include it explicitly if you want both:
+  #   - ~/.bashrc
+  #   - ~/.zshrc
+```
+
+Missing files are skipped silently. Sourcing happens in bash, so files that rely on zsh-only syntax may error — if that's a concern, source just the PATH-setting portion (e.g. nvm's `nvm.sh` directly) rather than the whole rc file.
+
+To disable the auto-source behaviour (strict login-shell semantics only):
+
+```yaml
+terminal:
+  auto_source_bashrc: false
+```
+
 #### `uv: command not found`
 
 **Cause:** The `uv` package manager isn't installed or not in PATH.
@@ -186,6 +231,32 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 ---
 
 ### Provider & Model Issues
+
+#### `/model` only shows one provider / can't switch providers
+
+**Cause:** `/model` (inside a chat session) can only switch between providers you've **already configured**. If you've only set up OpenRouter, that's all `/model` will show.
+
+**Solution:** Exit your session and use `rok model` from your terminal to add new providers:
+
+```bash
+# Exit the Rok chat session first (Ctrl+C or /quit)
+
+# Run the full provider setup wizard
+rok model
+
+# This lets you: add providers, run OAuth, enter API keys, configure endpoints
+```
+
+After adding a new provider via `rok model`, start a new chat session — `/model` will now show all your configured providers.
+
+:::tip Quick reference
+| Want to... | Use |
+|-----------|-----|
+| Add a new provider | `rok model` (from terminal) |
+| Enter/change API keys | `rok model` (from terminal) |
+| Switch model mid-session | `/model <name>` (inside session) |
+| Switch to different configured provider | `/model provider:model` (inside session) |
+:::
 
 #### API key not working
 
@@ -217,7 +288,7 @@ Make sure the key matches the provider. An OpenAI key won't work with OpenRouter
 rok model
 
 # Set a valid model
-rok config set ROK_MODEL openrouter/nous/hermes-3-llama-3.1-70b
+rok config set ROK_MODEL anthropic/claude-opus-4.7
 
 # Or specify per-session
 rok chat --model openrouter/meta-llama/llama-3.1-70b-instruct
@@ -365,8 +436,8 @@ Configure in `~/.rok/config.yaml` under your gateway's settings. See the [Messag
 
 **Solution:**
 ```bash
-# Install messaging dependencies
-pip install "rok[telegram]"   # or [discord], [slack], [whatsapp]
+# Install core messaging gateway dependencies
+pip install "rok-agent[messaging]"  # Telegram, Discord, Slack, and shared gateway deps
 
 # Check for port conflicts
 lsof -i :8080
@@ -486,7 +557,7 @@ rok chat --continue
 **Solution:**
 ```bash
 # Ensure MCP dependencies are installed (already included in standard install)
-cd ~/.rok/rok && uv pip install -e ".[mcp]"
+cd ~/.rok/rok-agent && uv pip install -e ".[mcp]"
 
 # For npm-based servers, ensure Node.js is available
 node --version
@@ -561,19 +632,6 @@ No. Each profile has its own memory store, session database, and skills director
 
 `rok update` pulls the latest code and reinstalls dependencies **once** (not per-profile). It then syncs updated skills to all profiles automatically. You only need to run `rok update` once — it covers every profile on the machine.
 
-### Can I move a profile to a different machine?
-
-Yes. Export the profile to a portable archive and import it on the other machine:
-
-```bash
-# On the source machine
-rok profile export work ./work-backup.tar.gz
-
-# Copy the file to the target machine, then:
-rok profile import ./work-backup.tar.gz work
-```
-
-The imported profile will have all config, memories, sessions, and skills from the export. You may need to update paths or re-authenticate with providers if the new machine has a different setup.
 
 ### How many profiles can I run?
 
@@ -696,24 +754,55 @@ Skills with very long descriptions are truncated to 40 characters in the Telegra
    curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
    ```
 
-2. Copy your entire `~/.rok/` directory **except** the `rok` subdirectory (that's the code repo — the new install has its own):
+2. On the **source machine**, create a full backup:
+   ```bash
+   rok backup
+   ```
+   This creates a zip of your entire `~/.rok/` directory — config, API keys, memories, skills, sessions, and profiles — saved to your home directory as `~/rok-backup-<timestamp>.zip`.
+
+3. Copy the zip to the new machine and import it:
    ```bash
    # On the source machine
-   rsync -av --exclude='rok' ~/.rok/ newmachine:~/.rok/
+   scp ~/rok-backup-<timestamp>.zip newmachine:~/
+
+   # On the new machine
+   rok import ~/rok-backup-<timestamp>.zip
    ```
 
-   Or use profile export/import:
-   ```bash
-   # On source machine
-   rok profile export default ./rok-backup.tar.gz
+4. On the new machine, run `rok setup` to verify API keys and provider config are working.
 
-   # On target machine
-   rok profile import ./rok-backup.tar.gz default
-   ```
+### Moving a single profile to another machine
 
-3. On the new machine, run `rok setup` to verify API keys and provider config are working. Re-authenticate any messaging platforms (especially WhatsApp, which uses QR pairing).
+**Scenario:** You want to move or share one specific profile — not your full installation.
 
-The `~/.rok/` directory contains everything: `config.yaml`, `.env`, `SOUL.md`, `memories/`, `skills/`, `state.db` (sessions), `cron/`, and any custom plugins. The code itself lives in `~/.rok/rok/` and is installed fresh.
+```bash
+# On the source machine
+rok profile export work ./work-backup.tar.gz
+
+# Copy the file to the target machine, then:
+rok profile import ./work-backup.tar.gz work
+```
+
+The imported profile will have all config, memories, sessions, and skills from the export. You may need to update paths or re-authenticate with providers if the new machine has a different setup.
+
+### `rok backup` vs `rok profile export`
+
+| Feature | `rok backup` | `rok profile export` |
+| :--- | :--- | :--- |
+| **Use Case** | **Full machine migration** | **Porting/sharing a specific profile** |
+| **Scope** | Global (entire `~/.rok` directory) | Local (single profile directory) |
+| **Includes** | All profiles, global config, API keys, sessions | Single profile: SOUL.md, memories, sessions, skills |
+| **Credentials** | **Included** (`.env` and `auth.json`) | **Excluded** (stripped for safe sharing) |
+| **Format** | `.zip` | `.tar.gz` |
+
+**Manual fallback (rsync):** If you prefer to copy files directly, exclude the code repo:
+```bash
+rsync -av --exclude='rok-agent' ~/.rok/ newmachine:~/.rok/
+```
+
+:::tip
+`rok backup` produces a consistent snapshot even while Rok is actively running. The restored archive excludes machine-local runtime files like `gateway.pid` and `cron.pid`.
+:::
 
 ### Permission denied when reloading shell after install
 
@@ -755,7 +844,7 @@ rok config show | head -20
 rok model
 
 # Or test with a known-good model
-rok chat -q "hello" --model anthropic/claude-sonnet-4.6
+rok chat -q "hello" --model anthropic/claude-opus-4.7
 ```
 
 If using OpenRouter, make sure your API key has credits. A 400 from OpenRouter often means the model requires a paid plan or the model ID has a typo.
@@ -766,6 +855,6 @@ If using OpenRouter, make sure your API key has credits. A 400 from OpenRouter o
 
 If your issue isn't covered here:
 
-1. **Search existing issues:** [GitHub Issues](https://github.com/RokctAI/rok/issues)
+1. **Search existing issues:** [GitHub Issues](https://github.com/RokctAI/rok-agent/issues)
 2. **Ask the community:** [Nous Research Discord](https://discord.gg/rokctai)
 3. **File a bug report:** Include your OS, Python version (`python3 --version`), Rok version (`rok --version`), and the full error message

@@ -4,6 +4,7 @@ description: Optional vendor skill for Parallel CLI — agent-native web search,
 version: 1.1.0
 author: Rok Agent
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [Research, Web, Search, Deep-Research, Enrichment, CLI]

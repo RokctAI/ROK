@@ -14,6 +14,10 @@ For the full feature reference, see [Scheduled Tasks (Cron)](/docs/user-guide/fe
 Cron jobs run in fresh agent sessions with no memory of your current chat. Prompts must be **completely self-contained** — include everything the agent needs to know.
 :::
 
+:::tip Don't need the LLM? Use no-agent mode.
+For recurring watchdogs where the script already produces the exact message you want to send (memory alerts, disk alerts, CI pings, heartbeats), skip the LLM entirely with [script-only cron jobs](/docs/guides/cron-script-only). Zero tokens, same scheduler. You can ask Rok to set one up for you in chat — the `cronjob` tool knows when to pick `no_agent=True` and writes the script for you.
+:::
+
 ---
 
 ## Pattern 1: Website Change Monitor
@@ -104,14 +108,14 @@ The `0 9 * * 1` is a standard cron expression: 9:00 AM every Monday.
 Monitor a repository for new issues, PRs, or releases.
 
 ```bash
-/cron add "every 6h" "Check the GitHub repository Rokctai/rok for:
+/cron add "every 6h" "Check the GitHub repository Rokctai/rok-agent for:
 - New issues opened in the last 6 hours
 - New PRs opened or merged in the last 6 hours
 - Any new releases
 
 Use the terminal to run gh commands:
-  gh issue list --repo Rokctai/rok --state open --json number,title,author,createdAt --limit 10
-  gh pr list --repo Rokctai/rok --state all --json number,title,author,createdAt,mergedAt --limit 10
+  gh issue list --repo Rokctai/rok-agent --state open --json number,title,author,createdAt --limit 10
+  gh pr list --repo Rokctai/rok-agent --state all --json number,title,author,createdAt,mergedAt --limit 10
 
 Filter to only items from the last 6 hours. If nothing new, respond with [SILENT].
 Otherwise, provide a concise summary of the activity." --name "Repo watcher" --deliver discord

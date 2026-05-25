@@ -261,6 +261,42 @@ class TestGatewayMode:
         ]
         assert len(gw_handlers) == 0
 
+    def test_gateway_log_created_after_cli_init(self, rok_home):
+        """Gateway mode attaches gateway.log even after earlier CLI init."""
+        rok_logging.setup_logging(rok_home=rok_home, mode="cli")
+        rok_logging.setup_logging(rok_home=rok_home, mode="gateway")
+
+        root = logging.getLogger()
+        gw_handlers = [
+            h for h in root.handlers
+            if isinstance(h, RotatingFileHandler)
+            and "gateway.log" in getattr(h, "baseFilename", "")
+        ]
+        assert len(gw_handlers) == 1
+
+        logging.getLogger("gateway.run").info("gateway connected after cli init")
+
+        for h in root.handlers:
+            h.flush()
+
+        gw_log = rok_home / "logs" / "gateway.log"
+        assert gw_log.exists()
+        assert "gateway connected after cli init" in gw_log.read_text()
+
+    def test_gateway_log_created_after_cli_init_without_duplicate_handlers(self, rok_home):
+        """Repeated gateway setup calls do not attach duplicate gateway handlers."""
+        rok_logging.setup_logging(rok_home=rok_home, mode="cli")
+        rok_logging.setup_logging(rok_home=rok_home, mode="gateway")
+        rok_logging.setup_logging(rok_home=rok_home, mode="gateway")
+
+        root = logging.getLogger()
+        gw_handlers = [
+            h for h in root.handlers
+            if isinstance(h, RotatingFileHandler)
+            and "gateway.log" in getattr(h, "baseFilename", "")
+        ]
+        assert len(gw_handlers) == 1
+
     def test_gateway_log_receives_gateway_records(self, rok_home):
         """gateway.log captures records from gateway.* loggers."""
         rok_logging.setup_logging(rok_home=rok_home, mode="gateway")

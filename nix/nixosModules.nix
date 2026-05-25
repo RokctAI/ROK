@@ -1,4 +1,4 @@
-# nix/nixosModules.nix — NixOS module for rok
+# nix/nixosModules.nix — NixOS module for rok-agent
 #
 # Two modes:
 #   container.enable = false (default) → native systemd service
@@ -17,7 +17,7 @@
 # writable tool prefixes for npm i -g, pip install, uv tool install, etc.
 #
 # Usage:
-#   services.rok = {
+#   services.rok-agent = {
 #     enable = true;
 #     settings.model = "anthropic/claude-sonnet-4";
 #     environmentFiles = [ config.sops.secrets."rok/env".path ];
@@ -27,10 +27,14 @@
   flake.nixosModules.default = { config, lib, pkgs, ... }:
 
   let
-    cfg = config.services.rok;
-    rok = inputs.self.packages.${pkgs.system}.default;
+    cfg = config.services.rok-agent;
+    effectivePackage =
+      if cfg.extraPythonPackages == [ ] && cfg.extraDependencyGroups == [ ]
+      then cfg.package
+      else cfg.package.override { inherit (cfg) extraPythonPackages extraDependencyGroups; };
+    rok-agent = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
-    # Deep-merge config type (from 0xrsydn/nix-rok)
+    # Deep-merge config type (from 0xrsydn/nix-rok-agent)
     deepConfigType = lib.types.mkOptionType {
       name = "rok-config-attrs";
       description = "Rok YAML config (attrset), merged deeply via lib.recursiveUpdate.";
@@ -62,7 +66,7 @@
       )
     );
 
-    containerName = "rok";
+    containerName = "rok-agent";
     containerDataDir = "/data";     # stateDir mount point inside container
     containerHomeDir = "/home/rok";
 
@@ -113,19 +117,31 @@
       chown "$ROK_UID:$ROK_GID" "$TARGET_HOME"
       chmod 0750 "$TARGET_HOME"
 
-      # Ensure ROK_HOME is owned by the target user
+      # Ensure ROK_HOME is owned by the target user.
+      # Use find instead of chown -R: chown strips the setgid bit (kernel
+      # behavior), destroying the 2770 permissions the NixOS activation
+      # script sets for group access by hostUsers.  Only touch files with
+      # wrong ownership so correctly-owned dirs keep their permission bits.
       if [ -n "''${ROK_HOME:-}" ] && [ -d "$ROK_HOME" ]; then
-        chown -R "$ROK_UID:$ROK_GID" "$ROK_HOME"
+        find "$ROK_HOME" \! -user "$ROK_UID" -exec chown "$ROK_UID:$ROK_GID" {} +
       fi
 
       # ── Provision apt packages (first boot only, cached in writable layer) ──
       # sudo: agent self-modification
       # nodejs/npm: writable node so npm i -g works (nix store copies are read-only)
-      # curl: needed for uv installer
+      #   Node 22 via NodeSource — Ubuntu 24.04 ships Node 18 which is EOL.
+      # curl: needed for uv installer + NodeSource setup
       if [ ! -f /var/lib/rok-tools-provisioned ] && command -v apt-get >/dev/null 2>&1; then
         echo "First boot: provisioning agent tools..."
         apt-get update -qq
-        apt-get install -y -qq sudo nodejs npm curl
+        apt-get install -y -qq sudo curl ca-certificates gnupg
+        mkdir -p /etc/apt/keyrings
+        curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+          | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" \
+          > /etc/apt/sources.list.d/nodesource.list
+        apt-get update -qq
+        apt-get install -y -qq nodejs
         touch /var/lib/rok-tools-provisioned
       fi
 
@@ -140,15 +156,14 @@
         su -s /bin/sh "$TARGET_USER" -c 'curl -LsSf https://astral.sh/uv/install.sh | sh' || true
       fi
 
-      # Python 3.11 venv — gives the agent a writable Python with pip.
-      # Uses uv to install Python 3.11 (Ubuntu 24.04 ships 3.12).
+      # Python 3.12 venv — gives the agent a writable Python with pip.
       # --seed includes pip/setuptools so bare `pip install` works.
       _UV_BIN="$TARGET_HOME/.local/bin/uv"
       if [ ! -d "$TARGET_HOME/.venv" ] && [ -x "$_UV_BIN" ]; then
         su -s /bin/sh "$TARGET_USER" -c "
           export PATH=\"\$HOME/.local/bin:\$PATH\"
-          uv python install 3.11
-          uv venv --python 3.11 --seed \"\$HOME/.venv\"
+          uv python install 3.12
+          uv venv --python 3.12 --seed \"\$HOME/.venv\"
         " || true
       fi
 
@@ -171,7 +186,7 @@
     # Package and entrypoint use stable symlinks (current-package, current-entrypoint)
     # so they can update without recreation. Env vars go through $ROK_HOME/.env.
     containerIdentity = builtins.hashString "sha256" (builtins.toJSON {
-      schema = 3; # bump when identity inputs change
+      schema = 4; # bump when identity inputs change (4: Node 18→22 via NodeSource)
       image = cfg.container.image;
       extraVolumes = cfg.container.extraVolumes;
       extraOptions = cfg.container.extraOptions;
@@ -187,14 +202,14 @@
       else cfg.workingDirectory;
 
   in {
-    options.services.rok = with lib; {
+    options.services.rok-agent = with lib; {
       enable = mkEnableOption "Rok Agent gateway service";
 
       # ── Package ──────────────────────────────────────────────────────────
       package = mkOption {
         type = types.package;
-        default = rok;
-        description = "The rok package to use.";
+        default = rok-agent;
+        description = "The rok-agent package to use.";
       };
 
       # ── Service identity ─────────────────────────────────────────────────
@@ -446,7 +461,76 @@
       extraPackages = mkOption {
         type = types.listOf types.package;
         default = [ ];
-        description = "Extra packages available on PATH.";
+        description = ''
+          Extra packages available to the agent — terminal commands, skills,
+          cron jobs, and the service process all see them.
+
+          Implemented via the rok user's per-user profile
+          (`/etc/profiles/per-user/${cfg.user}/bin`), which NixOS includes
+          in PATH for login shells.  The packages are also added to the
+          systemd service PATH for direct process access.
+        '';
+      };
+
+      extraPlugins = mkOption {
+        type = types.listOf types.package;
+        default = [ ];
+        description = ''
+          Directory-based plugin packages to symlink into the rok plugins
+          directory. Each package should contain a plugin.yaml and __init__.py
+          at its root. Rok discovers these automatically on startup.
+        '';
+        example = literalExpression ''
+          [
+            (pkgs.fetchFromGitHub {
+              owner = "stephenschoettler";
+              repo = "rok-lcm";
+              name = "rok-lcm";
+              rev = "v0.7.0";
+              hash = "sha256-...";
+            })
+          ]
+        '';
+      };
+
+      extraPythonPackages = mkOption {
+        type = types.listOf types.package;
+        default = [ ];
+        description = ''
+          Python packages to add to PYTHONPATH for entry-point plugin discovery.
+          These are pip-packaged plugins that register via the
+          rok_agent.plugins entry-point group. Each package must be built
+          with the same Python interpreter as rok (python312).
+        '';
+        example = literalExpression ''
+          [
+            (pkgs.python312Packages.buildPythonPackage {
+              pname = "rtk-rok";
+              version = "1.0.0";
+              src = pkgs.fetchFromGitHub {
+                owner = "ogallotti";
+                repo = "rtk-rok";
+                rev = "main";
+                hash = "sha256-...";
+              };
+            })
+          ]
+        '';
+      };
+
+      extraDependencyGroups = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = ''
+          Additional pyproject.toml optional-dependency groups to include in
+          the sealed Python venv. These are resolved by uv alongside core
+          dependencies — no PYTHONPATH patching or collision risk.
+
+          Use this for optional extras already declared in rok-agent's
+          pyproject.toml (e.g. "hindsight", "honcho", "voice").
+          Use extraPythonPackages for external packages not in pyproject.toml.
+        '';
+        example = [ "hindsight" ];
       };
 
       restart = mkOption {
@@ -516,7 +600,7 @@
 
       # ── Merge MCP servers into settings ────────────────────────────────
       (lib.mkIf (cfg.mcpServers != { }) {
-        services.rok.settings.mcp_servers = lib.mapAttrs (_name: srv:
+        services.rok-agent.settings.mcp_servers = lib.mapAttrs (_name: srv:
           # Stdio transport
           lib.optionalAttrs (srv.command != null) { inherit (srv) command args; }
           // lib.optionalAttrs (srv.env != { }) { inherit (srv) env; }
@@ -563,7 +647,7 @@
       # so interactive shells share state (sessions, skills, cron) with the
       # gateway service instead of creating a separate ~/.rok/.
       (lib.mkIf cfg.addToSystemPackages {
-        environment.systemPackages = [ cfg.package ];
+        environment.systemPackages = [ effectivePackage ];
         environment.variables.ROK_HOME = "${cfg.stateDir}/.rok";
       })
 
@@ -574,11 +658,42 @@
         });
       })
 
+      # ── Assertions ─────────────────────────────────────────────────────
+      {
+        assertions = let
+          names = map lib.getName cfg.extraPlugins;
+        in [{
+          assertion = (lib.length names) == (lib.length (lib.unique names));
+          message = "services.rok-agent.extraPlugins: duplicate plugin names detected: ${toString names}. If using fetchFromGitHub, set name = \"plugin-name\" to disambiguate.";
+        }];
+      }
+
+      # ── Assertions ─────────────────────────────────────────────────────
+      {
+        assertions = let
+          names = map lib.getName cfg.extraPlugins;
+        in [{
+          assertion = (lib.length names) == (lib.length (lib.unique names));
+          message = "services.rok-agent.extraPlugins: duplicate plugin names detected: ${toString names}. If using fetchFromGitHub, set name = \"plugin-name\" to disambiguate.";
+        }];
+      }
+
       # ── Warnings ──────────────────────────────────────────────────────
+      # ── Per-user profile for extraPackages ───────────────────────────
+      # Wire extraPackages into the rok user's per-user profile so the
+      # login-shell snapshot (which rebuilds PATH from NixOS profiles) sees
+      # them.  The systemd service PATH also includes them for direct access.
+      (lib.mkIf (cfg.extraPackages != []) {
+        # listOf options are merged by the NixOS module system — this appends to
+        # any packages the operator assigned to this user externally (e.g. when
+        # createUser = false and the user definition lives elsewhere in the config).
+        users.users.${cfg.user}.packages = cfg.extraPackages;
+      })
+
       (lib.mkIf (cfg.container.enable && !cfg.addToSystemPackages && cfg.container.hostUsers != []) {
         warnings = [
           ''
-            services.rok: container.enable is true and container.hostUsers
+            services.rok-agent: container.enable is true and container.hostUsers
             is set, but addToSystemPackages is false. Without a host-installed rok
             binary, container routing will not work for interactive users.
             Set addToSystemPackages = true or ensure rok is on PATH.
@@ -595,6 +710,7 @@
           "d ${cfg.stateDir}/.rok/sessions 2770 ${cfg.user} ${cfg.group} - -"
           "d ${cfg.stateDir}/.rok/logs   2770 ${cfg.user} ${cfg.group} - -"
           "d ${cfg.stateDir}/.rok/memories 2770 ${cfg.user} ${cfg.group} - -"
+          "d ${cfg.stateDir}/.rok/plugins 2770 ${cfg.user} ${cfg.group} - -"
           "d ${cfg.stateDir}/home           0750 ${cfg.user} ${cfg.group} - -"
           "d ${cfg.workingDirectory}         2770 ${cfg.user} ${cfg.group} - -"
         ];
@@ -602,7 +718,7 @@
 
       # ── Activation: link config + auth + documents ────────────────────
       {
-        system.activationScripts."rok-setup" = lib.stringAfter ([ "users" ] ++ lib.optional (config.system.activationScripts ? setupSecrets) "setupSecrets") ''
+        system.activationScripts."rok-agent-setup" = lib.stringAfter ([ "users" ] ++ lib.optional (config.system.activationScripts ? setupSecrets) "setupSecrets") ''
           # Ensure directories exist (activation runs before tmpfiles)
           mkdir -p ${cfg.stateDir}/.rok
           mkdir -p ${cfg.stateDir}/home
@@ -616,7 +732,7 @@
           find ${cfg.stateDir}/.rok -maxdepth 1 \
             \( -name "*.db" -o -name "*.db-wal" -o -name "*.db-shm" -o -name "SOUL.md" \) \
             -exec chmod g+rw {} + 2>/dev/null || true
-          for _subdir in cron sessions logs memories; do
+          for _subdir in cron sessions logs memories plugins; do
             mkdir -p "${cfg.stateDir}/.rok/$_subdir"
             chown ${cfg.user}:${cfg.group} "${cfg.stateDir}/.rok/$_subdir"
             chmod 2770 "${cfg.stateDir}/.rok/$_subdir"
@@ -645,12 +761,12 @@
           # is disabled so the host CLI falls back to native execution.
           ${if cfg.container.enable then ''
             cat > ${cfg.stateDir}/.rok/.container-mode <<'ROK_CONTAINER_MODE_EOF'
-# Written by NixOS activation script. Do not edit manually.
-backend=${cfg.container.backend}
-container_name=${containerName}
-exec_user=${cfg.user}
-rok_bin=${containerDataDir}/current-package/bin/rok
-ROK_CONTAINER_MODE_EOF
+    # Written by NixOS activation script. Do not edit manually.
+    backend=${cfg.container.backend}
+    container_name=${containerName}
+    exec_user=${cfg.user}
+    rok_bin=${containerDataDir}/current-package/bin/rok
+    ROK_CONTAINER_MODE_EOF
             chown ${cfg.user}:${cfg.group} ${cfg.stateDir}/.rok/.container-mode
             chmod 0644 ${cfg.stateDir}/.rok/.container-mode
           '' else ''
@@ -664,7 +780,7 @@ ROK_CONTAINER_MODE_EOF
               in ''
                 if [ -L "${symlinkPath}" ] && [ "$(readlink "${symlinkPath}")" = "${cfg.stateDir}/.rok" ]; then
                   rm -f "${symlinkPath}"
-                  echo "rok: removed symlink ${symlinkPath}"
+                  echo "rok-agent: removed symlink ${symlinkPath}"
                 fi
               '') cfg.container.hostUsers)}
           ''}
@@ -684,7 +800,7 @@ ROK_CONTAINER_MODE_EOF
                   # Real directory — back it up, then create symlink.
                   # (ln -sfn cannot atomically replace a directory.)
                   _backup="${symlinkPath}.bak.$(date +%s)"
-                  echo "rok: backing up existing ${symlinkPath} to $_backup"
+                  echo "rok-agent: backing up existing ${symlinkPath} to $_backup"
                   mv "${symlinkPath}" "$_backup"
                 fi
                 # For everything else (existing symlink, doesn't exist, etc.)
@@ -711,8 +827,8 @@ ROK_CONTAINER_MODE_EOF
             ENV_FILE="${cfg.stateDir}/.rok/.env"
             install -o ${cfg.user} -g ${cfg.group} -m 0640 /dev/null "$ENV_FILE"
             cat > "$ENV_FILE" <<'ROK_NIX_ENV_EOF'
-${envFileContent}
-ROK_NIX_ENV_EOF
+    ${envFileContent}
+    ROK_NIX_ENV_EOF
             ${lib.concatStringsSep "\n" (map (f: ''
               if [ -f "${f}" ]; then
                 echo "" >> "$ENV_FILE"
@@ -725,6 +841,22 @@ ROK_NIX_ENV_EOF
           ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: _value: ''
             install -o ${cfg.user} -g ${cfg.group} -m 0640 ${documentDerivation}/${name} ${cfg.workingDirectory}/${name}
           '') cfg.documents)}
+
+        # ── Declarative plugins ─────────────────────────────────────────
+        # Remove stale managed symlinks (plugins removed from config)
+        find ${cfg.stateDir}/.rok/plugins -maxdepth 1 -type l -name 'nix-managed-*' -delete 2>/dev/null || true
+
+        ${lib.concatStringsSep "\n" (map (plugin:
+          let
+            name = lib.getName plugin;
+          in ''
+            if [ ! -f "${plugin}/plugin.yaml" ]; then
+              echo "ERROR: extraPlugins entry '${plugin}' has no plugin.yaml" >&2
+              exit 1
+            fi
+            ln -sfn ${plugin} ${cfg.stateDir}/.rok/plugins/nix-managed-${name}
+            chown -h ${cfg.user}:${cfg.group} ${cfg.stateDir}/.rok/plugins/nix-managed-${name}
+          '') cfg.extraPlugins)}
         '';
       }
 
@@ -732,7 +864,7 @@ ROK_NIX_ENV_EOF
       # MODE A: Native systemd service (default)
       # ══════════════════════════════════════════════════════════════════
       (lib.mkIf (!cfg.container.enable) {
-        systemd.services.rok = {
+        systemd.services.rok-agent = {
           description = "Rok Agent Gateway";
           wantedBy = [ "multi-user.target" ];
           after = [ "network-online.target" ];
@@ -755,7 +887,7 @@ ROK_NIX_ENV_EOF
             # reads them at Python startup — no systemd EnvironmentFile needed.
 
             ExecStart = lib.concatStringsSep " " ([
-              "${cfg.package}/bin/rok"
+              "${effectivePackage}/bin/rok"
               "gateway"
             ] ++ cfg.extraArgs);
 
@@ -770,12 +902,15 @@ ROK_NIX_ENV_EOF
             NoNewPrivileges = true;
             ProtectSystem = "strict";
             ProtectHome = false;
-            ReadWritePaths = [ cfg.stateDir ];
+            ReadWritePaths = [
+              cfg.stateDir
+              cfg.workingDirectory
+            ];
             PrivateTmp = true;
           };
 
           path = [
-            cfg.package
+            effectivePackage
             pkgs.bash
             pkgs.coreutils
             pkgs.git
@@ -790,7 +925,7 @@ ROK_NIX_ENV_EOF
         # Ensure the container runtime is available
         virtualisation.docker.enable = lib.mkDefault (cfg.container.backend == "docker");
 
-        systemd.services.rok = {
+        systemd.services.rok-agent = {
           description = "Rok Agent Gateway (container)";
           wantedBy = [ "multi-user.target" ];
           after = [ "network-online.target" ]
@@ -800,11 +935,11 @@ ROK_NIX_ENV_EOF
 
           preStart = ''
             # Stable symlinks — container references these, not store paths directly
-            ln -sfn ${cfg.package} ${cfg.stateDir}/current-package
+            ln -sfn ${effectivePackage} ${cfg.stateDir}/current-package
             ln -sfn ${containerEntrypoint} ${cfg.stateDir}/current-entrypoint
 
             # GC roots so nix-collect-garbage doesn't remove store paths in use
-            ${pkgs.nix}/bin/nix-store --add-root ${cfg.stateDir}/.gc-root --indirect -r ${cfg.package} 2>/dev/null || true
+            ${pkgs.nix}/bin/nix-store --add-root ${cfg.stateDir}/.gc-root --indirect -r ${effectivePackage} 2>/dev/null || true
             ${pkgs.nix}/bin/nix-store --add-root ${cfg.stateDir}/.gc-root-entrypoint --indirect -r ${containerEntrypoint} 2>/dev/null || true
 
             # Check if container needs (re)creation

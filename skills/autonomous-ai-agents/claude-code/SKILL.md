@@ -1,13 +1,14 @@
 ---
 name: claude-code
-description: Delegate coding tasks to Claude Code (Anthropic's CLI agent). Use for building features, refactoring, PR reviews, and iterative coding. Requires the claude CLI installed.
+description: "Delegate coding to Claude Code CLI (features, PRs)."
 version: 2.2.0
 author: Rok Agent + Teknium
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [Coding-Agent, Claude, Anthropic, Code-Review, Refactoring, PTY, Automation]
-    related_skills: [codex, rok, opencode]
+    related_skills: [codex, rok-agent, opencode]
 ---
 
 # Claude Code — Rok Orchestration Guide

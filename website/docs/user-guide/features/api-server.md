@@ -1,12 +1,12 @@
 ---
 sidebar_position: 14
 title: "API Server"
-description: "Expose rok as an OpenAI-compatible API for any frontend"
+description: "Expose rok-agent as an OpenAI-compatible API for any frontend"
 ---
 
 # API Server
 
-The API server exposes rok as an OpenAI-compatible HTTP endpoint. Any frontend that speaks the OpenAI format — Open WebUI, LobeChat, LibreChat, NextChat, ChatBox, and hundreds more — can connect to rok and use it as a backend.
+The API server exposes rok-agent as an OpenAI-compatible HTTP endpoint. Any frontend that speaks the OpenAI format — Open WebUI, LobeChat, LibreChat, NextChat, ChatBox, and hundreds more — can connect to rok-agent and use it as a backend.
 
 Your agent handles requests with its full toolset (terminal, file operations, web search, memory, skills) and returns the final response. When streaming, tool progress indicators appear inline so frontends can show what the agent is doing.
 
@@ -44,7 +44,7 @@ Point any OpenAI-compatible client at `http://localhost:8642/v1`:
 curl http://localhost:8642/v1/chat/completions \
   -H "Authorization: Bearer change-me-local-dev" \
   -H "Content-Type: application/json" \
-  -d '{"model": "rok", "messages": [{"role": "user", "content": "Hello!"}]}'
+  -d '{"model": "rok-agent", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
 
 Or connect Open WebUI, LobeChat, or any other frontend — see the [Open WebUI integration guide](/docs/user-guide/messaging/open-webui) for step-by-step instructions.
@@ -58,7 +58,7 @@ Standard OpenAI Chat Completions format. Stateless — the full conversation is 
 **Request:**
 ```json
 {
-  "model": "rok",
+  "model": "rok-agent",
   "messages": [
     {"role": "system", "content": "You are a Python expert."},
     {"role": "user", "content": "Write a fibonacci function"}
@@ -73,7 +73,7 @@ Standard OpenAI Chat Completions format. Stateless — the full conversation is 
   "id": "chatcmpl-abc123",
   "object": "chat.completion",
   "created": 1710000000,
-  "model": "rok",
+  "model": "rok-agent",
   "choices": [{
     "index": 0,
     "message": {"role": "assistant", "content": "Here's a fibonacci function..."},
@@ -83,9 +83,30 @@ Standard OpenAI Chat Completions format. Stateless — the full conversation is 
 }
 ```
 
-**Streaming** (`"stream": true`): Returns Server-Sent Events (SSE) with token-by-token response chunks. When streaming is enabled in config, tokens are emitted live as the LLM generates them. When disabled, the full response is sent as a single SSE chunk.
+**Inline image input:** user messages may send `content` as an array of `text` and `image_url` parts. Both remote `http(s)` URLs and `data:image/...` URLs are supported:
 
-**Tool progress in streams**: When the agent calls tools during a streaming request, brief progress indicators are injected into the content stream as the tools start executing (e.g. `` `💻 pwd` ``, `` `🔍 Python docs` ``). These appear as inline markdown before the agent's response text, giving frontends like Open WebUI real-time visibility into tool execution.
+```json
+{
+  "model": "rok-agent",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "What is in this image?"},
+        {"type": "image_url", "image_url": {"url": "https://example.com/cat.png", "detail": "high"}}
+      ]
+    }
+  ]
+}
+```
+
+Uploaded files (`file` / `input_file` / `file_id`) and non-image `data:` URLs return `400 unsupported_content_type`.
+
+**Streaming** (`"stream": true`): Returns Server-Sent Events (SSE) with token-by-token response chunks. For **Chat Completions**, the stream uses standard `chat.completion.chunk` events plus Rok' custom `rok.tool.progress` event for tool-start UX. For **Responses**, the stream uses OpenAI Responses event types such as `response.created`, `response.output_text.delta`, `response.output_item.added`, `response.output_item.done`, and `response.completed`.
+
+**Tool progress in streams**:
+- **Chat Completions**: Rok emits `event: rok.tool.progress` for tool-start visibility without polluting persisted assistant text.
+- **Responses**: Rok emits spec-native `function_call` and `function_call_output` output items during the SSE stream, so clients can render structured tool UI in real time.
 
 ### POST /v1/responses
 
@@ -94,7 +115,7 @@ OpenAI Responses API format. Supports server-side conversation state via `previo
 **Request:**
 ```json
 {
-  "model": "rok",
+  "model": "rok-agent",
   "input": "What files are in my project?",
   "instructions": "You are a helpful coding assistant.",
   "store": true
@@ -107,7 +128,7 @@ OpenAI Responses API format. Supports server-side conversation state via `previo
   "id": "resp_abc123",
   "object": "response",
   "status": "completed",
-  "model": "rok",
+  "model": "rok-agent",
   "output": [
     {"type": "function_call", "name": "terminal", "arguments": "{\"command\": \"ls\"}", "call_id": "call_1"},
     {"type": "function_call_output", "call_id": "call_1", "output": "README.md src/ tests/"},
@@ -116,6 +137,25 @@ OpenAI Responses API format. Supports server-side conversation state via `previo
   "usage": {"input_tokens": 50, "output_tokens": 200, "total_tokens": 250}
 }
 ```
+
+**Inline image input:** `input[].content` can contain `input_text` and `input_image` parts. Both remote URLs and `data:image/...` URLs are supported:
+
+```json
+{
+  "model": "rok-agent",
+  "input": [
+    {
+      "role": "user",
+      "content": [
+        {"type": "input_text", "text": "Describe this screenshot."},
+        {"type": "input_image", "image_url": "data:image/png;base64,iVBORw0K..."}
+      ]
+    }
+  ]
+}
+```
+
+Uploaded files (`input_file` / `file_id`) and non-image `data:` URLs return `400 unsupported_content_type`.
 
 #### Multi-turn with previous_response_id
 
@@ -128,7 +168,7 @@ Chain responses to maintain full context (including tool calls) across turns:
 }
 ```
 
-The server reconstructs the full conversation from the stored response chain — all previous tool calls and results are preserved.
+The server reconstructs the full conversation from the stored response chain — all previous tool calls and results are preserved. Chained requests also share the same session, so multi-turn conversations appear as a single entry in the dashboard and session history.
 
 #### Named conversations
 
@@ -152,15 +192,121 @@ Delete a stored response.
 
 ### GET /v1/models
 
-Lists the agent as an available model. The advertised model name defaults to the [profile](/docs/user-guide/features/profiles) name (or `rok` for the default profile). Required by most frontends for model discovery.
+Lists the agent as an available model. The advertised model name defaults to the [profile](/docs/user-guide/profiles) name (or `rok-agent` for the default profile). Required by most frontends for model discovery.
+
+### GET /v1/capabilities
+
+Returns a machine-readable description of the API server's stable surface for external UIs, orchestrators, and plugin bridges.
+
+```json
+{
+  "object": "rok.api_server.capabilities",
+  "platform": "rok-agent",
+  "model": "rok-agent",
+  "auth": {"type": "bearer", "required": true},
+  "features": {
+    "chat_completions": true,
+    "responses_api": true,
+    "run_submission": true,
+    "run_status": true,
+    "run_events_sse": true,
+    "run_stop": true
+  }
+}
+```
+
+Use this endpoint when integrating dashboards, browser UIs, or control planes so they can discover whether the running Rok version supports runs, streaming, cancellation, and session continuity without depending on private Python internals.
 
 ### GET /health
 
 Health check. Returns `{"status": "ok"}`. Also available at **GET /v1/health** for OpenAI-compatible clients that expect the `/v1/` prefix.
 
+### GET /health/detailed
+
+Extended health check that also reports active sessions, running agents, and resource usage. Useful for monitoring/observability tooling.
+
+## Runs API (streaming-friendly alternative)
+
+In addition to `/v1/chat/completions` and `/v1/responses`, the server exposes a **runs** API for long-form sessions where the client wants to subscribe to progress events instead of managing streaming themselves.
+
+### POST /v1/runs
+
+Create a new agent run. Returns a `run_id` that can be used to subscribe to progress events.
+
+```json
+{
+  "run_id": "run_abc123",
+  "status": "started"
+}
+```
+
+Runs accept a simple `input` string and optional `session_id`, `instructions`, `conversation_history`, or `previous_response_id`. When `session_id` is provided, Rok surfaces it in the run status so external UIs can correlate runs with their own conversation IDs.
+
+### GET /v1/runs/\{run_id\}
+
+Poll the current run state. This is useful for dashboards that need status without holding an SSE connection open, or for UIs that reconnect after navigation.
+
+```json
+{
+  "object": "rok.run",
+  "run_id": "run_abc123",
+  "status": "completed",
+  "session_id": "space-session",
+  "model": "rok-agent",
+  "output": "Done.",
+  "usage": {"input_tokens": 50, "output_tokens": 200, "total_tokens": 250}
+}
+```
+
+Statuses are retained briefly after terminal states (`completed`, `failed`, or `cancelled`) for polling and UI reconciliation.
+
+### GET /v1/runs/\{run_id\}/events
+
+Server-Sent Events stream of the run's tool-call progress, token deltas, and lifecycle events. Designed for dashboards and thick clients that want to attach/detach without losing state.
+
+### POST /v1/runs/\{run_id\}/stop
+
+Interrupt a running agent turn. The endpoint returns immediately with `{"status": "stopping"}` while Rok asks the active agent to stop at the next safe interruption point.
+
+## Jobs API (background scheduled work)
+
+The server exposes a lightweight jobs CRUD surface for managing scheduled / background agent runs from a remote client. All endpoints are gated behind the same bearer auth.
+
+### GET /api/jobs
+
+List all scheduled jobs.
+
+### POST /api/jobs
+
+Create a new scheduled job. Body accepts the same shape as `rok cron` — prompt, schedule, skills, provider override, delivery target.
+
+### GET /api/jobs/\{job_id\}
+
+Fetch a single job's definition and last-run state.
+
+### PATCH /api/jobs/\{job_id\}
+
+Update fields on an existing job (prompt, schedule, etc.). Partial updates are merged.
+
+### DELETE /api/jobs/\{job_id\}
+
+Remove a job. Also cancels any in-flight run.
+
+### POST /api/jobs/\{job_id\}/pause
+
+Pause a job without deleting it. Next-scheduled-run timestamps are suspended until resumed.
+
+### POST /api/jobs/\{job_id\}/resume
+
+Resume a previously paused job.
+
+### POST /api/jobs/\{job_id\}/run
+
+Trigger the job to run immediately, out of schedule.
+
 ## System Prompt Handling
 
-When a frontend sends a `system` message (Chat Completions) or `instructions` field (Responses API), rok **layers it on top** of its core system prompt. Your agent keeps all its tools, memory, and skills — the frontend's system prompt adds extra instructions.
+When a frontend sends a `system` message (Chat Completions) or `instructions` field (Responses API), rok-agent **layers it on top** of its core system prompt. Your agent keeps all its tools, memory, and skills — the frontend's system prompt adds extra instructions.
 
 This means you can customize behavior per-frontend without losing capabilities:
 - Open WebUI system prompt: "You are a Python expert. Always include type hints."
@@ -177,7 +323,7 @@ Authorization: Bearer ***
 Configure the key via `API_SERVER_KEY` env var. If you need a browser to call Rok directly, also set `API_SERVER_CORS_ORIGINS` to an explicit allowlist.
 
 :::warning Security
-The API server gives full access to rok's toolset, **including terminal commands**. When binding to a non-loopback address like `0.0.0.0`, `API_SERVER_KEY` is **required**. Also keep `API_SERVER_CORS_ORIGINS` narrow to control browser access.
+The API server gives full access to rok-agent's toolset, **including terminal commands**. When binding to a non-loopback address like `0.0.0.0`, `API_SERVER_KEY` is **required**. Also keep `API_SERVER_CORS_ORIGINS` narrow to control browser access.
 
 The default bind address (`127.0.0.1`) is for local-only use. Browser access is disabled by default; enable it only for explicit trusted origins.
 :::
@@ -193,7 +339,7 @@ The default bind address (`127.0.0.1`) is for local-only use. Browser access is 
 | `API_SERVER_HOST` | `127.0.0.1` | Bind address (localhost only by default) |
 | `API_SERVER_KEY` | _(none)_ | Bearer token for auth |
 | `API_SERVER_CORS_ORIGINS` | _(none)_ | Comma-separated allowed browser origins |
-| `API_SERVER_MODEL_NAME` | _(profile name)_ | Model name on `/v1/models`. Defaults to profile name, or `rok` for default profile. |
+| `API_SERVER_MODEL_NAME` | _(profile name)_ | Model name on `/v1/models`. Defaults to profile name, or `rok-agent` for default profile. |
 
 ### config.yaml
 
@@ -245,21 +391,26 @@ Any frontend that supports the OpenAI API format works. Tested/documented integr
 
 ## Multi-User Setup with Profiles
 
-To give multiple users their own isolated Rok instance (separate config, memory, skills), use [profiles](/docs/user-guide/features/profiles):
+To give multiple users their own isolated Rok instance (separate config, memory, skills), use [profiles](/docs/user-guide/profiles):
 
 ```bash
 # Create a profile per user
 rok profile create alice
 rok profile create bob
 
-# Configure each profile's API server on a different port
-rok -p alice config set API_SERVER_ENABLED true
-rok -p alice config set API_SERVER_PORT 8643
-rok -p alice config set API_SERVER_KEY alice-secret
+# Configure each profile's API server on a different port. API_SERVER_* are env
+# vars (not config.yaml keys), so write them to each profile's .env:
+cat >> ~/.rok/profiles/alice/.env <<EOF
+API_SERVER_ENABLED=true
+API_SERVER_PORT=8643
+API_SERVER_KEY=alice-secret
+EOF
 
-rok -p bob config set API_SERVER_ENABLED true
-rok -p bob config set API_SERVER_PORT 8644
-rok -p bob config set API_SERVER_KEY bob-secret
+cat >> ~/.rok/profiles/bob/.env <<EOF
+API_SERVER_ENABLED=true
+API_SERVER_PORT=8644
+API_SERVER_KEY=bob-secret
+EOF
 
 # Start each profile's gateway
 rok -p alice gateway &
@@ -276,5 +427,11 @@ In Open WebUI, add each as a separate connection. The model dropdown shows `alic
 ## Limitations
 
 - **Response storage** — stored responses (for `previous_response_id`) are persisted in SQLite and survive gateway restarts. Max 100 stored responses (LRU eviction).
-- **No file upload** — vision/document analysis via uploaded files is not yet supported through the API.
+- **No file upload** — inline images are supported on both `/v1/chat/completions` and `/v1/responses`, but uploaded files (`file`, `input_file`, `file_id`) and non-image document inputs are not supported through the API.
 - **Model field is cosmetic** — the `model` field in requests is accepted but the actual LLM model used is configured server-side in config.yaml.
+
+## Proxy Mode
+
+The API server also serves as the backend for **gateway proxy mode**. When another Rok gateway instance is configured with `GATEWAY_PROXY_URL` pointing at this API server, it forwards all messages here instead of running its own agent. This enables split deployments — for example, a Docker container handling Matrix E2EE that relays to a host-side agent.
+
+See [Matrix Proxy Mode](/docs/user-guide/messaging/matrix#proxy-mode-e2ee-on-macos) for the full setup guide.

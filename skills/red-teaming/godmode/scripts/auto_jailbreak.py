@@ -7,7 +7,7 @@ finds what works, and locks it in by writing config.yaml + prefill.json.
 
 Usage in execute_code:
     exec(open(os.path.expanduser(
-        "~/.rok/skills/red-teaming/godmode/scripts/auto_jailbreak.py"
+        os.path.join(os.environ.get("ROK_HOME", os.path.expanduser("~/.rok")), "skills/red-teaming/godmode/scripts/auto_jailbreak.py")
     )).read())
     
     result = auto_jailbreak()  # Uses current model from config

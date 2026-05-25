@@ -15,19 +15,19 @@ Rok isn't just a CLI tool. You can import `AIAgent` directly and use it programm
 Install Rok directly from the repository:
 
 ```bash
-pip install git+https://github.com/RokctAI/rok.git
+pip install git+https://github.com/RokctAI/rok-agent.git
 ```
 
 Or with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-uv pip install git+https://github.com/RokctAI/rok.git
+uv pip install git+https://github.com/RokctAI/rok-agent.git
 ```
 
 You can also pin it in your `requirements.txt`:
 
 ```text
-rok @ git+https://github.com/RokctAI/rok.git
+rok-agent @ git+https://github.com/RokctAI/rok-agent.git
 ```
 
 :::tip
@@ -81,7 +81,8 @@ print(f"Messages exchanged: {len(result['messages'])}")
 The returned dictionary contains:
 - **`final_response`** — The agent's final text reply
 - **`messages`** — The complete message history (system, user, assistant, tool calls)
-- **`task_id`** — The task identifier used for VM isolation
+
+(The `task_id` you pass in is stored on the agent instance for VM isolation but isn't echoed back in the return dict.)
 
 You can also pass a custom system message that overrides the ephemeral system prompt for that call:
 

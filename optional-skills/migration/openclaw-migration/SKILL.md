@@ -4,10 +4,11 @@ description: Migrate a user's OpenClaw customization footprint into Rok Agent. I
 version: 1.0.0
 author: Rok Agent (Nous Research)
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [Migration, OpenClaw, Rok, Memory, Persona, Import]
-    related_skills: [rok]
+    related_skills: [rok-agent]
 ---
 
 # OpenClaw -> Rok Migration

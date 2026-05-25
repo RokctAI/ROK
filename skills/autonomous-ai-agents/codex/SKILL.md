@@ -1,25 +1,42 @@
 ---
 name: codex
-description: Delegate coding tasks to OpenAI Codex CLI agent. Use for building features, refactoring, PR reviews, and batch issue fixing. Requires the codex CLI and a git repository.
+description: "Delegate coding to OpenAI Codex CLI (features, PRs)."
 version: 1.0.0
 author: Rok Agent
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [Coding-Agent, Codex, OpenAI, Code-Review, Refactoring]
-    related_skills: [claude-code, rok]
+    related_skills: [claude-code, rok-agent]
 ---
 
 # Codex CLI
 
 Delegate coding tasks to [Codex](https://github.com/openai/codex) via the Rok terminal. Codex is OpenAI's autonomous coding agent CLI.
 
+## When to use
+
+- Building features
+- Refactoring
+- PR reviews
+- Batch issue fixing
+
+Requires the codex CLI and a git repository.
+
 ## Prerequisites
 
 - Codex installed: `npm install -g @openai/codex`
-- OpenAI API key configured
+- OpenAI auth configured: either `OPENAI_API_KEY` or Codex OAuth credentials
+  from the Codex CLI login flow
 - **Must run inside a git repository** — Codex refuses to run outside one
 - Use `pty=true` in terminal calls — Codex is an interactive terminal app
+
+For Rok itself, `model.provider: openai-codex` uses Rok-managed Codex
+OAuth from `~/.rok/auth.json` after `rok auth add openai-codex`. For the
+standalone Codex CLI, a valid CLI OAuth session may live under
+`~/.codex/auth.json`; do not treat a missing `OPENAI_API_KEY` alone as proof
+that Codex auth is missing.
 
 ## One-Shot Tasks
 

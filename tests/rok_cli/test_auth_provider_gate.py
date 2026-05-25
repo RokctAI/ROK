@@ -18,6 +18,13 @@ def _write_auth_store(tmp_path, payload: dict) -> None:
     (rok_home / "auth.json").write_text(json.dumps(payload, indent=2))
 
 
+@pytest.fixture(autouse=True)
+def _clean_anthropic_env(monkeypatch):
+    """Strip Anthropic env vars so CI secrets don't leak into tests."""
+    for key in ("ANTHROPIC_API_KEY", "ANTHROPIC_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN"):
+        monkeypatch.delenv(key, raising=False)
+
+
 def test_returns_false_when_no_config(tmp_path, monkeypatch):
     monkeypatch.setenv("ROK_HOME", str(tmp_path / "rok"))
     (tmp_path / "rok").mkdir(parents=True, exist_ok=True)

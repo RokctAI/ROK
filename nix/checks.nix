@@ -4,12 +4,10 @@
 # transitive deps like onnxruntime that lack compatible wheels on
 # aarch64-darwin. The package and devShell still work on macOS.
 { inputs, ... }: {
-  perSystem = { pkgs, system, lib, ... }:
+  perSystem = { pkgs, lib, self', ... }:
     let
-      rok = inputs.self.packages.${system}.default;
-      rokVenv = pkgs.callPackage ./python.nix {
-        inherit (inputs) uv2nix pyproject-nix pyproject-build-systems;
-      };
+      rok-agent = self'.packages.default;
+      rokVenv = rok-agent.rokVenv;
 
       configMergeScript = pkgs.callPackage ./configMergeScript.nix { };
 
@@ -37,17 +35,40 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
     in {
       packages.configKeys = configKeys;
 
-      checks = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+      checks = {
+        # Cross-platform evaluation — catches "not supported for interpreter"
+        # errors (e.g. sphinx dropping python311) without needing a darwin builder.
+        # Evaluation is pure and instant; it doesn't build anything.
+        cross-eval = let
+          targetSystems = builtins.filter
+            (s: inputs.self.packages ? ${s})
+            [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+          tryEvalPkg = sys:
+            let pkg = inputs.self.packages.${sys}.default;
+            in builtins.tryEval (builtins.seq pkg.drvPath true);
+          results = map (sys: { inherit sys; result = tryEvalPkg sys; }) targetSystems;
+          failures = builtins.filter (r: !r.result.success) results;
+          failMsg = lib.concatMapStringsSep "\n" (r: "  - ${r.sys}") failures;
+        in pkgs.runCommand "rok-cross-eval" { } (
+          if failures != [] then
+            throw "Package fails to evaluate on:\n${failMsg}"
+          else ''
+            echo "PASS: package evaluates on all ${toString (builtins.length targetSystems)} platforms"
+            mkdir -p $out
+            echo "ok" > $out/result
+          ''
+        );
+      } // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         # Verify binaries exist and are executable
         package-contents = pkgs.runCommand "rok-package-contents" { } ''
           set -e
           echo "=== Checking binaries ==="
-          test -x ${rok}/bin/rok || (echo "FAIL: rok binary missing"; exit 1)
-          test -x ${rok}/bin/rok || (echo "FAIL: rok binary missing"; exit 1)
+          test -x ${rok-agent}/bin/rok || (echo "FAIL: rok binary missing"; exit 1)
+          test -x ${rok-agent}/bin/rok-agent || (echo "FAIL: rok-agent binary missing"; exit 1)
           echo "PASS: All binaries present"
 
           echo "=== Checking version ==="
-          ${rok}/bin/rok version 2>&1 | grep -qi "rok" || (echo "FAIL: version check"; exit 1)
+          ${rok-agent}/bin/rok version 2>&1 | grep -qi "rok" || (echo "FAIL: version check"; exit 1)
           echo "PASS: Version check"
 
           echo "=== All checks passed ==="
@@ -59,8 +80,8 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         entry-points-sync = pkgs.runCommand "rok-entry-points-sync" { } ''
           set -e
           echo "=== Checking entry points match pyproject.toml [project.scripts] ==="
-          for bin in rok rok rok-acp; do
-            test -x ${rok}/bin/$bin || (echo "FAIL: $bin binary missing from Nix package"; exit 1)
+          for bin in rok rok-agent rok-acp; do
+            test -x ${rok-agent}/bin/$bin || (echo "FAIL: $bin binary missing from Nix package"; exit 1)
             echo "PASS: $bin present"
           done
 
@@ -74,8 +95,8 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           export HOME=$(mktemp -d)
 
           echo "=== Checking rok --help ==="
-          ${rok}/bin/rok --help 2>&1 | grep -q "gateway" || (echo "FAIL: gateway subcommand missing"; exit 1)
-          ${rok}/bin/rok --help 2>&1 | grep -q "config" || (echo "FAIL: config subcommand missing"; exit 1)
+          ${rok-agent}/bin/rok --help 2>&1 | grep -q "gateway" || (echo "FAIL: gateway subcommand missing"; exit 1)
+          ${rok-agent}/bin/rok --help 2>&1 | grep -q "config" || (echo "FAIL: config subcommand missing"; exit 1)
           echo "PASS: All subcommands accessible"
 
           echo "=== All CLI checks passed ==="
@@ -87,18 +108,82 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         bundled-skills = pkgs.runCommand "rok-bundled-skills" { } ''
           set -e
           echo "=== Checking bundled skills ==="
-          test -d ${rok}/share/rok/skills || (echo "FAIL: skills directory missing"; exit 1)
+          test -d ${rok-agent}/share/rok-agent/skills || (echo "FAIL: skills directory missing"; exit 1)
           echo "PASS: skills directory exists"
 
-          SKILL_COUNT=$(find ${rok}/share/rok/skills -name "SKILL.md" | wc -l)
+          SKILL_COUNT=$(find ${rok-agent}/share/rok-agent/skills -name "SKILL.md" | wc -l)
           test "$SKILL_COUNT" -gt 0 || (echo "FAIL: no SKILL.md files found in skills directory"; exit 1)
           echo "PASS: $SKILL_COUNT bundled skills found"
 
-          grep -q "ROK_BUNDLED_SKILLS" ${rok}/bin/rok || \
+          grep -q "ROK_BUNDLED_SKILLS" ${rok-agent}/bin/rok || \
             (echo "FAIL: ROK_BUNDLED_SKILLS not in wrapper"; exit 1)
           echo "PASS: ROK_BUNDLED_SKILLS set in wrapper"
 
           echo "=== All bundled skills checks passed ==="
+          mkdir -p $out
+          echo "ok" > $out/result
+        '';
+
+        # Verify bundled plugins (platforms, memory, context_engine) are present
+        bundled-plugins = pkgs.runCommand "rok-bundled-plugins" { } ''
+          set -e
+          echo "=== Checking bundled plugins ==="
+          test -d ${rok-agent}/share/rok-agent/plugins || (echo "FAIL: plugins directory missing"; exit 1)
+          echo "PASS: plugins directory exists"
+
+          test -f ${rok-agent}/share/rok-agent/plugins/platforms/irc/plugin.yaml || \
+            (echo "FAIL: irc plugin manifest missing"; exit 1)
+          echo "PASS: irc plugin manifest present"
+
+          grep -q "ROK_BUNDLED_PLUGINS" ${rok-agent}/bin/rok || \
+            (echo "FAIL: ROK_BUNDLED_PLUGINS not in wrapper"; exit 1)
+          echo "PASS: ROK_BUNDLED_PLUGINS set in wrapper"
+
+          echo "=== All bundled plugins checks passed ==="
+          mkdir -p $out
+          echo "ok" > $out/result
+        '';
+
+        # Verify bundled TUI is present and compiled
+        bundled-tui = pkgs.runCommand "rok-bundled-tui" { } ''
+          set -e
+          echo "=== Checking bundled TUI ==="
+          test -d ${rok-agent}/ui-tui || (echo "FAIL: ui-tui directory missing"; exit 1)
+          echo "PASS: ui-tui directory exists"
+
+          test -f ${rok-agent}/ui-tui/dist/entry.js || (echo "FAIL: compiled entry.js missing"; exit 1)
+          echo "PASS: compiled entry.js present"
+
+          # self-contained bundle; no runtime node_modules expected
+
+          grep -q "ROK_TUI_DIR" ${rok-agent}/bin/rok || \
+            (echo "FAIL: ROK_TUI_DIR not in wrapper"; exit 1)
+          echo "PASS: ROK_TUI_DIR set in wrapper"
+
+          echo "=== All bundled TUI checks passed ==="
+          mkdir -p $out
+          echo "ok" > $out/result
+        '';
+
+        # Verify ROK_NODE is set in wrapper and points to Node 20+
+        # (string-width uses the /v regex flag which requires Node 20+)
+        rok-node = pkgs.runCommand "rok-node-version" { } ''
+          set -e
+          echo "=== Checking ROK_NODE in wrapper ==="
+          grep -q "ROK_NODE" ${rok-agent}/bin/rok || \
+            (echo "FAIL: ROK_NODE not set in wrapper"; exit 1)
+          echo "PASS: ROK_NODE present in wrapper"
+
+          ROK_NODE=$(sed -n "s/^export ROK_NODE='\(.*\)'/\1/p" ${rok-agent}/bin/rok)
+          test -x "$ROK_NODE" || (echo "FAIL: ROK_NODE=$ROK_NODE not executable"; exit 1)
+          echo "PASS: ROK_NODE executable at $ROK_NODE"
+
+          NODE_MAJOR=$("$ROK_NODE" --version | sed 's/^v//' | cut -d. -f1)
+          test "$NODE_MAJOR" -ge 20 || \
+            (echo "FAIL: Node v$NODE_MAJOR < 20, TUI needs /v regex flag support"; exit 1)
+          echo "PASS: Node v$NODE_MAJOR >= 20"
+
+          echo "=== All ROK_NODE checks passed ==="
           mkdir -p $out
           echo "ok" > $out/result
         '';
@@ -117,10 +202,60 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           }
 
           echo "=== Checking ROK_MANAGED guards ==="
-          check_blocked "config set" ${rok}/bin/rok config set model foo
-          check_blocked "config edit" ${rok}/bin/rok config edit
+          check_blocked "config set" ${rok-agent}/bin/rok config set model foo
+          check_blocked "config edit" ${rok-agent}/bin/rok config edit
 
           echo "=== All guard checks passed ==="
+          mkdir -p $out
+          echo "ok" > $out/result
+        '';
+
+        # Verify extraPythonPackages PYTHONPATH injection
+        extra-python-packages = let
+          testPkg = pkgs.python312Packages.pyfiglet;
+          rokWithExtra = rok-agent.override {
+            extraPythonPackages = [ testPkg ];
+          };
+        in pkgs.runCommand "rok-extra-python-packages" { } ''
+          set -e
+          echo "=== Checking extraPythonPackages PYTHONPATH injection ==="
+
+          grep -q "PYTHONPATH" ${rokWithExtra}/bin/rok || \
+            (echo "FAIL: PYTHONPATH not in wrapper"; exit 1)
+          echo "PASS: PYTHONPATH present in wrapper"
+
+          grep -q "${testPkg}" ${rokWithExtra}/bin/rok || \
+            (echo "FAIL: test package path not in PYTHONPATH"; exit 1)
+          echo "PASS: test package path found in wrapper"
+
+          echo "=== Checking base package has no PYTHONPATH ==="
+          if grep -q "PYTHONPATH" ${rok-agent}/bin/rok; then
+            echo "FAIL: base package should not have PYTHONPATH"; exit 1
+          fi
+          echo "PASS: base package clean"
+
+          echo "=== All extraPythonPackages checks passed ==="
+          mkdir -p $out
+          echo "ok" > $out/result
+        '';
+
+        # Verify extraDependencyGroups passes through to python.nix
+        extra-dependency-groups = let
+          rokWithGroups = rok-agent.override {
+            extraDependencyGroups = [ "honcho" ];
+          };
+        in pkgs.runCommand "rok-extra-dependency-groups" { } ''
+          set -e
+          echo "=== Checking extraDependencyGroups override evaluates ==="
+
+          # Eval-only: verify the override produces valid derivation paths
+          # without building the full venv (which is expensive and redundant
+          # since the mechanism is just list concatenation into python.nix).
+          echo "derivation: ${rokWithGroups}"
+          echo "venv: ${rokWithGroups.rokVenv}"
+          echo "PASS: extraDependencyGroups override evaluates cleanly"
+
+          echo "=== All extraDependencyGroups checks passed ==="
           mkdir -p $out
           echo "ok" > $out/result
         '';

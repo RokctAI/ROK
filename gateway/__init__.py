@@ -2,7 +2,7 @@
 Rok Gateway - Multi-platform messaging integration.
 
 This module provides a unified gateway for connecting the Rok agent
-to various messaging platforms (Telegram, Discord, WhatsApp) with:
+to various messaging platforms (Telegram, Discord, WhatsApp, Weixin, and more) with:
 - Session management (persistent conversations with reset policies)
 - Dynamic context injection (agent knows where messages come from)
 - Delivery routing (cron job outputs to appropriate channels)

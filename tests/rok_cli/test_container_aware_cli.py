@@ -33,7 +33,7 @@ def container_env(tmp_path, monkeypatch):
     container_mode.write_text(
         "# Written by NixOS activation script. Do not edit manually.\n"
         "backend=podman\n"
-        "container_name=rok\n"
+        "container_name=rok-agent\n"
         "exec_user=rok\n"
         "rok_bin=/data/current-package/bin/rok\n"
     )
@@ -47,7 +47,7 @@ def test_get_container_exec_info_returns_metadata(container_env):
 
     assert info is not None
     assert info["backend"] == "podman"
-    assert info["container_name"] == "rok"
+    assert info["container_name"] == "rok-agent"
     assert info["exec_user"] == "rok"
     assert info["rok_bin"] == "/data/current-package/bin/rok"
 
@@ -105,14 +105,14 @@ def test_get_container_exec_info_defaults():
         )
 
         with patch("rok_constants.is_container", return_value=False), \
-             patch("rok_cli.config.get_rok_home", return_value=rok_home), \
+             patch.dict(get_container_exec_info.__globals__, {"get_rok_home": lambda: rok_home}), \
              patch.dict(os.environ, {}, clear=False):
             os.environ.pop("ROK_DEV", None)
             info = get_container_exec_info()
 
         assert info is not None
         assert info["backend"] == "docker"
-        assert info["container_name"] == "rok"
+        assert info["container_name"] == "rok-agent"
         assert info["exec_user"] == "rok"
         assert info["rok_bin"] == "/data/current-package/bin/rok"
 
@@ -152,7 +152,7 @@ def test_get_container_exec_info_crashes_on_permission_error(container_env):
 def docker_container_info():
     return {
         "backend": "docker",
-        "container_name": "rok",
+        "container_name": "rok-agent",
         "exec_user": "rok",
         "rok_bin": "/data/current-package/bin/rok",
     }
@@ -162,7 +162,7 @@ def docker_container_info():
 def podman_container_info():
     return {
         "backend": "podman",
-        "container_name": "rok",
+        "container_name": "rok-agent",
         "exec_user": "rok",
         "rok_bin": "/data/current-package/bin/rok",
     }
@@ -195,7 +195,7 @@ def test_exec_in_container_calls_execvp(docker_container_info):
     e_values = [cmd[i + 1] for i in e_indices]
     assert "TERM=xterm-256color" in e_values
     assert "LANG=en_US.UTF-8" in e_values
-    assert "rok" in cmd
+    assert "rok-agent" in cmd
     assert "/data/current-package/bin/rok" in cmd
     assert "chat" in cmd
 

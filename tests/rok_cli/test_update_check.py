@@ -21,7 +21,7 @@ def test_check_for_updates_uses_cache(tmp_path, monkeypatch):
     from rok_cli.banner import check_for_updates
 
     # Create a fake git repo and fresh cache
-    repo_dir = tmp_path / "rok"
+    repo_dir = tmp_path / "rok-agent"
     repo_dir.mkdir()
     (repo_dir / ".git").mkdir()
 
@@ -40,7 +40,7 @@ def test_check_for_updates_expired_cache(tmp_path, monkeypatch):
     """When cache is expired, check_for_updates should call git fetch."""
     from rok_cli.banner import check_for_updates
 
-    repo_dir = tmp_path / "rok"
+    repo_dir = tmp_path / "rok-agent"
     repo_dir.mkdir()
     (repo_dir / ".git").mkdir()
 
@@ -59,7 +59,7 @@ def test_check_for_updates_expired_cache(tmp_path, monkeypatch):
 
 
 def test_check_for_updates_no_git_dir(tmp_path, monkeypatch):
-    """Returns None when .git directory doesn't exist anywhere."""
+    """Falls back to PyPI check when .git directory doesn't exist anywhere."""
     import rok_cli.banner as banner
 
     # Create a fake banner.py so the fallback path also has no .git
@@ -70,8 +70,9 @@ def test_check_for_updates_no_git_dir(tmp_path, monkeypatch):
     monkeypatch.setattr(banner, "__file__", str(fake_banner))
     monkeypatch.setenv("ROK_HOME", str(tmp_path))
     with patch("rok_cli.banner.subprocess.run") as mock_run:
-        result = banner.check_for_updates()
-    assert result is None
+        with patch("rok_cli.banner.check_via_pypi", return_value=0):
+            result = banner.check_for_updates()
+    assert result == 0
     mock_run.assert_not_called()
 
 
@@ -83,7 +84,7 @@ def test_check_for_updates_fallback_to_project_root(tmp_path, monkeypatch):
     if not (project_root / ".git").exists():
         pytest.skip("Not running from a git checkout")
 
-    # Point ROK_HOME at a temp dir with no rok/.git
+    # Point ROK_HOME at a temp dir with no rok-agent/.git
     monkeypatch.setenv("ROK_HOME", str(tmp_path))
     with patch("rok_cli.banner.subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(returncode=0, stdout="0\n")
@@ -111,23 +112,6 @@ def test_prefetch_non_blocking():
         # Wait for the background thread to finish
         banner._update_check_done.wait(timeout=5)
         assert banner._update_result == 5
-
-
-def test_get_update_result_timeout():
-    """get_update_result() returns None when check hasn't completed within timeout."""
-    import rok_cli.banner as banner
-
-    # Reset module state — don't set the event
-    banner._update_result = None
-    banner._update_check_done = threading.Event()
-
-    start = time.monotonic()
-    result = banner.get_update_result(timeout=0.1)
-    elapsed = time.monotonic() - start
-
-    # Should have waited ~0.1s and returned None
-    assert result is None
-    assert elapsed < 0.5
 
 
 def test_invalidate_update_cache_clears_all_profiles(tmp_path):

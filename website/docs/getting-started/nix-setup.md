@@ -44,14 +44,14 @@ rok setup
 rok chat
 ```
 
-After `nix profile install`, `rok`, `rok`, and `rok-acp` are on your PATH. From here, the workflow is identical to the [standard installation](./installation.md) — `rok setup` walks you through provider selection, `rok gateway install` sets up a launchd (macOS) or systemd user service, and config lives in `~/.rok/`.
+After `nix profile install`, `rok`, `rok-agent`, and `rok-acp` are on your PATH. From here, the workflow is identical to the [standard installation](./installation.md) — `rok setup` walks you through provider selection, `rok gateway install` sets up a launchd (macOS) or systemd user service, and config lives in `~/.rok/`.
 
 <details>
 <summary><strong>Building from a local clone</strong></summary>
 
 ```bash
-git clone https://github.com/RokctAI/rok.git
-cd rok
+git clone https://github.com/RokctAI/rok-agent.git
+cd rok-agent
 nix build
 ./result/bin/rok setup
 ```
@@ -75,14 +75,14 @@ This module requires NixOS. For non-NixOS systems (macOS, other Linux distros), 
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    rok.url = "github:NousResearch/hermes-agent";
+    rok-agent.url = "github:NousResearch/hermes-agent";
   };
 
-  outputs = { nixpkgs, rok, ... }: {
+  outputs = { nixpkgs, rok-agent, ... }: {
     nixosConfigurations.your-host = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        rok.nixosModules.default
+        rok-agent.nixosModules.default
         ./configuration.nix
       ];
     };
@@ -95,7 +95,7 @@ This module requires NixOS. For non-NixOS systems (macOS, other Linux distros), 
 ```nix
 # configuration.nix
 { config, ... }: {
-  services.rok = {
+  services.rok-agent = {
     enable = true;
     settings.model.default = "anthropic/claude-sonnet-4";
     environmentFiles = [ config.sops.secrets."rok-env".path ];
@@ -114,7 +114,7 @@ echo "OPENROUTER_API_KEY=sk-or-your-key" | sudo install -m 0600 -o rok /dev/stdi
 ```
 
 ```nix
-services.rok.environmentFiles = [ "/var/lib/rok/env" ];
+services.rok-agent.environmentFiles = [ "/var/lib/rok/env" ];
 ```
 :::
 
@@ -122,7 +122,9 @@ services.rok.environmentFiles = [ "/var/lib/rok/env" ];
 Setting `addToSystemPackages = true` does two things: puts the `rok` CLI on your system PATH **and** sets `ROK_HOME` system-wide so the interactive CLI shares state (sessions, skills, cron) with the gateway service. Without it, running `rok` in your shell creates a separate `~/.rok/` directory.
 :::
 
-:::info Container-aware CLI
+### Container-aware CLI
+
+:::info
 When `container.enable = true` and `addToSystemPackages = true`, **every** `rok` command on the host automatically routes into the managed container. This means your interactive CLI session runs inside the same environment as the gateway service — with access to all container-installed packages and tools.
 
 - The routing is transparent: `rok chat`, `rok sessions list`, `rok version`, etc. all exec into the container under the hood
@@ -133,7 +135,7 @@ When `container.enable = true` and `addToSystemPackages = true`, **every** `rok`
 Set `container.hostUsers` to create a `~/.rok` symlink to the service state directory, so the host CLI and the container share sessions, config, and memories:
 
 ```nix
-services.rok = {
+services.rok-agent = {
   container.enable = true;
   container.hostUsers = [ "your-username" ];
   addToSystemPackages = true;
@@ -163,10 +165,10 @@ After `nixos-rebuild switch`, check that the service is running:
 
 ```bash
 # Check service status
-systemctl status rok
+systemctl status rok-agent
 
 # Watch logs (Ctrl+C to stop)
-journalctl -u rok -f
+journalctl -u rok-agent -f
 
 # If addToSystemPackages is true, test the CLI
 rok version
@@ -189,7 +191,7 @@ To enable container mode, add one line:
 
 ```nix
 {
-  services.rok = {
+  services.rok-agent = {
     enable = true;
     container.enable = true;
     # ... rest of config is identical
@@ -211,14 +213,14 @@ The `settings` option accepts an arbitrary attrset that is rendered as `config.y
 
 ```nix
 # base.nix
-services.rok.settings = {
+services.rok-agent.settings = {
   model.default = "anthropic/claude-sonnet-4";
   toolsets = [ "all" ];
   terminal = { backend = "local"; timeout = 180; };
 };
 
 # personality.nix
-services.rok.settings = {
+services.rok-agent.settings = {
   display = { compact = false; personality = "kawaii"; };
   memory = { memory_enabled = true; user_profile_enabled = true; };
 };
@@ -239,7 +241,7 @@ Run `nix build .#configKeys && cat result` to see every leaf config key extracte
 
 ```nix
 { config, ... }: {
-  services.rok = {
+  services.rok-agent = {
     enable = true;
     container.enable = true;
 
@@ -267,7 +269,6 @@ Run `nix build .#configKeys && cat result` to see every leaf config key extracte
 
     # ── Documents ──────────────────────────────────────────────────────
     documents = {
-      "SOUL.md" = builtins.readFile /home/user/.rok/SOUL.md;
       "USER.md" = ./documents/USER.md;
     };
 
@@ -302,7 +303,7 @@ Run `nix build .#configKeys && cat result` to see every leaf config key extracte
 If you'd rather manage `config.yaml` entirely outside Nix, use `configFile`:
 
 ```nix
-services.rok.configFile = /etc/rok/config.yaml;
+services.rok-agent.configFile = /etc/rok/config.yaml;
 ```
 
 This bypasses `settings` entirely — no merge, no generation. The file is copied as-is to `$ROK_HOME/config.yaml` on each activation.
@@ -316,15 +317,15 @@ Quick reference for the most common things Nix users want to customize:
 | Change the LLM model | `settings.model.default` | `"anthropic/claude-sonnet-4"` |
 | Use a different provider endpoint | `settings.model.base_url` | `"https://openrouter.ai/api/v1"` |
 | Add API keys | `environmentFiles` | `[ config.sops.secrets."rok-env".path ]` |
-| Give the agent a personality | `documents."SOUL.md"` | `builtins.readFile ./my-soul.md` |
+| Give the agent a personality | `${services.rok-agent.stateDir}/.rok/SOUL.md` | manage the file directly |
 | Add MCP tool servers | `mcpServers.<name>` | See [MCP Servers](#mcp-servers) |
 | Mount host directories into container | `container.extraVolumes` | `[ "/data:/data:rw" ]` |
 | Pass GPU access to container | `container.extraOptions` | `[ "--gpus" "all" ]` |
 | Use Podman instead of Docker | `container.backend` | `"podman"` |
 | Share state between host CLI and container | `container.hostUsers` | `[ "sidbin" ]` |
-| Add tools to the service PATH (native only) | `extraPackages` | `[ pkgs.pandoc pkgs.imagemagick ]` |
+| Make extra tools available to the agent | `extraPackages` | `[ pkgs.pandoc pkgs.imagemagick ]` |
 | Use a custom base image | `container.image` | `"ubuntu:24.04"` |
-| Override the rok package | `package` | `inputs.rok.packages.${system}.default.override { ... }` |
+| Override the rok package | `package` | `inputs.rok-agent.packages.${system}.default.override { ... }` |
 | Change state directory | `stateDir` | `"/opt/rok"` |
 | Set the agent's working directory | `workingDirectory` | `"/home/user/projects"` |
 
@@ -336,7 +337,7 @@ Quick reference for the most common things Nix users want to customize:
 Values in Nix expressions end up in `/nix/store`, which is world-readable. Always use `environmentFiles` with a secrets manager.
 :::
 
-Both `environment` (non-secret vars) and `environmentFiles` (secret files) are merged into `$ROK_HOME/.env` at activation time (`nixos-rebuild switch`). Rok reads this file on every startup, so changes take effect with a `systemctl restart rok` — no container recreation needed.
+Both `environment` (non-secret vars) and `environmentFiles` (secret files) are merged into `$ROK_HOME/.env` at activation time (`nixos-rebuild switch`). Rok reads this file on every startup, so changes take effect with a `systemctl restart rok-agent` — no container recreation needed.
 
 ### sops-nix
 
@@ -348,7 +349,7 @@ Both `environment` (non-secret vars) and `environmentFiles` (secret files) are m
     secrets."rok-env" = { format = "yaml"; };
   };
 
-  services.rok.environmentFiles = [
+  services.rok-agent.environmentFiles = [
     config.sops.secrets."rok-env".path
   ];
 }
@@ -370,7 +371,7 @@ rok-env: |
 {
   age.secrets.rok-env.file = ./secrets/rok-env.age;
 
-  services.rok.environmentFiles = [
+  services.rok-agent.environmentFiles = [
     config.age.secrets.rok-env.path
   ];
 }
@@ -382,7 +383,7 @@ For platforms requiring OAuth (e.g., Discord), use `authFile` to seed credential
 
 ```nix
 {
-  services.rok = {
+  services.rok-agent = {
     authFile = config.sops.secrets."rok/auth.json".path;
     # authFileForceOverwrite = true;  # overwrite on every activation
   };
@@ -397,17 +398,14 @@ The file is only copied if `auth.json` doesn't already exist (unless `authFileFo
 
 The `documents` option installs files into the agent's working directory (the `workingDirectory`, which the agent reads as its workspace). Rok looks for specific filenames by convention:
 
-- **`SOUL.md`** — the agent's system prompt / personality. Rok reads this on startup and uses it as persistent instructions that shape its behavior across all conversations.
 - **`USER.md`** — context about the user the agent is interacting with.
 - Any other files you place here are visible to the agent as workspace files.
 
+The agent identity file is separate: Rok loads its primary `SOUL.md` from `$ROK_HOME/SOUL.md`, which in the NixOS module is `${services.rok-agent.stateDir}/.rok/SOUL.md`. Putting `SOUL.md` in `documents` only creates a workspace file and will not replace the main persona file.
+
 ```nix
 {
-  services.rok.documents = {
-    "SOUL.md" = ''
-      You are a helpful research assistant specializing in NixOS packaging.
-      Always cite sources and prefer reproducible solutions.
-    '';
+  services.rok-agent.documents = {
     "USER.md" = ./documents/USER.md;  # path reference, copied from Nix store
   };
 }
@@ -425,7 +423,7 @@ The `mcpServers` option declaratively configures [MCP (Model Context Protocol)](
 
 ```nix
 {
-  services.rok.mcpServers = {
+  services.rok-agent.mcpServers = {
     filesystem = {
       command = "npx";
       args = [ "-y" "@modelcontextprotocol/server-filesystem" "/data/workspace" ];
@@ -447,7 +445,7 @@ Environment variables in `env` values are resolved from `$ROK_HOME/.env` at runt
 
 ```nix
 {
-  services.rok.mcpServers.remote-api = {
+  services.rok-agent.mcpServers.remote-api = {
     url = "https://mcp.example.com/v1/mcp";
     headers.Authorization = "Bearer \${MCP_REMOTE_API_KEY}";
     timeout = 180;
@@ -461,7 +459,7 @@ Set `auth = "oauth"` for servers using OAuth 2.1. Rok implements the full PKCE f
 
 ```nix
 {
-  services.rok.mcpServers.my-oauth-server = {
+  services.rok-agent.mcpServers.my-oauth-server = {
     url = "https://mcp.example.com/mcp";
     auth = "oauth";
   };
@@ -479,7 +477,7 @@ The first OAuth authorization requires a browser-based consent flow. In a headle
 
 ```bash
 # Container mode
-docker exec -it rok \
+docker exec -it rok-agent \
   rok mcp add my-oauth-server --url https://mcp.example.com/mcp --auth oauth
 
 # Native mode
@@ -506,7 +504,7 @@ Some MCP servers can request LLM completions from the agent:
 
 ```nix
 {
-  services.rok.mcpServers.analysis = {
+  services.rok-agent.mcpServers.analysis = {
     command = "npx";
     args = [ "-y" "analysis-server" ];
     sampling = {
@@ -537,7 +535,7 @@ When rok runs via the NixOS module, the following CLI commands are **blocked** w
 This prevents drift between what Nix declares and what's on disk. Detection uses two signals:
 
 1. **`ROK_MANAGED=true`** environment variable — set by the systemd service, visible to the gateway process
-2. **`.managed` marker file** in `ROK_HOME` — set by the activation script, visible to interactive shells (e.g., `docker exec -it rok rok config set ...` is also blocked)
+2. **`.managed` marker file** in `ROK_HOME` — set by the activation script, visible to interactive shells (e.g., `docker exec -it rok-agent rok config set ...` is also blocked)
 
 To change configuration, edit your Nix config and run `sudo nixos-rebuild switch`.
 
@@ -554,7 +552,7 @@ When container mode is enabled, rok runs inside a persistent Ubuntu container wi
 ```
 Host                                    Container
 ────                                    ─────────
-/nix/store/...-rok-0.1.0  ──►  /nix/store/... (ro)
+/nix/store/...-rok-agent-0.1.0  ──►  /nix/store/... (ro)
 ~/.rok -> /var/lib/rok/.rok       (symlink bridge, per hostUsers)
 /var/lib/rok/                    ──►  /data/          (rw)
   ├── current-package -> /nix/store/...    (symlink, updated each rebuild)
@@ -581,7 +579,7 @@ The Nix-built binary works inside the Ubuntu container because `/nix/store` is b
 
 | Event | Container recreated? | `/data` (state) | `/home/rok` | Writable layer (`apt`/`pip`/`npm`) |
 |---|---|---|---|---|
-| `systemctl restart rok` | No | Persists | Persists | Persists |
+| `systemctl restart rok-agent` | No | Persists | Persists | Persists |
 | `nixos-rebuild switch` (code change) | No (symlink updated) | Persists | Persists | Persists |
 | Host reboot | No | Persists | Persists | Persists |
 | `nix-collect-garbage` | No (GC root) | Persists | Persists | Persists |
@@ -603,19 +601,130 @@ The `preStart` script creates a GC root at `${stateDir}/.gc-root` pointing to th
 
 ---
 
+## Plugins
+
+The NixOS module supports declarative plugin installation — no imperative `rok plugins install` needed.
+
+### Directory Plugins (`extraPlugins`)
+
+For plugins that are just a source tree with `plugin.yaml` + `__init__.py` (e.g., [rok-lcm](https://github.com/stephenschoettler/rok-lcm)):
+
+```nix
+services.rok-agent.extraPlugins = [
+  (pkgs.fetchFromGitHub {
+    owner = "stephenschoettler";
+    repo = "rok-lcm";
+    rev = "v0.7.0";
+    hash = "sha256-...";
+  })
+];
+```
+
+Plugins are symlinked into `$ROK_HOME/plugins/` at activation time. Rok discovers them via its normal directory scan. Removing a plugin from the list and running `nixos-rebuild switch` removes the symlink.
+
+### Entry-Point Plugins (`extraPythonPackages`)
+
+For pip-packaged plugins that register via `[project.entry-points."rok_agent.plugins"]` (e.g., [rtk-rok](https://github.com/ogallotti/rtk-rok)):
+
+```nix
+services.rok-agent.extraPythonPackages = [
+  (pkgs.python312Packages.buildPythonPackage {
+    pname = "rtk-rok";
+    version = "1.0.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "ogallotti";
+      repo = "rtk-rok";
+      rev = "v1.0.0";
+      hash = "sha256-...";
+    };
+    format = "pyproject";
+    build-system = [ pkgs.python312Packages.setuptools ];
+  })
+];
+```
+
+The package's `site-packages` is added to PYTHONPATH in the rok wrapper. `importlib.metadata` discovers the entry point at session start.
+
+### Optional Dependency Groups (`extraDependencyGroups`)
+
+For optional extras already declared in rok-agent's `pyproject.toml` (e.g., memory providers like `hindsight` or `honcho`), use `extraDependencyGroups` to include them in the sealed venv at build time:
+
+```nix
+services.rok-agent = {
+  extraDependencyGroups = [ "hindsight" ];
+  settings.memory.provider = "hindsight";
+};
+```
+
+This is resolved by uv alongside core dependencies in a single pass — no PYTHONPATH patching, no collision risk. Available groups match the `[project.optional-dependencies]` keys in `pyproject.toml` (e.g., `"hindsight"`, `"honcho"`, `"voice"`, `"matrix"`, `"mistral"`, `"bedrock"`).
+
+**When to use which:**
+
+| Need | Option |
+|------|--------|
+| Enable a pyproject.toml optional extra | `extraDependencyGroups` |
+| Add an external Python plugin not in pyproject.toml | `extraPythonPackages` |
+| Add a system binary (pandoc, jq, etc.) | `extraPackages` |
+| Add a directory-based plugin source tree | `extraPlugins` |
+
+### Combining Both
+
+A directory plugin with third-party Python dependencies needs both options:
+
+```nix
+services.rok-agent = {
+  extraPlugins = [ my-plugin-src ];          # plugin source
+  extraPythonPackages = [ pkgs.python312Packages.redis ];  # its Python dep
+  extraPackages = [ pkgs.redis ];            # system binary it needs
+};
+```
+
+### Using the Overlay
+
+External flakes can override the package directly:
+
+```nix
+{
+  inputs.rok-agent.url = "github:NousResearch/hermes-agent";
+  outputs = { rok-agent, nixpkgs, ... }: {
+    nixpkgs.overlays = [ rok-agent.overlays.default ];
+    # Then:
+    #   pkgs.rok-agent.override { extraPythonPackages = [...]; }
+    #   pkgs.rok-agent.override { extraDependencyGroups = [ "hindsight" ]; }
+  };
+}
+```
+
+### Plugin Configuration
+
+Plugins still need to be enabled in `config.yaml`. Add them via the declarative settings:
+
+```nix
+services.rok-agent.settings.plugins.enabled = [
+  "rok-lcm"
+  "rtk-rewrite"
+];
+```
+
+:::note
+A build-time collision check prevents plugin packages from shadowing core rok dependencies. If a plugin provides a package already in the sealed venv, `nixos-rebuild` fails with a clear error.
+:::
+
+---
+
 ## Development
 
 ### Dev Shell
 
-The flake provides a development shell with Python 3.11, uv, Node.js, and all runtime tools:
+The flake provides a development shell with Python 3.12, uv, Node.js, and all runtime tools:
 
 ```bash
-cd rok
+cd rok-agent
 nix develop
 
 # Shell provides:
-#   - Python 3.11 + uv (deps installed into .venv on first entry)
-#   - Node.js 20, ripgrep, git, openssh, ffmpeg on PATH
+#   - Python 3.12 + uv (deps installed into .venv on first entry)
+#   - Node.js 22, ripgrep, git, openssh, ffmpeg on PATH
 #   - Stamp-file optimization: re-entry is near-instant if deps haven't changed
 
 rok setup
@@ -627,7 +736,7 @@ rok chat
 The included `.envrc` activates the dev shell automatically:
 
 ```bash
-cd rok
+cd rok-agent
 direnv allow    # one-time
 # Subsequent entries are near-instant (stamp file skips dep install)
 ```
@@ -654,7 +763,7 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 
 | Check | What it tests |
 |---|---|
-| `package-contents` | `rok` and `rok` binaries exist and `rok version` runs |
+| `package-contents` | `rok` and `rok-agent` binaries exist and `rok version` runs |
 | `entry-points-sync` | Every `[project.scripts]` entry in `pyproject.toml` has a wrapped binary in the Nix package |
 | `cli-commands` | `rok --help` exposes `gateway` and `config` subcommands |
 | `managed-guard` | `ROK_MANAGED=true rok config set ...` prints the NixOS error |
@@ -671,8 +780,8 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `enable` | `bool` | `false` | Enable the rok service |
-| `package` | `package` | `rok` | The rok package to use |
+| `enable` | `bool` | `false` | Enable the rok-agent service |
+| `package` | `package` | `rok-agent` | The rok-agent package to use |
 | `user` | `str` | `"rok"` | System user |
 | `group` | `str` | `"rok"` | System group |
 | `createUser` | `bool` | `true` | Auto-create user/group |
@@ -724,7 +833,10 @@ nix build .#checks.x86_64-linux.config-roundtrip    # merge script preserves use
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `extraArgs` | `listOf str` | `[]` | Extra args for `rok gateway` |
-| `extraPackages` | `listOf package` | `[]` | Extra packages on service PATH (native mode only) |
+| `extraPackages` | `listOf package` | `[]` | Extra packages available to the agent. Added to the rok user's per-user profile so terminal commands, skills, and cron jobs all see them |
+| `extraPlugins` | `listOf package` | `[]` | Directory plugin packages to symlink into `$ROK_HOME/plugins/`. Each must contain `plugin.yaml` |
+| `extraPythonPackages` | `listOf package` | `[]` | Python packages added to PYTHONPATH for entry-point plugin discovery. Build with `python312Packages` |
+| `extraDependencyGroups` | `listOf str` | `[]` | pyproject.toml optional extras to include in the sealed venv (e.g. `["hindsight"]`). Resolved by uv — no collisions |
 | `restart` | `str` | `"always"` | systemd `Restart=` policy |
 | `restartSec` | `int` | `5` | systemd `RestartSec=` value |
 
@@ -782,8 +894,8 @@ Same layout, mounted into the container:
 ## Updating
 
 ```bash
-# Update the flake input
-nix flake update rok --flake /etc/nixos
+# Update the flake input (run from the directory containing flake.nix)
+cd /etc/nixos && nix flake update rok-agent
 
 # Rebuild
 sudo nixos-rebuild switch
@@ -803,21 +915,21 @@ All `docker` commands below work the same with `podman`. Substitute accordingly 
 
 ```bash
 # Both modes use the same systemd unit
-journalctl -u rok -f
+journalctl -u rok-agent -f
 
 # Container mode: also available directly
-docker logs -f rok
+docker logs -f rok-agent
 ```
 
 ### Container Inspection
 
 ```bash
-systemctl status rok
-docker ps -a --filter name=rok
-docker inspect rok --format='{{.State.Status}}'
-docker exec -it rok bash
-docker exec rok readlink /data/current-package
-docker exec rok cat /data/.container-identity
+systemctl status rok-agent
+docker ps -a --filter name=rok-agent
+docker inspect rok-agent --format='{{.State.Status}}'
+docker exec -it rok-agent bash
+docker exec rok-agent readlink /data/current-package
+docker exec rok-agent cat /data/.container-identity
 ```
 
 ### Force Container Recreation
@@ -825,10 +937,10 @@ docker exec rok cat /data/.container-identity
 If you need to reset the writable layer (fresh Ubuntu):
 
 ```bash
-sudo systemctl stop rok
-docker rm -f rok
+sudo systemctl stop rok-agent
+docker rm -f rok-agent
 sudo rm /var/lib/rok/.container-identity
-sudo systemctl start rok
+sudo systemctl start rok-agent
 ```
 
 ### Verify Secrets Are Loaded
@@ -840,13 +952,13 @@ If the agent starts but can't authenticate with the LLM provider, check that the
 sudo -u rok cat /var/lib/rok/.rok/.env
 
 # Container mode
-docker exec rok cat /data/.rok/.env
+docker exec rok-agent cat /data/.rok/.env
 ```
 
 ### GC Root Verification
 
 ```bash
-nix-store --query --roots $(docker exec rok readlink /data/current-package)
+nix-store --query --roots $(docker exec rok-agent readlink /data/current-package)
 ```
 
 ### Common Issues
@@ -855,8 +967,9 @@ nix-store --query --roots $(docker exec rok readlink /data/current-package)
 |---|---|---|
 | `Cannot save configuration: managed by NixOS` | CLI guards active | Edit `configuration.nix` and `nixos-rebuild switch` |
 | Container recreated unexpectedly | `extraVolumes`, `extraOptions`, or `image` changed | Expected — writable layer resets. Reinstall packages or use a custom image |
-| `rok version` shows old version | Container not restarted | `systemctl restart rok` |
+| `rok version` shows old version | Container not restarted | `systemctl restart rok-agent` |
 | Permission denied on `/var/lib/rok` | State dir is `0750 rok:rok` | Use `docker exec` or `sudo -u rok` |
 | `nix-collect-garbage` removed rok | GC root missing | Restart the service (preStart recreates the GC root) |
-| `no container with name or ID "rok"` (Podman) | Podman rootful container not visible to regular user | Add passwordless sudo for podman (see [Container-aware CLI](#container-aware-cli) section) |
+| `no container with name or ID "rok-agent"` (Podman) | Podman rootful container not visible to regular user | Add passwordless sudo for podman (see [Container Mode](#container-mode) section) |
 | `unable to find user rok` | Container still starting (entrypoint hasn't created user yet) | Wait a few seconds and retry — the CLI retries automatically |
+| Tool added via `extraPackages` not found in terminal | Requires `nixos-rebuild switch` to update the per-user profile | Rebuild and restart: `nixos-rebuild switch && systemctl restart rok-agent` |

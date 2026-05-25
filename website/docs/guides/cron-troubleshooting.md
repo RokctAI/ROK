@@ -38,7 +38,7 @@ If the job fires once and then disappears from the list, it's a one-shot schedul
 
 Cron jobs are fired by the gateway's background ticker thread, which ticks every 60 seconds. A regular CLI chat session does **not** automatically fire cron jobs.
 
-If you're expecting jobs to fire automatically, you need a running gateway (`rok gateway` or `rok serve`). For one-off debugging, you can manually trigger a tick with `rok cron tick`.
+If you're expecting jobs to fire automatically, you need a running gateway (`rok gateway` for foreground, or `rok gateway start` for the installed service). For one-off debugging, you can manually trigger a tick with `rok cron tick`.
 
 ### Check 4: Check the system clock and timezone
 
@@ -70,7 +70,7 @@ Delivery targets are case-sensitive and require the correct platform to be confi
 | `local` | Write access to `~/.rok/cron/output/` |
 | `origin` | Delivers to the chat where the job was created |
 
-Other supported platforms include `mattermost`, `homeassistant`, `dingtalk`, `feishu`, `wecom`, `weixin`, `bluebubbles`, and `webhook`. You can also target a specific chat with `platform:chat_id` syntax (e.g., `telegram:-1001234567890`).
+Other supported platforms include `mattermost`, `homeassistant`, `dingtalk`, `feishu`, `wecom`, `weixin`, `bluebubbles`, `qqbot`, and `webhook`. You can also target a specific chat with `platform:chat_id` syntax (e.g., `telegram:-1001234567890`).
 
 If delivery fails, the job still runs — it just won't send anywhere. Check `rok cron list` for updated `last_error` field (if available).
 
@@ -214,7 +214,7 @@ If you've worked through this guide and the issue persists:
 
 1. Run the job with `rok cron run <job_id>` (fires on next gateway tick) and watch for errors in the chat output
 2. Check `~/.rok/logs/agent.log` for scheduler messages and `~/.rok/logs/errors.log` for warnings
-3. Open an issue at [github.com/Rokctai/rok](https://github.com/RokctAI/rok) with:
+3. Open an issue at [github.com/Rokctai/rok-agent](https://github.com/RokctAI/rok-agent) with:
    - The job ID and schedule
    - The delivery target
    - What you expected vs. what happened

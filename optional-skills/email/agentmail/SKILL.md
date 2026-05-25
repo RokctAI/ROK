@@ -1,7 +1,8 @@
 ---
 name: agentmail
-description: Give the agent its own dedicated email inbox via AgentMail. Send, receive, and manage email autonomously using agent-owned email addresses (e.g. rok@agentmail.to).
+description: Give the agent its own dedicated email inbox via AgentMail. Send, receive, and manage email autonomously using agent-owned email addresses (e.g. rok-agent@agentmail.to).
 version: 1.0.0
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [email, communication, agentmail, mcp]
@@ -70,8 +71,8 @@ All 11 AgentMail tools are now available automatically.
 
 ### Create an inbox and send an email
 1. Create a dedicated inbox:
-   - Use `create_inbox` with a username (e.g. `rok`)
-   - The agent gets address: `rok@agentmail.to`
+   - Use `create_inbox` with a username (e.g. `rok-agent`)
+   - The agent gets address: `rok-agent@agentmail.to`
 2. Send an email:
    - Use `send_message` with `inbox_id`, `to`, `subject`, `text`
 3. Check for replies:

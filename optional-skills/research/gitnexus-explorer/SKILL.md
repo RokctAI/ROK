@@ -4,6 +4,7 @@ description: Index a codebase with GitNexus and serve an interactive knowledge g
 version: 1.0.0
 author: Rok Agent + Teknium
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [gitnexus, code-intelligence, knowledge-graph, visualization]
@@ -200,7 +201,7 @@ rm -rf .claude/
 - **The web UI does NOT create `.claude/` or `CLAUDE.md`.** Those are created by
   `npx gitnexus analyze`. Use `--skip-agents-md` to suppress the markdown files,
   then `rm -rf .claude/` for the rest. These are Claude Code integrations that
-  rok users don't need.
+  rok-agent users don't need.
 
 - **Browser memory limit.** The web UI loads the entire graph into browser memory.
   Repos with 5k+ files may be sluggish. 30k+ files will likely crash the tab.

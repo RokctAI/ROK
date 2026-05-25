@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@rok/ink": ["src/types/rok-ink.d.ts"]
+    }
+  }
+}

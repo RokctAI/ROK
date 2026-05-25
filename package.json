@@ -1,5 +1,5 @@
 {
-  "name": "rok",
+  "name": "rok-agent",
   "version": "1.0.0",
   "description": "An AI agent with advanced tool-calling capabilities, featuring a flexible toolsets system for organizing and managing tools.",
   "private": true,
@@ -8,21 +8,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RokctAI/Rok.git"
+    "url": "git+https://github.com/RokctAI/Rok-agent.git"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/RokctAI/Rok/issues"
+    "url": "https://github.com/RokctAI/Rok-agent/issues"
   },
-  "homepage": "https://github.com/RokctAI/Rok#readme",
+  "homepage": "https://github.com/RokctAI/Rok-agent#readme",
   "dependencies": {
-    "agent-browser": "^0.13.0",
-    "@askjo/camoufox-browser": "^1.0.0"
+    "@askjo/camofox-browser": "^1.5.2",
+    "agent-browser": "^0.26.0"
   },
   "overrides": {
     "lodash": "4.18.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }

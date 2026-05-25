@@ -10,7 +10,7 @@ import requests
 
 from tools.browser_providers.base import CloudBrowserProvider
 from tools.managed_tool_gateway import resolve_managed_tool_gateway
-from tools.tool_backend_helpers import managed_nous_tools_enabled
+from tools.tool_backend_helpers import managed_nous_tools_enabled, prefers_gateway
 
 logger = logging.getLogger(__name__)
 _pending_create_keys: Dict[str, str] = {}
@@ -75,7 +75,7 @@ class BrowserUseProvider(CloudBrowserProvider):
 
     def _get_config_or_none(self) -> Optional[Dict[str, Any]]:
         api_key = os.environ.get("BROWSER_USE_API_KEY")
-        if api_key:
+        if api_key and not prefers_gateway("browser"):
             return {
                 "api_key": api_key,
                 "base_url": _BASE_URL,
@@ -137,12 +137,22 @@ class BrowserUseProvider(CloudBrowserProvider):
             else {}
         )
 
-        response = requests.post(
-            f"{config['base_url']}/browsers",
-            headers=headers,
-            json=payload,
-            timeout=30,
-        )
+        try:
+            response = requests.post(
+                f"{config['base_url']}/browsers",
+                headers=headers,
+                json=payload,
+                timeout=30,
+            )
+        except requests.RequestException as exc:
+            # Managed mode: propagate raw so callers can retry with the
+            # preserved idempotency key. Direct mode: wrap network failures
+            # into a clean RuntimeError for end users.
+            if managed_mode:
+                raise
+            raise RuntimeError(
+                f"Browser Use API connection failed: {exc}"
+            ) from exc
 
         if not response.ok:
             if managed_mode and not _should_preserve_pending_create_key(response):
@@ -184,7 +194,7 @@ class BrowserUseProvider(CloudBrowserProvider):
                 json={"action": "stop"},
                 timeout=10,
             )
-            if response.status_code in (200, 201, 204):
+            if response.status_code in {200, 201, 204}:
                 logger.debug("Successfully closed Browser Use session %s", session_id)
                 return True
             else:

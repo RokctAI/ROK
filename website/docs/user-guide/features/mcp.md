@@ -23,7 +23,7 @@ If you have ever wanted Rok to use a tool that already exists somewhere else, MC
 1. Install MCP support (already included if you used the standard install script):
 
 ```bash
-cd ~/.rok/rok
+cd ~/.rok/rok-agent
 uv pip install -e ".[mcp]"
 ```
 
@@ -105,6 +105,7 @@ Rok reads MCP config from `~/.rok/config.yaml` under `mcp_servers`.
 | `timeout` | number | Tool call timeout |
 | `connect_timeout` | number | Initial connection timeout |
 | `enabled` | bool | If `false`, Rok skips the server entirely |
+| `supports_parallel_tool_calls` | bool | If `true`, tools from this server may run concurrently |
 | `tools` | mapping | Per-server tool filtering and utility policy |
 
 ### Minimal stdio example
@@ -382,7 +383,7 @@ Check:
 
 ```bash
 # Verify MCP deps are installed (already included in standard install)
-cd ~/.rok/rok && uv pip install -e ".[mcp]"
+cd ~/.rok/rok-agent && uv pip install -e ".[mcp]"
 
 node --version
 npx --version
@@ -408,6 +409,23 @@ Because Rok now only registers those wrappers when both are true:
 2. the server session actually supports the capability
 
 This is intentional and keeps the tool list honest.
+
+## Parallel Tool Calls
+
+By default, MCP tools run sequentially — one at a time. If your MCP server exposes tools that are safe to run concurrently (e.g. read-only queries, independent API calls), you can opt-in to parallel execution:
+
+```yaml
+mcp_servers:
+  docs:
+    command: "docs-server"
+    supports_parallel_tool_calls: true
+```
+
+When `supports_parallel_tool_calls` is `true`, Rok may execute multiple tools from that server at the same time within a single tool-call batch, just like it does for built-in read-only tools (web_search, read_file, etc.).
+
+:::caution
+Only enable parallel calls for MCP servers whose tools are safe to run at the same time. If tools read and write shared state, files, databases, or external resources, review the read/write race conditions before enabling this setting.
+:::
 
 ## MCP Sampling Support
 
@@ -481,7 +499,7 @@ Or if you installed Rok in a specific location:
 {
   "mcpServers": {
     "rok": {
-      "command": "/home/user/.rok/rok/venv/bin/rok",
+      "command": "/home/user/.rok/rok-agent/venv/bin/rok",
       "args": ["mcp", "serve"]
     }
   }

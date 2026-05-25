@@ -1,14 +1,14 @@
-"""Regression test: openai-codex must appear in /model picker when
-credentials are only in the Codex CLI shared file (~/.codex/auth.json)
-and haven't been migrated to the Rok auth store yet.
+"""Regression tests for the /model picker's credential-discovery paths.
 
-Root cause: list_authenticated_providers() checked the raw Rok auth
-store but didn't know about the Codex CLI fallback import path.
+Covers:
+ - Normal path (tokens already in Rok auth store)
+ - Claude Code fallback (tokens only in ~/.claude/.credentials.json)
+ - Negative case (no credentials anywhere)
 
-Fix: _seed_from_singletons() now imports from the Codex CLI when the
-Rok auth store has no openai-codex tokens, and
-list_authenticated_providers() falls back to load_pool() for OAuth
-providers.
+Note: auto-import from ~/.codex/auth.json was removed in #12360 — Rok
+now owns its own openai-codex auth state, and users explicitly adopt
+existing Codex CLI tokens via `rok auth openai-codex`. The old
+"Codex CLI shared file" discovery tests were removed with that change.
 """
 
 import base64
@@ -29,83 +29,6 @@ def _make_fake_jwt(expiry_offset: int = 3600) -> str:
     payload_bytes = json.dumps({"exp": exp, "sub": "test"}).encode()
     payload = base64.urlsafe_b64encode(payload_bytes).rstrip(b"=").decode()
     return f"{header}.{payload}.fakesig"
-
-
-@pytest.fixture()
-def codex_cli_only_env(tmp_path, monkeypatch):
-    """Set up an environment where Codex tokens exist only in ~/.codex/auth.json,
-    NOT in the Rok auth store."""
-    rok_home = tmp_path / ".rok"
-    rok_home.mkdir()
-    codex_home = tmp_path / ".codex"
-    codex_home.mkdir()
-
-    monkeypatch.setenv("ROK_HOME", str(rok_home))
-    monkeypatch.setenv("CODEX_HOME", str(codex_home))
-
-    # Empty Rok auth store
-    (rok_home / "auth.json").write_text(
-        json.dumps({"version": 2, "providers": {}})
-    )
-
-    # Valid Codex CLI tokens
-    fake_jwt = _make_fake_jwt()
-    (codex_home / "auth.json").write_text(
-        json.dumps({
-            "tokens": {
-                "access_token": fake_jwt,
-                "refresh_token": "fake-refresh-token",
-            }
-        })
-    )
-
-    # Clear provider env vars so only OAuth is a detection path
-    for var in [
-        "OPENROUTER_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY",
-        "NOUS_API_KEY", "DEEPSEEK_API_KEY", "COPILOT_GITHUB_TOKEN",
-        "GH_TOKEN", "GEMINI_API_KEY",
-    ]:
-        monkeypatch.delenv(var, raising=False)
-
-    return rok_home
-
-
-def test_codex_cli_tokens_detected_by_model_picker(codex_cli_only_env):
-    """openai-codex should appear when tokens only exist in ~/.codex/auth.json."""
-    from rok_cli.model_switch import list_authenticated_providers
-
-    providers = list_authenticated_providers(
-        current_provider="openai-codex",
-        max_models=10,
-    )
-    slugs = [p["slug"] for p in providers]
-    assert "openai-codex" in slugs, (
-        f"openai-codex not found in /model picker providers: {slugs}"
-    )
-
-    codex = next(p for p in providers if p["slug"] == "openai-codex")
-    assert codex["is_current"] is True
-    assert codex["total_models"] > 0
-
-
-def test_codex_cli_tokens_migrated_after_detection(codex_cli_only_env):
-    """After the /model picker detects Codex CLI tokens, they should be
-    migrated into the Rok auth store for subsequent fast lookups."""
-    from rok_cli.model_switch import list_authenticated_providers
-
-    # First call triggers migration
-    list_authenticated_providers(current_provider="openai-codex")
-
-    # Verify tokens are now in Rok auth store
-    auth_path = codex_cli_only_env / "auth.json"
-    store = json.loads(auth_path.read_text())
-    providers = store.get("providers", {})
-    assert "openai-codex" in providers, (
-        f"openai-codex not migrated to Rok auth store: {list(providers.keys())}"
-    )
-    tokens = providers["openai-codex"].get("tokens", {})
-    assert tokens.get("access_token"), "access_token missing after migration"
-    assert tokens.get("refresh_token"), "refresh_token missing after migration"
 
 
 @pytest.fixture()
@@ -150,6 +73,37 @@ def test_normal_path_still_works(rok_auth_only_env):
     )
     slugs = [p["slug"] for p in providers]
     assert "openai-codex" in slugs
+
+
+def test_codex_picker_uses_live_codex_catalog(rok_auth_only_env, tmp_path, monkeypatch):
+    """The gateway /model picker should surface Codex CLI-only listed models."""
+    from rok_cli.model_switch import list_authenticated_providers
+
+    codex_home = tmp_path / "codex-home"
+    codex_home.mkdir()
+    (codex_home / "models_cache.json").write_text(json.dumps({
+        "models": [
+            {"slug": "gpt-5.5", "priority": 0, "supported_in_api": True},
+            {"slug": "gpt-5.3-codex-spark", "priority": 7, "supported_in_api": False},
+        ]
+    }))
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    # Force the cache fallback path — without this the test issues a real
+    # 10s HTTP probe to chatgpt.com/backend-api/codex/models which is both
+    # slow and non-deterministic in CI/sandboxed environments.
+    monkeypatch.setattr(
+        "rok_cli.codex_models._fetch_models_from_api",
+        lambda access_token: [],
+    )
+
+    providers = list_authenticated_providers(
+        current_provider="openai-codex",
+        max_models=10,
+    )
+
+    codex = next(p for p in providers if p["slug"] == "openai-codex")
+    assert "gpt-5.3-codex-spark" in codex["models"]
+    assert codex["total_models"] == len(codex["models"])
 
 
 @pytest.fixture()

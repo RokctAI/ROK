@@ -4,10 +4,11 @@ description: Delegate coding tasks to Blackbox AI CLI agent. Multi-model agent w
 version: 1.0.0
 author: Rok Agent (Nous Research)
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [Coding-Agent, Blackbox, Multi-Agent, Judge, Multi-Model]
-    related_skills: [claude-code, codex, rok]
+    related_skills: [claude-code, codex, rok-agent]
 ---
 
 # Blackbox CLI

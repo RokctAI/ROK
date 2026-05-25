@@ -57,19 +57,19 @@ If that is not solid yet, fix text mode first.
 ### CLI microphone + playback
 
 ```bash
-pip install "rok[voice]"
+pip install "rok-agent[voice]"
 ```
 
 ### Messaging platforms
 
 ```bash
-pip install "rok[messaging]"
+pip install "rok-agent[messaging]"
 ```
 
 ### Premium ElevenLabs TTS
 
 ```bash
-pip install "rok[tts-premium]"
+pip install "rok-agent[tts-premium]"
 ```
 
 ### Local NeuTTS (optional)
@@ -81,7 +81,7 @@ python -m pip install -U neutts[all]
 ### Everything
 
 ```bash
-pip install "rok[all]"
+pip install "rok-agent[all]"
 ```
 
 ## Step 3: install system dependencies
@@ -164,6 +164,7 @@ voice:
   record_key: "ctrl+b"
   max_recording_seconds: 120
   auto_tts: false
+  beep_enabled: true
   silence_threshold: 200
   silence_duration: 3.0
 
@@ -439,7 +440,7 @@ By default, the bot needs an `@mention` in Discord server text channels unless c
 If you want the shortest path to success:
 
 1. get text Rok working
-2. install `rok[voice]`
+2. install `rok-agent[voice]`
 3. use CLI voice mode with local STT + Edge TTS
 4. then enable `/voice on` in Telegram or Discord
 5. only after that, try Discord VC mode

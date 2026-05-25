@@ -8,26 +8,66 @@ description: "How to update Rok Agent to the latest version or uninstall it"
 
 ## Updating
 
+### Git installs
+
 Update to the latest version with a single command:
 
 ```bash
 rok update
 ```
 
-This pulls the latest code, updates dependencies, and prompts you to configure any new options that were added since your last update.
+This pulls the latest code from `main`, updates dependencies, and prompts you to configure any new options that were added since your last update.
+
+### pip installs
+
+PyPI releases track **tagged versions** (major and minor releases), not every commit on `main`. Check for updates and upgrade with:
+
+```bash
+rok update --check    # see if a newer release is on PyPI
+rok update            # runs pip install --upgrade rok-agent
+```
+
+Or manually:
+
+```bash
+pip install --upgrade rok-agent    # or: uv pip install --upgrade rok-agent
+```
 
 :::tip
 `rok update` automatically detects new configuration options and prompts you to add them. If you skipped that prompt, you can manually run `rok config check` to see missing options, then `rok config migrate` to interactively add them.
 :::
 
-### What happens during an update
+### What happens during an update (git installs)
 
 When you run `rok update`, the following steps occur:
 
-1. **Git pull** — pulls the latest code from the `main` branch and updates submodules
-2. **Dependency install** — runs `uv pip install -e ".[all]"` to pick up new or changed dependencies
-3. **Config migration** — detects new config options added since your version and prompts you to set them
-4. **Gateway auto-restart** — if the gateway service is running (systemd on Linux, launchd on macOS), it is **automatically restarted** after the update completes so the new code takes effect immediately
+1. **Pairing-data snapshot** — a lightweight pre-update state snapshot is saved (covers `~/.rok/pairing/`, Feishu comment rules, and other state files that get modified at runtime). Recoverable via the snapshot restore flow described under [Snapshots and rollback](../user-guide/checkpoints-and-rollback.md), or by extracting the most recent quick-snapshot zip Rok wrote next to your `~/.rok/` directory.
+2. **Git pull** — pulls the latest code from the `main` branch and updates submodules
+3. **Dependency install** — runs `uv pip install -e ".[all]"` to pick up new or changed dependencies
+4. **Config migration** — detects new config options added since your version and prompts you to set them
+5. **Gateway auto-restart** — running gateways are refreshed after the update completes so the new code takes effect immediately. Service-managed gateways (systemd on Linux, launchd on macOS) are restarted through the service manager. Manual gateways are relaunched automatically when Rok can map the running PID back to a profile.
+
+### Preview-only: `rok update --check`
+
+Want to know if an update is available before pulling? Run `rok update --check` — for git installs it fetches and compares commits against `origin/main`; for pip installs it queries PyPI for the latest release. No files are modified, no gateway is restarted. Useful in scripts and cron jobs that gate on "is there an update".
+
+### Full pre-update backup: `--backup`
+
+For high-value profiles (production gateways, shared team installs) you can opt into a full pre-pull backup of `ROK_HOME` (config, auth, sessions, skills, pairing):
+
+```bash
+rok update --backup
+```
+
+Or make it the default for every run:
+
+```yaml
+# ~/.rok/config.yaml
+updates:
+  pre_update_backup: true
+```
+
+`--backup` was the always-on behavior in earlier builds, but it was adding minutes to every update on large homes, so it's now opt-in. The lightweight pairing-data snapshot above still runs unconditionally.
 
 Expected output looks like:
 
@@ -40,7 +80,7 @@ Already up to date.  (or: Updating abc1234..def5678)
 ✅ Dependencies updated
 🔍 Checking for new config options...
 ✅ Config is up to date  (or: Found 2 new options — running migration...)
-🔄 Restarting gateway service...
+🔄 Restarting gateways...
 ✅ Gateway restarted
 ✅ Rok Agent updated successfully!
 ```
@@ -59,43 +99,52 @@ Already up to date.  (or: Updating abc1234..def5678)
 If `git status --short` shows unexpected changes after `rok update`, stop and inspect them before continuing. This usually means local modifications were reapplied on top of the updated code, or a dependency step refreshed lockfiles.
 :::
 
+### If your terminal disconnects mid-update
+
+`rok update` protects itself against accidental terminal loss:
+
+- The update ignores `SIGHUP`, so closing your SSH session or terminal window no longer kills it mid-install. `pip` and `git` child processes inherit this protection, so the Python environment cannot be left half-installed by a dropped connection.
+- All output is mirrored to `~/.rok/logs/update.log` while the update runs. If your terminal disappears, reconnect and inspect the log to see whether the update finished and whether the gateway restart succeeded:
+
+```bash
+tail -f ~/.rok/logs/update.log
+```
+
+- `Ctrl-C` (SIGINT) and system shutdown (SIGTERM) are still honored — those are deliberate cancellations, not accidents.
+
+You no longer need to wrap `rok update` in `screen` or `tmux` to survive a terminal drop.
+
 ### Checking your current version
 
 ```bash
 rok version
 ```
 
-Compare against the latest release at the [GitHub releases page](https://github.com/RokctAI/rok/releases) or check for available updates:
-
-```bash
-rok update --check
-```
+Compare against the latest release at the [GitHub releases page](https://github.com/RokctAI/rok-agent/releases).
 
 ### Updating from Messaging Platforms
 
-You can also update directly from Telegram, Discord, Slack, or WhatsApp by sending:
+You can also update directly from Telegram, Discord, Slack, WhatsApp, or Teams by sending:
 
 ```
 /update
 ```
 
-This pulls the latest code, updates dependencies, and restarts the gateway. The bot will briefly go offline during the restart (typically 5–15 seconds) and then resume.
+This pulls the latest code, updates dependencies, and restarts running gateways. The bot will briefly go offline during the restart (typically 5–15 seconds) and then resume.
 
 ### Manual Update
 
 If you installed manually (not via the quick installer):
 
 ```bash
-cd /path/to/rok
+cd /path/to/rok-agent
 export VIRTUAL_ENV="$(pwd)/venv"
 
-# Pull latest code and submodules
+# Pull latest code
 git pull origin main
-git submodule update --init --recursive
 
 # Reinstall (picks up new dependencies)
 uv pip install -e ".[all]"
-uv pip install -e "./tinker-atropos"
 
 # Check for new config options
 rok config check
@@ -107,7 +156,7 @@ rok config migrate   # Interactively add any missing options
 If an update introduces a problem, you can roll back to a previous version:
 
 ```bash
-cd /path/to/rok
+cd /path/to/rok-agent
 
 # List recent versions
 git log --oneline -10
@@ -139,10 +188,10 @@ If you installed via Nix flake, updates are managed through the Nix package mana
 
 ```bash
 # Update the flake input
-nix flake update rok
+nix flake update rok-agent
 
 # Or rebuild with the latest
-nix profile upgrade rok
+nix profile upgrade rok-agent
 ```
 
 Nix installations are immutable — rollback is handled by Nix's generation system:
@@ -157,17 +206,26 @@ See [Nix Setup](./nix-setup.md) for more details.
 
 ## Uninstalling
 
+### Git installs
+
 ```bash
 rok uninstall
 ```
 
 The uninstaller gives you the option to keep your configuration files (`~/.rok/`) for a future reinstall.
 
+### pip installs
+
+```bash
+pip uninstall rok-agent
+rm -rf ~/.rok            # Optional — keep if you plan to reinstall
+```
+
 ### Manual Uninstall
 
 ```bash
 rm -f ~/.local/bin/rok
-rm -rf /path/to/rok
+rm -rf /path/to/rok-agent
 rm -rf ~/.rok            # Optional — keep if you plan to reinstall
 ```
 

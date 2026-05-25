@@ -1,82 +1,151 @@
+C:\Users\sinya\Desktop\RokctAI\ROK\.dockerignore:14: # that now depends on the full ui-tui/packages/hermes-ink/ tree being present.
+C:\Users\sinya\Desktop\RokctAI\ROK\.dockerignore:16: ui-tui/packages/hermes-ink/dist/
+C:\Users\sinya\Desktop\RokctAI\ROK\.dockerignore:30: hermes-config/
 C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:1: # Hermes Agent Environment Configuration
 C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:12: # Default model is configured in ~/.hermes/config.yaml (model.default).
 C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:13: # Use 'hermes model' or 'hermes setup' to change it.
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:91: # HERMES_QWEN_BASE_URL=https://portal.qwen.ai/v1
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:133: # Terminal backend is configured in ~/.hermes/config.yaml (terminal.backend).
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:134: # Use 'hermes setup' or 'hermes config set terminal.backend docker' to change.
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:278: # WhatsApp (built-in Baileys bridge — run `hermes whatsapp` to pair)
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:282: # Email (IMAP/SMTP — send and receive emails as Hermes)
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:284: # EMAIL_ADDRESS=hermes@gmail.com
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:303: # HERMES_HUMAN_DELAY_MODE=off     # off | natural | custom
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:304: # HERMES_HUMAN_DELAY_MIN_MS=800   # Min delay in ms (custom mode)
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:305: # HERMES_HUMAN_DELAY_MAX_MS=2500  # Max delay in ms (custom mode)
-C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:321: # Context compression is configured in ~/.hermes/config.yaml under compression:
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:116: # HERMES_QWEN_BASE_URL=https://portal.qwen.ai/v1
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:170: # Terminal backend is configured in ~/.hermes/config.yaml (terminal.backend).
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:171: # Use 'hermes setup' or 'hermes config set terminal.backend docker' to change.
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:179: # HERMES_DOCKER_BINARY=/usr/local/bin/podman
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:285: # Hermes auto-injects "--no-sandbox,--disable-dev-shm-usage" when it detects root
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:297: # Camofox browser, set these so Hermes shares the same userId/profile instead
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:349: # WhatsApp (built-in Baileys bridge — run `hermes whatsapp` to pair)
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:353: # Email (IMAP/SMTP — send and receive emails as Hermes)
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:355: # EMAIL_ADDRESS=hermes@gmail.com
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:374: # HERMES_HUMAN_DELAY_MODE=off     # off | natural | custom
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:375: # HERMES_HUMAN_DELAY_MIN_MS=800   # Min delay in ms (custom mode)
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:376: # HERMES_HUMAN_DELAY_MAX_MS=2500  # Max delay in ms (custom mode)
+C:\Users\sinya\Desktop\RokctAI\ROK\.env.example:392: # Context compression is configured in ~/.hermes/config.yaml under compression:
+C:\Users\sinya\Desktop\RokctAI\ROK\.mailmap:15: Teknium <127238744+teknium1@users.noreply.github.com> <teknium@nousresearch.com>
+C:\Users\sinya\Desktop\RokctAI\ROK\.mailmap:76: emozilla <emozilla@nousresearch.com> <emozilla@nousresearch.com>
+C:\Users\sinya\Desktop\RokctAI\ROK\.mailmap:88: benbarclay <ben@nousresearch.com> <ben@nousresearch.com>
+C:\Users\sinya\Desktop\RokctAI\ROK\.mailmap:89: jquesnelle <jonny@nousresearch.com> <jonny@nousresearch.com>
 C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1: # Hermes Agent CLI Configuration
 C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:16: #   "nous"         - Nous Portal OAuth (requires: hermes login)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:19: #   "openai-codex" - OpenAI Codex (requires: hermes login --provider openai-codex)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:45: # Can also be overridden with --provider flag or HERMES_INFERENCE_PROVIDER env var.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:55: #   Controls when Hermes compresses history and validates requests.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:56: #   Leave unset — Hermes auto-detects the correct value from the provider.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:132: #   - CLI (`hermes` command): Uses "." (current directory where you run hermes)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:171: #   # These values come from your current shell first, then ~/.hermes/.env.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:240: # from leaving it unset. Hermes will try an empty password via `sudo -S` and
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:318: # Hermes uses lightweight "auxiliary" models for side tasks: image analysis,
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:337: #   "nous"       - Force Nous Portal (requires: hermes login)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:339: #   "codex"       - Force Codex OAuth (requires: hermes model → Codex).
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:451: # copying them into ~/.hermes/skills/.  Each path is expanded (~ and ${VAR})
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:453: # creation always writes to ~/.hermes/skills/.  Local skills take precedence
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:501: pirate: "Arrr! Ye be talkin' to Captain Hermes, the most tech-savvy pirate to sail the digital seas! Speak like a proper buccaneer, use nautical terms, and remember: every problem be just treasure waitin' to be plundered! Yo ho ho!"
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:504: noir: "The rain hammered against the terminal like regrets on a guilty conscience. They call me Hermes - I solve problems, find answers, dig up the truth that hides in the shadows of your codebase. In this city of silicon and secrets, everyone's got something to hide. What's your story, pal?"
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:513: # Use `hermes tools` to interactively enable/disable tools per platform.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:522: #   - A preset like "hermes-cli" or "hermes-telegram" (curated tool set)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:531: #     cli: [hermes-cli]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:532: #     telegram: [hermes-telegram]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:547: #   cli:           hermes-cli            (everything + cronjob management)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:548: #   telegram:      hermes-telegram       (terminal, file, web, vision, image, tts, browser, skills, todo, cronjob, messaging)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:549: #   discord:       hermes-discord        (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:550: #   whatsapp:      hermes-whatsapp       (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:551: #   slack:         hermes-slack          (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:552: #   signal:        hermes-signal         (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:553: #   homeassistant: hermes-homeassistant  (same as telegram)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:556: cli: [hermes-cli]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:557: telegram: [hermes-telegram]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:558: discord: [hermes-discord]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:559: whatsapp: [hermes-whatsapp]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:560: slack: [hermes-slack]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:561: signal: [hermes-signal]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:562: homeassistant: [hermes-homeassistant]
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:567: # Run `hermes chat --list-toolsets` to see all toolsets and their tools.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:568: # Run `hermes chat --list-tools` to see every individual tool with descriptions.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:590: #   hermes-cli       - All of the above except rl + send_message
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:591: #   hermes-telegram  - terminal, file, web, vision, image_gen, tts, browser,
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:593: #   hermes-discord   - Same as hermes-telegram
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:594: #   hermes-whatsapp  - Same as hermes-telegram
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:595: #   hermes-slack     - Same as hermes-telegram
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:624: # Use `hermes tools` to configure interactively, or edit platform_toolsets directly.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:626: # CLI override: hermes chat --toolsets terminal,web,file
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:722: # The execute_code tool runs Python scripts that call Hermes tools via RPC.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:750: # API key: HONCHO_API_KEY in ~/.hermes/.env or ~/.honcho/config.json
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:752: # Hermes-specific overrides (optional — most config comes from ~/.honcho/config.json):
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:775: # What Enter does when Hermes is already busy in the CLI.
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:776: #   interrupt: Interrupt the current run and redirect Hermes (default)
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:814: #   default  — Classic Hermes gold/kawaii
-C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:819: # Custom skins: drop a YAML file in ~/.hermes/skins/<name>.yaml
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:19: #   "openai-codex" - OpenAI Codex (requires: hermes auth)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:41: # Can also be overridden with --provider flag or HERMES_INFERENCE_PROVIDER env var.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:51: #   Controls when Hermes compresses history and validates requests.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:52: #   Leave unset — Hermes auto-detects the correct value from the provider.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:75: # HERMES_API_TIMEOUT env var (which still applies when no config is set).
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:77: # wins over the legacy HERMES_API_CALL_STALE_TIMEOUT env var. Leaving these
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:78: # unset keeps the legacy defaults (HERMES_API_TIMEOUT=1800s,
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:79: # HERMES_API_CALL_STALE_TIMEOUT=300s, native Anthropic 900s).
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:157: #   - CLI (`hermes` command): Uses "." (current directory where you run hermes)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:201: #   # These values come from your current shell first, then ~/.hermes/.env.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:276: # from leaving it unset. Hermes will try an empty password via `sudo -S` and
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:395: # Hermes uses lightweight "auxiliary" models for side tasks: image analysis,
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:414: #   "nous"       - Force Nous Portal (requires: hermes login)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:417: #   "codex"       - Force Codex OAuth (requires: hermes model → Codex).
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:542: # copying them into ~/.hermes/skills/.  Each path is expanded (~ and ${VAR})
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:544: # creation always writes to ~/.hermes/skills/.  Local skills take precedence
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:579: # underneath this wrapper — this is the Hermes-level loop.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:599: pirate: "Arrr! Ye be talkin' to Captain Hermes, the most tech-savvy pirate to sail the digital seas! Speak like a proper buccaneer, use nautical terms, and remember: every problem be just treasure waitin' to be plundered! Yo ho ho!"
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:602: noir: "The rain hammered against the terminal like regrets on a guilty conscience. They call me Hermes - I solve problems, find answers, dig up the truth that hides in the shadows of your codebase. In this city of silicon and secrets, everyone's got something to hide. What's your story, pal?"
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:611: # Use `hermes tools` to interactively enable/disable tools per platform.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:620: #   - A preset like "hermes-cli" or "hermes-telegram" (curated tool set)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:629: #     cli: [hermes-cli]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:630: #     telegram: [hermes-telegram]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:645: #   cli:           hermes-cli            (everything + cronjob management)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:646: #   telegram:      hermes-telegram       (terminal, file, web, vision, image, tts, browser, skills, todo, cronjob, messaging)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:647: #   discord:       hermes-discord        (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:648: #   whatsapp:      hermes-whatsapp       (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:649: #   slack:         hermes-slack          (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:650: #   signal:        hermes-signal         (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:651: #   homeassistant: hermes-homeassistant  (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:652: #   qqbot:            hermes-qqbot            (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:653: #   teams:            hermes-teams            (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:654: #   google_chat:      hermes-google_chat      (same as telegram)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:657: cli: [hermes-cli]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:658: telegram: [hermes-telegram]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:659: discord: [hermes-discord]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:660: whatsapp: [hermes-whatsapp]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:661: slack: [hermes-slack]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:662: signal: [hermes-signal]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:663: homeassistant: [hermes-homeassistant]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:664: qqbot: [hermes-qqbot]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:665: yuanbao: [hermes-yuanbao]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:666: teams: [hermes-teams]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:667: google_chat: [hermes-google_chat]
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:698: # Run `hermes chat --list-toolsets` to see all toolsets and their tools.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:699: # Run `hermes chat --list-tools` to see every individual tool with descriptions.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:720: #   hermes-cli       - All of the above except send_message
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:721: #   hermes-telegram  - terminal, file, web, vision, image_gen, tts, browser,
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:723: #   hermes-discord   - Same as hermes-telegram
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:724: #   hermes-whatsapp  - Same as hermes-telegram
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:725: #   hermes-slack     - Same as hermes-telegram
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:753: # Use `hermes tools` to configure interactively, or edit platform_toolsets directly.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:755: # CLI override: hermes chat --toolsets terminal,web,file
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:851: # The execute_code tool runs Python scripts that call Hermes tools via RPC.
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:889: # API key: HONCHO_API_KEY in ~/.hermes/.env or ~/.honcho/config.json
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:891: # Hermes-specific overrides (optional — most config comes from ~/.honcho/config.json):
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:934: # What Enter does when Hermes is already busy (CLI and gateway platforms).
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:935: #   interrupt: Interrupt the current run and redirect Hermes (default)
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:986: #   default        — Classic Hermes gold/kawaii
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:996: # Custom skins: drop a YAML file in ~/.hermes/skins/<name>.yaml
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1065: # Valid events (mirror hermes_cli.plugins.VALID_HOOKS):
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1071: # is persisted to ~/.hermes/shell-hooks-allowlist.json.  Non-interactive
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1072: # runs (gateway, cron) need --accept-hooks, HERMES_ACCEPT_HOOKS=1, or the
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1081: #       command: "~/.hermes/agent-hooks/block-rm-rf.sh"
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1085: #       command: "~/.hermes/agent-hooks/auto-format.sh"
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1087: #     - command: "~/.hermes/agent-hooks/inject-cwd-context.sh"
+C:\Users\sinya\Desktop\RokctAI\ROK\cli-config.yaml.example:1089: #     - command: "~/.hermes/agent-hooks/log-orchestration.sh"
 C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:10: ENV PLAYWRIGHT_BROWSERS_PATH=/opt/hermes/.playwright
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:18: # Non-root user for runtime; UID can be overridden via HERMES_UID at runtime
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:19: RUN useradd -u 10000 -m -d /opt/data hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:24: COPY . /opt/hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:25: WORKDIR /opt/hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:30: cd /opt/hermes/scripts/whatsapp-bridge && \
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:34: # Hand ownership to hermes user, then install Python deps in a virtualenv
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:35: RUN chown -R hermes:hermes /opt/hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:36: USER hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:42: RUN chmod +x /opt/hermes/docker/entrypoint.sh
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:44: ENV HERMES_HOME=/opt/data
-C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:46: ENTRYPOINT [ "/opt/hermes/docker/entrypoint.sh" ]
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:14: # that would otherwise accumulate when hermes runs as PID 1. See #15012.
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:20: # Non-root user for runtime; UID can be overridden via HERMES_UID at runtime
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:21: RUN useradd -u 10000 -m -d /opt/data hermes
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:26: WORKDIR /opt/hermes
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:32: # ui-tui/packages/hermes-ink/ is copied IN FULL (not just its manifests)
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:39: COPY ui-tui/packages/hermes-ink/ ui-tui/packages/hermes-ink/
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:46: # that permanently disagrees with the root lock on the @hermes/ink entry.
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:83: COPY --chown=hermes:hermes . .
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:90: # Make install dir world-readable so any HERMES_UID can read it at runtime.
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:92: # node_modules trees additionally need to be writable by the hermes user
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:94: # hermes_cli/main.py succeeds (see #18800). /opt/hermes/web is build-time
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:95: # only (HERMES_WEB_DIST points at hermes_cli/web_dist) and is intentionally
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:97: # The .venv MUST be hermes-writable so lazy_deps.py can install platform
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:102: RUN chmod -R a+rX /opt/hermes && \
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:103: chown -R hermes:hermes /opt/hermes/.venv /opt/hermes/ui-tui /opt/hermes/node_modules
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:105: # If HERMES_UID is unset, the entrypoint drops to the default hermes user (10000).
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:107: # ---------- Link hermes-agent itself (editable) ----------
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:113: ENV HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:114: ENV HERMES_HOME=/opt/data
+C:\Users\sinya\Desktop\RokctAI\ROK\Dockerfile:117: ENTRYPOINT [ "/usr/bin/tini", "-g", "--", "/opt/hermes/docker/entrypoint.sh" ]
 C:\Users\sinya\Desktop\RokctAI\ROK\rok:3: Hermes Agent CLI launcher.
 C:\Users\sinya\Desktop\RokctAI\ROK\rok:5: This wrapper should behave like the installed `hermes` command, including
 C:\Users\sinya\Desktop\RokctAI\ROK\rok:10: from hermes_cli.main import main
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:2: # into ~/.hermes/node/ for use by Hermes Agent's browser tools on Windows.
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:4: # Targets the registry-install path: users who got Hermes via
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:5: # `uvx --from 'hermes-agent[acp]==X' hermes-acp` don't have a repo clone,
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:38: $HermesHome = $env:HERMES_HOME
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:39: if (-not $HermesHome) {
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:40: $HermesHome = Join-Path $env:USERPROFILE ".hermes"
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:42: $NodePrefix = Join-Path $HermesHome "node"
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:89: # Hermes-managed Node?
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:93: Write-Success "Node.js $v found (Hermes-managed at $NodePrefix)"
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:114: $tmpDir = Join-Path $env:TEMP "hermes-node-$([guid]::NewGuid().ToString('N'))"
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:127: New-Item -ItemType Directory -Force -Path $HermesHome | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:162: # prefix to the user-writable Hermes-managed Node directory so we never
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:209: $envFile = Join-Path $HermesHome ".env"
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:210: New-Item -ItemType Directory -Force -Path $HermesHome | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:218: Add-Content -Path $envFile -Value "# Hermes Agent browser tools — use the system Chrome/Chromium/Edge binary."
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:279: Write-Info "Hermes Agent: bootstrapping browser tools"
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:280: Write-Info "  HERMES_HOME = $HermesHome"
+C:\Users\sinya\Desktop\RokctAI\ROK\acp_adapter\bootstrap\bootstrap_browser_tools.ps1:288: Write-Info "Hermes Agent will pick up agent-browser from $NodePrefix on next launch."
 C:\Users\sinya\Desktop\RokctAI\ROK\datagen-config-examples\example_browser_tasks.jsonl:2: {"prompt": "Navigate to https://en.wikipedia.org/wiki/Hermes and extract the first paragraph of the article, the image caption, and the list of items in the infobox. Summarize what you find."}
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:24: local kc_account="${2:-hermes}"
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:26: if grep -q "^${var}=" "$HOME/.hermes/.env" 2>/dev/null && \
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:27: [ -n "$(grep "^${var}=" "$HOME/.hermes/.env" | cut -d= -f2-)" ]; then
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:36: echo "  ✗ ${var} not set in ~/.hermes/.env or Keychain (${kc_account}/${kc_service})"
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:52: # 3. Create Hermes profiles
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:54: echo "═══ Creating Hermes profiles ═══"
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:68: """Patch a Hermes profile config.yaml using PyYAML so we don't depend on the
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:85: p = os.path.expanduser(f"~/.hermes/profiles/{profile}/config.yaml")
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:100: # per-task by `--workspace dir:<path>` on `hermes kanban create`, so we
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:156: hermes kanban create "Direct production of {{TITLE}}" \
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:181: echo "  hermes kanban watch --tenant $TENANT"
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:182: echo "  hermes kanban list  --tenant $TENANT"
+C:\Users\sinya\Desktop\RokctAI\ROK\optional-skills\creative\kanban-video-orchestrator\assets\setup.sh.tmpl:183: echo "  hermes dashboard"
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:1: class HermesAgent < Formula
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:5: homepage "https://hermes-agent.nousresearch.com"
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:8: url "https://github.com/NousResearch/hermes-agent/releases/download/v2026.3.30/hermes_agent-0.6.0.tar.gz"
@@ -88,6 +157,13 @@ C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:36: HERMES_MA
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:42: assert_match "Hermes Agent v#{version}", shell_output("#{bin}/hermes version")
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:44: managed = shell_output("#{bin}/hermes update 2>&1")
 C:\Users\sinya\Desktop\RokctAI\ROK\packaging\homebrew\rok-agent.rb:46: assert_match "brew upgrade hermes-agent", managed
+C:\Users\sinya\Desktop\RokctAI\ROK\plugins\kanban\systemd\rok-kanban-dispatcher.service:5: #     systemctl --user disable --now hermes-kanban-dispatcher.service
+C:\Users\sinya\Desktop\RokctAI\ROK\plugins\kanban\systemd\rok-kanban-dispatcher.service:7: #     # for `hermes gateway start`. The gateway hosts the dispatcher.
+C:\Users\sinya\Desktop\RokctAI\ROK\plugins\kanban\systemd\rok-kanban-dispatcher.service:17: Description=Hermes Kanban dispatcher (DEPRECATED standalone daemon — prefer gateway-embedded dispatch)
+C:\Users\sinya\Desktop\RokctAI\ROK\plugins\kanban\systemd\rok-kanban-dispatcher.service:18: Documentation=https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban
+C:\Users\sinya\Desktop\RokctAI\ROK\plugins\kanban\systemd\rok-kanban-dispatcher.service:23: ExecStart=/usr/bin/env hermes kanban daemon --force --interval 60 --pidfile %t/hermes-kanban-dispatcher.pid
+C:\Users\sinya\Desktop\RokctAI\ROK\plugins\kanban\systemd\rok-kanban-dispatcher.service:27: # worker output to $HERMES_HOME/kanban/logs/<task>.log.
+C:\Users\sinya\Desktop\RokctAI\ROK\plugins\rok-achievements\LICENSE:3: Copyright (c) 2026 Hermes Achievements contributors
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.cmd:3: REM Hermes Agent Installer for Windows (CMD wrapper)
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.cmd:15: echo  Hermes Agent Installer
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:2: # Hermes Agent Installer for Windows
@@ -96,90 +172,127 @@ C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:20: [string]$InstallDir =
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:29: $RepoUrlSsh = "git@github.com:NousResearch/hermes-agent.git"
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:30: $RepoUrlHttps = "https://github.com/NousResearch/hermes-agent.git"
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:41: Write-Host "│             ⚕ Hermes Agent Installer                    │" -ForegroundColor Magenta
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:220: $managedNode = "$HermesHome\node\node.exe"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:223: $env:Path = "$HermesHome\node;$env:Path"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:224: Write-Success "Node.js $version found (Hermes-managed)"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:247: # Fallback: download binary zip to ~/.hermes/node/
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:258: $tmpDir = "$env:TEMP\hermes-node-extract"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:266: if (Test-Path "$HermesHome\node") { Remove-Item -Recurse -Force "$HermesHome\node" }
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:267: Move-Item $extractedDir.FullName "$HermesHome\node"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:268: $env:Path = "$HermesHome\node;$env:Path"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:270: $version = & "$HermesHome\node\node.exe" --version
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:271: Write-Success "Node.js $version installed to ~/.hermes/node/"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:464: $zipUrl = "https://github.com/NousResearch/hermes-agent/archive/refs/heads/$Branch.zip"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:465: $zipPath = "$env:TEMP\hermes-agent-$Branch.zip"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:466: $extractPath = "$env:TEMP\hermes-agent-extract"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:581: Write-Info "Setting up hermes command..."
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:584: $hermesBin = "$InstallDir"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:586: $hermesBin = "$InstallDir\venv\Scripts"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:589: # Add the venv Scripts dir to user PATH so hermes is globally available
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:590: # On Windows, the hermes.exe in venv\Scripts\ has the venv Python baked in
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:593: if ($currentPath -notlike "*$hermesBin*") {
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:596: "$hermesBin;$currentPath",
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:599: Write-Success "Added to user PATH: $hermesBin"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:604: # Set HERMES_HOME so the Python code finds config/data in the right place.
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:605: # Only needed on Windows where we install to %LOCALAPPDATA%\hermes instead
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:606: # of the Unix default ~/.hermes
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:607: $currentHermesHome = [Environment]::GetEnvironmentVariable("HERMES_HOME", "User")
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:608: if (-not $currentHermesHome -or $currentHermesHome -ne $HermesHome) {
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:609: [Environment]::SetEnvironmentVariable("HERMES_HOME", $HermesHome, "User")
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:610: Write-Success "Set HERMES_HOME=$HermesHome"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:612: $env:HERMES_HOME = $HermesHome
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:615: $env:Path = "$hermesBin;$env:Path"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:617: Write-Success "hermes command ready"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:623: # Create ~/.hermes directory structure
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:624: New-Item -ItemType Directory -Force -Path "$HermesHome\cron" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:625: New-Item -ItemType Directory -Force -Path "$HermesHome\sessions" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:626: New-Item -ItemType Directory -Force -Path "$HermesHome\logs" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:627: New-Item -ItemType Directory -Force -Path "$HermesHome\pairing" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:628: New-Item -ItemType Directory -Force -Path "$HermesHome\hooks" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:629: New-Item -ItemType Directory -Force -Path "$HermesHome\image_cache" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:630: New-Item -ItemType Directory -Force -Path "$HermesHome\audio_cache" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:631: New-Item -ItemType Directory -Force -Path "$HermesHome\memories" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:632: New-Item -ItemType Directory -Force -Path "$HermesHome\skills" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:633: New-Item -ItemType Directory -Force -Path "$HermesHome\whatsapp\session" | Out-Null
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:636: $envPath = "$HermesHome\.env"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:641: Write-Success "Created ~/.hermes/.env from template"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:644: Write-Success "Created ~/.hermes/.env"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:647: Write-Info "~/.hermes/.env already exists, keeping it"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:651: $configPath = "$HermesHome\config.yaml"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:656: Write-Success "Created ~/.hermes/config.yaml from template"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:659: Write-Info "~/.hermes/config.yaml already exists, keeping it"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:663: $soulPath = "$HermesHome\SOUL.md"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:666: # Hermes Agent Persona
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:671: Edit this to customize how Hermes communicates with you.
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:682: Write-Success "Created ~/.hermes/SOUL.md (edit to customize personality)"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:685: Write-Success "Configuration directory ready: ~/.hermes/"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:687: # Seed bundled skills into ~/.hermes/skills/ (manifest-based, one-time per skill)
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:688: Write-Info "Syncing bundled skills to ~/.hermes/skills/ ..."
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:693: Write-Success "Skills synced to ~/.hermes/skills/"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:697: $userSkills = "$HermesHome\skills"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:700: Write-Success "Skills copied to ~/.hermes/skills/"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:753: # Run hermes setup using the venv Python directly (no activation needed)
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:755: & ".\venv\Scripts\python.exe" -m hermes_cli.main setup
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:757: python -m hermes_cli.main setup
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:764: $envPath = "$HermesHome\.env"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:776: $hermesCmd = "$InstallDir\venv\Scripts\hermes.exe"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:777: if (-not (Test-Path $hermesCmd)) {
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:778: $hermesCmd = "hermes"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:783: $whatsappSession = "$HermesHome\whatsapp\session\creds.json"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:787: Write-Info "Running 'hermes whatsapp' to pair via QR code..."
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:792: & $hermesCmd whatsapp
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:808: $logFile = "$HermesHome\logs\gateway.log"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:809: Start-Process -FilePath $hermesCmd -ArgumentList "gateway" `
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:811: -RedirectStandardError "$HermesHome\logs\gateway-error.log" `
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:817: Write-Warn "Failed to start gateway. Run manually: hermes gateway"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:820: Write-Info "Skipped. Start the gateway later with: hermes gateway"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:835: Write-Host "$HermesHome\config.yaml"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:837: Write-Host "$HermesHome\.env"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:839: Write-Host "$HermesHome\cron\, sessions\, logs\"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:841: Write-Host "$HermesHome\hermes-agent\"
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:848: Write-Host "   hermes              " -NoNewline -ForegroundColor Green
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:850: Write-Host "   hermes setup        " -NoNewline -ForegroundColor Green
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:852: Write-Host "   hermes config       " -NoNewline -ForegroundColor Green
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:854: Write-Host "   hermes config edit  " -NoNewline -ForegroundColor Green
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:856: Write-Host "   hermes gateway      " -NoNewline -ForegroundColor Green
-C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:858: Write-Host "   hermes update       " -NoNewline -ForegroundColor Green
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:245: which Hermes uses to run shell commands.
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:252: ``%LOCALAPPDATA%\hermes\git`` — never touches system Git, never
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:258: Hermes needs ``bash.exe`` to run shell commands.  PortableGit is the
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:265: blocked).  Owning the Hermes copy of Git ourselves is predictable and
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:266: recoverable: if it ever breaks, ``Remove-Item %LOCALAPPDATA%\hermes\git``
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:270: ``HERMES_GIT_BASH_PATH`` (User scope) so Hermes can find it in a fresh
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:282: # Download PortableGit into $HermesHome\git.  Always works as long as
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:285: Write-Info "Git not found — downloading PortableGit to $HermesHome\git\ ..."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:303: $release = Invoke-RestMethod -Uri $releaseApi -UseBasicParsing -Headers @{ "User-Agent" = "hermes-installer" }
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:306: Write-Warn "32-bit Windows detected — PortableGit is 64-bit only.  Installing MinGit 32-bit as a last resort; bash-dependent Hermes features (terminal tool, agent-browser) will not work on this machine."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:326: $gitDir = "$HermesHome\git"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:392: Write-Info "then re-run this installer.  Hermes needs Git Bash on Windows to run"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:402: ``HERMES_GIT_BASH_PATH`` (User env scope) so Hermes can find it even before
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:413: #   PortableGit (our default): $HermesHome\git\bin\bash.exe
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:414: #   MinGit (32-bit fallback):  $HermesHome\git\usr\bin\bash.exe
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:415: $candidates += "$HermesHome\git\bin\bash.exe"       # PortableGit layout (primary)
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:416: $candidates += "$HermesHome\git\usr\bin\bash.exe"   # MinGit / PortableGit usr\bin fallback
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:439: [Environment]::SetEnvironmentVariable("HERMES_GIT_BASH_PATH", $candidate, "User")
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:440: $env:HERMES_GIT_BASH_PATH = $candidate
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:441: Write-Info "Set HERMES_GIT_BASH_PATH=$candidate"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:446: Write-Warn "Could not locate bash.exe — Hermes may not find Git Bash."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:447: Write-Info "If needed, set HERMES_GIT_BASH_PATH manually to your bash.exe path."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:461: $managedNode = "$HermesHome\node\node.exe"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:464: $env:Path = "$HermesHome\node;$env:Path"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:465: Write-Success "Node.js $version found (Hermes-managed)"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:488: # Fallback: download binary zip to ~/.hermes/node/
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:499: $tmpDir = "$env:TEMP\hermes-node-extract"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:507: if (Test-Path "$HermesHome\node") { Remove-Item -Recurse -Force "$HermesHome\node" }
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:508: Move-Item $extractedDir.FullName "$HermesHome\node"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:509: $env:Path = "$HermesHome\node;$env:Path"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:511: $version = & "$HermesHome\node\node.exe" --version
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:512: Write-Success "Node.js $version installed to ~/.hermes/node/"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:713: Write-Info "terminals, running hermes processes) and try again."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:755: $zipUrl = "https://github.com/NousResearch/hermes-agent/archive/refs/heads/$Branch.zip"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:756: $zipPath = "$env:TEMP\hermes-agent-$Branch.zip"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:757: $extractPath = "$env:TEMP\hermes-agent-extract"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:867: # empty and producing the broken state where `hermes.exe` exists
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:919: m = re.search(r'hermes-agent\[([\w-]+)\]', s)
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:957: throw "Failed to install hermes-agent package even with no extras. Inspect the uv pip install output above."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:963: # isn't set, leaving venv\ empty and hermes.exe broken with
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:966: # here, not 30 seconds later when the user runs `hermes`.
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:986: # users hit and lazy-import errors from `hermes dashboard` are confusing.
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:997: Write-Warn "fastapi/uvicorn not importable — `hermes dashboard` will not work."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1001: Write-Success "[web] extra installed; `hermes dashboard` should now work."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1014: Write-Info "Setting up hermes command..."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1017: $hermesBin = "$InstallDir"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1019: $hermesBin = "$InstallDir\venv\Scripts"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1022: # Add the venv Scripts dir to user PATH so hermes is globally available
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1023: # On Windows, the hermes.exe in venv\Scripts\ has the venv Python baked in
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1026: if ($currentPath -notlike "*$hermesBin*") {
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1029: "$hermesBin;$currentPath",
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1032: Write-Success "Added to user PATH: $hermesBin"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1037: # Set HERMES_HOME so the Python code finds config/data in the right place.
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1038: # Only needed on Windows where we install to %LOCALAPPDATA%\hermes instead
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1039: # of the Unix default ~/.hermes
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1040: $currentHermesHome = [Environment]::GetEnvironmentVariable("HERMES_HOME", "User")
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1041: if (-not $currentHermesHome -or $currentHermesHome -ne $HermesHome) {
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1042: [Environment]::SetEnvironmentVariable("HERMES_HOME", $HermesHome, "User")
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1043: Write-Success "Set HERMES_HOME=$HermesHome"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1045: $env:HERMES_HOME = $HermesHome
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1048: $env:Path = "$hermesBin;$env:Path"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1050: Write-Success "hermes command ready"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1056: # Create ~/.hermes directory structure
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1057: New-Item -ItemType Directory -Force -Path "$HermesHome\cron" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1058: New-Item -ItemType Directory -Force -Path "$HermesHome\sessions" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1059: New-Item -ItemType Directory -Force -Path "$HermesHome\logs" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1060: New-Item -ItemType Directory -Force -Path "$HermesHome\pairing" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1061: New-Item -ItemType Directory -Force -Path "$HermesHome\hooks" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1062: New-Item -ItemType Directory -Force -Path "$HermesHome\image_cache" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1063: New-Item -ItemType Directory -Force -Path "$HermesHome\audio_cache" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1064: New-Item -ItemType Directory -Force -Path "$HermesHome\memories" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1065: New-Item -ItemType Directory -Force -Path "$HermesHome\skills" | Out-Null
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1069: $envPath = "$HermesHome\.env"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1074: Write-Success "Created ~/.hermes/.env from template"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1077: Write-Success "Created ~/.hermes/.env"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1080: Write-Info "~/.hermes/.env already exists, keeping it"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1084: $configPath = "$HermesHome\config.yaml"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1089: Write-Success "Created ~/.hermes/config.yaml from template"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1092: Write-Info "~/.hermes/config.yaml already exists, keeping it"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1098: # (the default PS5 behaviour), and Hermes's prompt-injection scanner
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1104: $soulPath = "$HermesHome\SOUL.md"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1107: # Hermes Agent Persona
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1112: Edit this to customize how Hermes communicates with you.
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1125: Write-Success "Created ~/.hermes/SOUL.md (edit to customize personality)"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1128: Write-Success "Configuration directory ready: ~/.hermes/"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1130: # Seed bundled skills into ~/.hermes/skills/ (manifest-based, one-time per skill)
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1131: Write-Info "Syncing bundled skills to ~/.hermes/skills/ ..."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1136: Write-Success "Skills synced to ~/.hermes/skills/"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1140: $userSkills = "$HermesHome\skills"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1143: Write-Success "Skills copied to ~/.hermes/skills/"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1169: Write-Info "Open a new PowerShell window and re-run 'hermes setup tools' later."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1231: $browserLog = "$env:TEMP\hermes-npm-browser-$(Get-Random).log"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1258: $pwLog = "$env:TEMP\hermes-playwright-install-$(Get-Random).log"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1296: $tuiLog = "$env:TEMP\hermes-npm-tui-$(Get-Random).log"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1303: # ~/.hermes/.env are importable.  Two problems this solves:
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1328: $envPath = "$HermesHome\.env"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1422: # Run hermes setup using the venv Python directly (no activation needed)
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1424: & ".\venv\Scripts\python.exe" -m hermes_cli.main setup
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1426: python -m hermes_cli.main setup
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1433: $envPath = "$HermesHome\.env"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1445: $hermesCmd = "$InstallDir\venv\Scripts\hermes.exe"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1446: if (-not (Test-Path $hermesCmd)) {
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1447: $hermesCmd = "hermes"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1452: $whatsappSession = "$HermesHome\whatsapp\session\creds.json"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1456: Write-Info "Running 'hermes whatsapp' to pair via QR code..."
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1461: & $hermesCmd whatsapp
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1477: $logFile = "$HermesHome\logs\gateway.log"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1478: Start-Process -FilePath $hermesCmd -ArgumentList "gateway" `
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1480: -RedirectStandardError "$HermesHome\logs\gateway-error.log" `
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1486: Write-Warn "Failed to start gateway. Run manually: hermes gateway"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1489: Write-Info "Skipped. Start the gateway later with: hermes gateway"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1504: Write-Host "$HermesHome\config.yaml"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1506: Write-Host "$HermesHome\.env"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1508: Write-Host "$HermesHome\cron\, sessions\, logs\"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1510: Write-Host "$HermesHome\hermes-agent\"
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1517: Write-Host "   hermes              " -NoNewline -ForegroundColor Green
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1519: Write-Host "   hermes setup        " -NoNewline -ForegroundColor Green
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1521: Write-Host "   hermes config       " -NoNewline -ForegroundColor Green
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1523: Write-Host "   hermes config edit  " -NoNewline -ForegroundColor Green
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1525: Write-Host "   hermes gateway      " -NoNewline -ForegroundColor Green
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\install.ps1:1527: Write-Host "   hermes update       " -NoNewline -ForegroundColor Green
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\rok-gateway:3: Hermes Gateway - Standalone messaging platform integration.
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\rok-gateway:10: ./scripts/hermes-gateway
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\rok-gateway:13: ./scripts/hermes-gateway install
@@ -214,3 +327,10 @@ C:\Users\sinya\Desktop\RokctAI\ROK\scripts\rok-gateway:366: print("Please run ma
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\whatsapp-bridge\allowlist.test.mjs:21: const sessionDir = mkdtempSync(path.join(os.tmpdir(), 'hermes-wa-allowlist-'));
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\whatsapp-bridge\allowlist.test.mjs:35: const sessionDir = mkdtempSync(path.join(os.tmpdir(), 'hermes-wa-allowlist-'));
 C:\Users\sinya\Desktop\RokctAI\ROK\scripts\whatsapp-bridge\allowlist.test.mjs:50: const sessionDir = mkdtempSync(path.join(os.tmpdir(), 'hermes-wa-allowlist-'));
+C:\Users\sinya\Desktop\RokctAI\ROK\scripts\whatsapp-bridge\allowlist.test.mjs:66: const sessionDir = mkdtempSync(path.join(os.tmpdir(), 'hermes-wa-allowlist-'));
+C:\Users\sinya\Desktop\RokctAI\ROK\ui-tui\eslint.config.mjs:89: files: ['packages/hermes-ink/**/*.{ts,tsx}'],
+C:\Users\sinya\Desktop\RokctAI\ROK\ui-tui\scripts\build.mjs:38: // Skip the prebuilt @hermes/ink bundle — esbuild's __esm helper doesn't
+C:\Users\sinya\Desktop\RokctAI\ROK\ui-tui\scripts\build.mjs:41: alias: { '@hermes/ink': resolve(root, 'packages/hermes-ink/src/entry-exports.ts') },
+C:\Users\sinya\Desktop\RokctAI\ROK\ui-tui\scripts\build.mjs:53: // the `node` token, leaving a broken interpreter). The hermes_cli launcher
+C:\Users\sinya\Desktop\RokctAI\ROK\ui-tui\scripts\profile-tui.mjs:7: import { render } from '@hermes/ink'
+C:\Users\sinya\Desktop\RokctAI\ROK\website\docs\user-stories.mdx:3: description: Real stories from the Hermes Agent community — what people are actually building, scraped from X, GitHub, Reddit, Hacker News, YouTube, blogs, and podcasts.

@@ -4,10 +4,11 @@ description: Give Rok phone capabilities without core tool changes. Provision an
 version: 1.0.0
 author: Nous Research
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [telephony, phone, sms, mms, voice, twilio, bland.ai, vapi, calling, texting]
-    related_skills: [find-nearby, google-workspace, agentmail]
+    related_skills: [maps, google-workspace, agentmail]
     category: productivity
 ---
 

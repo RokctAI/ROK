@@ -1,9 +1,10 @@
 ---
 name: native-mcp
-description: Built-in MCP (Model Context Protocol) client that connects to external MCP servers, discovers their tools, and registers them as native Rok Agent tools. Supports stdio and HTTP transports with automatic reconnection, security filtering, and zero-config tool injection.
+description: "MCP client: connect servers, register tools (stdio/HTTP)."
 version: 1.0.0
 author: Rok Agent
 license: MIT
+platforms: [linux, macos, windows]
 metadata:
   rok:
     tags: [MCP, Tools, Integrations]

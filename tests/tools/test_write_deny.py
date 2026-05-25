@@ -33,7 +33,12 @@ class TestWriteDenyExactPaths:
         assert _is_write_denied(path) is True
 
     def test_rok_env(self):
-        path = os.path.join(str(Path.home()), ".rok", ".env")
+        # ``.env`` under the active ROK_HOME (profile-aware, not just
+        # ``~/.rok``) must be write-denied. The hermetic test conftest
+        # points ROK_HOME at a tempdir — resolve via get_rok_home()
+        # to match the denylist.
+        from rok_constants import get_rok_home
+        path = str(get_rok_home() / ".env")
         assert _is_write_denied(path) is True
 
     def test_shell_profiles(self):

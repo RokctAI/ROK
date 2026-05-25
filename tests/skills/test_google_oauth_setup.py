@@ -160,7 +160,9 @@ class TestExchangeAuthCode:
         assert flow.state == "saved-state"
         assert flow.code_verifier == "saved-verifier"
         assert flow.fetch_token_calls == [{"code": "4/test-auth-code"}]
-        assert json.loads(setup_module.TOKEN_PATH.read_text())["token"] == "access-token"
+        saved = json.loads(setup_module.TOKEN_PATH.read_text())
+        assert saved["token"] == "access-token"
+        assert saved["type"] == "authorized_user"
         assert not setup_module.PENDING_AUTH_PATH.exists()
 
     def test_extracts_code_from_redirect_url_and_checks_state(self, setup_module):
@@ -174,6 +176,22 @@ class TestExchangeAuthCode:
 
         flow = FakeFlow.created[-1]
         assert flow.fetch_token_calls == [{"code": "4/extracted-code"}]
+
+    def test_passes_scopes_from_redirect_url_to_flow(self, setup_module):
+        """Callback URL carries space-delimited scope list; Flow must receive it (not full SCOPES)."""
+        setup_module.PENDING_AUTH_PATH.write_text(
+            json.dumps({"state": "saved-state", "code_verifier": "saved-verifier"})
+        )
+        g1 = "https://www.googleapis.com/auth/gmail.readonly"
+        g2 = "https://www.googleapis.com/auth/calendar"
+        from urllib.parse import quote
+
+        scope_q = quote(f"{g1} {g2}", safe="")
+        setup_module.exchange_auth_code(
+            f"http://localhost:1/?code=4/extracted-code&state=saved-state&scope={scope_q}"
+        )
+        flow = FakeFlow.created[-1]
+        assert flow.scopes == [g1, g2]
 
     def test_rejects_state_mismatch(self, setup_module, capsys):
         setup_module.PENDING_AUTH_PATH.write_text(
@@ -238,3 +256,69 @@ class TestExchangeAuthCode:
         assert setup_module.TOKEN_PATH.exists()
         # Pending auth is cleaned up
         assert not setup_module.PENDING_AUTH_PATH.exists()
+
+
+class TestRokConstantsFallback:
+    """Tests for _rok_home.py fallback when rok_constants is unavailable."""
+
+    HELPER_PATH = (
+        Path(__file__).resolve().parents[2]
+        / "skills/productivity/google-workspace/scripts/_rok_home.py"
+    )
+
+    def _load_helper(self, monkeypatch):
+        """Load _rok_home.py with rok_constants blocked."""
+        monkeypatch.setitem(sys.modules, "rok_constants", None)
+        spec = importlib.util.spec_from_file_location("_rok_home_test", self.HELPER_PATH)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        return module
+
+    def test_fallback_uses_rok_home_env_var(self, monkeypatch, tmp_path):
+        """When rok_constants is missing, ROK_HOME comes from env var."""
+        monkeypatch.setenv("ROK_HOME", str(tmp_path / "custom-rok"))
+        module = self._load_helper(monkeypatch)
+        assert module.get_rok_home() == tmp_path / "custom-rok"
+
+    def test_fallback_defaults_to_dot_rok(self, monkeypatch):
+        """When rok_constants is missing and ROK_HOME unset, default to ~/.rok."""
+        monkeypatch.delenv("ROK_HOME", raising=False)
+        module = self._load_helper(monkeypatch)
+        assert module.get_rok_home() == Path.home() / ".rok"
+
+    def test_fallback_ignores_empty_rok_home(self, monkeypatch):
+        """Empty/whitespace ROK_HOME is treated as unset."""
+        monkeypatch.setenv("ROK_HOME", "  ")
+        module = self._load_helper(monkeypatch)
+        assert module.get_rok_home() == Path.home() / ".rok"
+
+    def test_fallback_display_rok_home_shortens_path(self, monkeypatch):
+        """Fallback display_rok_home() uses ~/ shorthand like the real one."""
+        monkeypatch.delenv("ROK_HOME", raising=False)
+        module = self._load_helper(monkeypatch)
+        assert module.display_rok_home() == "~/.rok"
+
+    def test_fallback_display_rok_home_profile_path(self, monkeypatch):
+        """Fallback display_rok_home() handles profile paths under ~/."""
+        monkeypatch.setenv("ROK_HOME", str(Path.home() / ".rok/profiles/coder"))
+        module = self._load_helper(monkeypatch)
+        assert module.display_rok_home() == "~/.rok/profiles/coder"
+
+    def test_fallback_display_rok_home_custom_path(self, monkeypatch):
+        """Fallback display_rok_home() returns full path for non-home locations."""
+        monkeypatch.setenv("ROK_HOME", "/opt/rok-custom")
+        module = self._load_helper(monkeypatch)
+        assert module.display_rok_home() == "/opt/rok-custom"
+
+    def test_delegates_to_rok_constants_when_available(self):
+        """When rok_constants IS importable, _rok_home delegates to it."""
+        spec = importlib.util.spec_from_file_location(
+            "_rok_home_happy", self.HELPER_PATH
+        )
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        import rok_constants
+        assert module.get_rok_home is rok_constants.get_rok_home
+        assert module.display_rok_home is rok_constants.display_rok_home

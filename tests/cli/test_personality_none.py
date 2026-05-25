@@ -144,6 +144,18 @@ class TestGatewayPersonalityNone:
 
         assert "none" in result.lower()
 
+    @pytest.mark.asyncio
+    async def test_empty_personality_list_uses_profile_display_path(self, tmp_path):
+        runner = self._make_runner(personalities={})
+        (tmp_path / "config.yaml").write_text(yaml.dump({"agent": {"personalities": {}}}))
+
+        with patch("gateway.run._rok_home", tmp_path), \
+             patch("rok_constants.display_rok_home", return_value="~/.rok/profiles/coder"):
+            event = self._make_event("")
+            result = await runner._handle_personality_command(event)
+
+        assert result == "No personalities configured in `~/.rok/profiles/coder/config.yaml`"
+
 
 class TestPersonalityDictFormat:
     """Test dict-format custom personalities with description, tone, style."""
