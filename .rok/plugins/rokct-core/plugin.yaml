@@ -1,0 +1,7 @@
+name: "rokct-core"
+version: "1.0.0"
+description: "ROKCT custom workspace mapper and gateway digest tools"
+author: "ROKCT Team"
+provides_tools:
+  - "workspace_map"
+  - "session_digest"
