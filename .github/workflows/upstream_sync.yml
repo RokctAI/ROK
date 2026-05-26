@@ -1,0 +1,92 @@
+name: Upstream Sync (Weekly)
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Run every Sunday at midnight
+  workflow_dispatch: # Support manual triggering from the GitHub Actions tab
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Sync Upstream Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ROK Main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch Latest Upstream Release Tag
+        id: get-release
+        run: |
+          # Query latest release metadata from the upstream hermes-agent repo
+          RELEASE_JSON=$(curl -s https://api.github.com/repos/NousResearch/hermes-agent/releases/latest)
+          TAG=$(echo "$RELEASE_JSON" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          if [ -z "$TAG" ]; then
+            echo "Error: Could not retrieve latest release tag from upstream."
+            exit 1
+          fi
+          echo "Latest upstream tag is: $TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          # Download the source code tarball
+          curl -L -o release.tar.gz "https://github.com/NousResearch/hermes-agent/archive/refs/tags/${TAG}.tar.gz"
+
+      - name: Clean Main Branch (Exclude .github and .rokct)
+        run: |
+          echo "🧹 Cleaning main branch files..."
+          # Delete everything in the working directory except git metadata, workflow files, .rokct folder, and the downloaded release tarball
+          find . -maxdepth 1 ! -name '.' ! -name '..' ! -name '.git' ! -name '.github' ! -name '.rokct' ! -name 'release.tar.gz' -exec rm -rf {} +
+          echo "Working directory cleaned. Current files:"
+          ls -la
+
+      - name: Extract Latest Upstream Release
+        run: |
+          echo "📦 Extracting release contents..."
+          tar -xzf release.tar.gz --strip-components=1
+          rm release.tar.gz
+          echo "Extraction complete. Current files:"
+          ls -la
+
+      - name: Run Washlist Rebranding sweeps
+        run: |
+          echo "🧼 Running Washlist rebranding sweeps..."
+          python .rokct/.washlist/washlist_run.py
+
+      - name: Commit and Push Upstream Updates to Main
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "chore: sync upstream latest release (${{ steps.get-release.outputs.tag }})"
+            git push origin main
+          else
+            echo "No changes found. Already up-to-date with upstream."
+          fi
+
+      - name: Create Pull Request to Rokct
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Verify if the head branch (main) is ahead of the base branch (rokct)
+          # Check if an open PR already exists from main to rokct
+          PR_EXISTS=$(gh pr list --head main --base rokct --state open --json number -q '.[0].number')
+          if [ -z "$PR_EXISTS" ]; then
+            echo "🚀 Creating Pull Request to branch 'rokct'..."
+            gh pr create \
+              --title "chore: merge upstream latest release (${{ steps.get-release.outputs.tag }}) into rokct" \
+              --body "### Upstream Release Synchronization
+              
+              This is an automated weekly Pull Request syncing the latest release from upstream **NousResearch/hermes-agent** (${{ steps.get-release.outputs.tag }}).
+              
+              All custom ROKCT features (plugins, Docker security gating, and visual formatters) are built using **Zero-Invasive Overrides (ZIO)**, so this PR should merge cleanly without conflicts." \
+              --head main \
+              --base rokct
+          else
+            echo "⚠️ An open Pull Request already exists: #$PR_EXISTS. Skipping PR creation."
+          fi
