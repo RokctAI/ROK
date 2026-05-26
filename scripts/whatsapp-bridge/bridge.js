@@ -52,9 +52,24 @@ const PAIR_ONLY = args.includes('--pair-only');
 const WHATSAPP_MODE = getArg('mode', process.env.WHATSAPP_MODE || 'self-chat'); // "bot" or "self-chat"
 const ALLOWED_USERS = parseAllowedUsers(process.env.WHATSAPP_ALLOWED_USERS || '');
 const DEFAULT_REPLY_PREFIX = '⚕ *Rok Agent*\n────────────\n';
-const REPLY_PREFIX = process.env.WHATSAPP_REPLY_PREFIX === undefined
+let REPLY_PREFIX = process.env.WHATSAPP_REPLY_PREFIX === undefined
   ? DEFAULT_REPLY_PREFIX
   : process.env.WHATSAPP_REPLY_PREFIX.replace(/\\n/g, '\n');
+
+// --- Visual Formatters Dynamic Overrides (ZIO) ---
+let formatCard = (card) => {
+  // Safe default fallback
+  return JSON.stringify(card, null, 2);
+};
+
+try {
+  const custom = await import('./custom_formatter.js');
+  if (custom.formatCard) formatCard = custom.formatCard;
+  if (custom.DEFAULT_REPLY_PREFIX) REPLY_PREFIX = custom.DEFAULT_REPLY_PREFIX;
+} catch (e) {
+  // Use default
+}
+
 const MAX_MESSAGE_LENGTH = parseInt(process.env.WHATSAPP_MAX_MESSAGE_LENGTH || '4096', 10);
 const CHUNK_DELAY_MS = parseInt(process.env.WHATSAPP_CHUNK_DELAY_MS || '300', 10);
 // Per-call timeout for sock.sendMessage(). Baileys occasionally hangs forever
@@ -495,13 +510,14 @@ app.post('/send', async (req, res) => {
     return res.status(503).json({ error: 'Not connected to WhatsApp' });
   }
 
-  const { chatId, message, replyTo } = req.body;
-  if (!chatId || !message) {
-    return res.status(400).json({ error: 'chatId and message are required' });
+  const { chatId, message, card, replyTo } = req.body;
+  if (!chatId || (!message && !card)) {
+    return res.status(400).json({ error: 'chatId and either message or card are required' });
   }
 
   try {
-    const chunks = splitLongMessage(formatOutgoingMessage(message));
+    const content = card ? formatCard(card) : formatOutgoingMessage(message);
+    const chunks = splitLongMessage(content);
     const messageIds = [];
     for (let i = 0; i < chunks.length; i += 1) {
       const sent = await sendWithTimeout(chatId, { text: chunks[i] });
@@ -581,12 +597,16 @@ app.post('/send-media', async (req, res) => {
     return res.status(503).json({ error: 'Not connected to WhatsApp' });
   }
 
-  const { chatId, filePath, mediaType, caption, fileName } = req.body;
+  const { chatId, filePath, mediaType, caption, fileName, card } = req.body;
   if (!chatId || !filePath) {
     return res.status(400).json({ error: 'chatId and filePath are required' });
   }
 
   try {
+    if (card) {
+      await sendWithTimeout(chatId, { text: formatCard(card) });
+    }
+
     if (!existsSync(filePath)) {
       return res.status(404).json({ error: `File not found: ${filePath}` });
     }
