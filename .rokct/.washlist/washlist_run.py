@@ -96,7 +96,7 @@ def grep_missed():
 
 def run_replacer(pass_num):
     print(f"--- PASS {pass_num} ---")
-    result = subprocess.run(["python", str(SCRIPT)])
+    result = subprocess.run([sys.executable, str(SCRIPT)])
     return result.returncode
 
 # -----------------------------
