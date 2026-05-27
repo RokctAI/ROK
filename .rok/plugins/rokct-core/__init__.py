@@ -173,6 +173,25 @@ def session_digest_tool() -> str:
     digest = generate_session_digest()
     return json.dumps({"success": True, "digest": digest})
 
+def check_strategic_alignment(instance_name: str, profile_type: str = "life") -> str:
+    """
+    Queries the local site API to compare strategic baseline against operational DB state.
+    """
+    try:
+        import requests
+        url = "http://localhost:8000/api/method/rcore.api.plan_builder.generate_strategic_alignment_report"
+        payload = {
+            "instance_name": instance_name,
+            "profile_type": profile_type
+        }
+        res = requests.post(url, data=payload, timeout=30.0)
+        if res.ok:
+            return json.dumps(res.json().get("message", {}), indent=2)
+        return json.dumps({"success": False, "error": f"HTTP Error {res.status_code}: {res.text}"})
+    except Exception as e:
+        return json.dumps({"success": False, "error": str(e)})
+
+
 def register(ctx):
     """
     Called automatically on startup by the ROK Plugin Manager.
@@ -209,4 +228,30 @@ def register(ctx):
         },
         handler=lambda args, **kw: session_digest_tool(),
         emoji="📊"
+    )
+
+    ctx.register_tool(
+        name="strategic_alignment_check",
+        toolset="strategy",
+        schema={
+            "name": "strategic_alignment_check",
+            "description": "Compares the high-level strategic baseline (questions.md) with the live database (objectives, KPIs, goals) to produce an alignment report.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "instance_name": {
+                        "type": "string",
+                        "description": "The name of the company or life profile instance (e.g. MyVenture)"
+                    },
+                    "profile_type": {
+                        "type": "string",
+                        "description": "The type of strategic profile: 'business' or 'life' (default: 'life')",
+                        "default": "life"
+                    }
+                },
+                "required": ["instance_name"]
+            }
+        },
+        handler=lambda args, **kw: check_strategic_alignment(args.get("instance_name"), args.get("profile_type", "life")),
+        emoji="🎯"
     )
