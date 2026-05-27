@@ -5,3 +5,4 @@ author: "ROKCT Team"
 provides_tools:
   - "workspace_map"
   - "session_digest"
+  - "strategic_alignment_check"
