@@ -12845,7 +12845,7 @@ class AIAgent:
                 elif not self._has_stream_consumers() and self._should_start_quiet_spinner():
                     # Raw KawaiiSpinner only when no streaming consumers and the
                     # spinner output has a safe sink.
-                    spinner_type = random.choice(['brain', 'sparkle', 'pulse', 'moon', 'star'])
+                    spinner_type = random.choice(['rcore', 'sparkle', 'pulse', 'moon', 'star'])
                     thinking_spinner = KawaiiSpinner(f"{face} {verb}...", spinner_type=spinner_type, print_fn=self._print_fn)
                     thinking_spinner.start()
             
