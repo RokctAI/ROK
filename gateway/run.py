@@ -6810,6 +6810,42 @@ class GatewayRunner:
                 return self._telegram_topic_root_lobby_message()
             return None
 
+        # ── ROKCT Ambient Capture (opt-in via ROK_AMBIENT_CAPTURE=true) ──────
+        # When enabled, non-command messages are classified by intent (reminder,
+        # task, note, career, life, goal, health) and saved to Frappe with a
+        # confirmation loop so users don't lose important life/career moments.
+        if os.getenv("ROK_AMBIENT_CAPTURE", "").lower() in {"true", "1", "yes"} and not command:
+            try:
+                from gateway.ambient import handle_ambient_capture, process_confirmed_capture
+
+                raw_text = (event.text or "").strip()
+
+                # Branch A: check if this message resolves a pending approval
+                if _quick_key in self._pending_approvals:
+                    _ambient_result = await process_confirmed_capture(
+                        self, _quick_key, raw_text
+                    )
+                    if _ambient_result is not None:
+                        adapter = self.adapters.get(source.platform)
+                        if adapter:
+                            await adapter.send(source.chat_id, _ambient_result)
+                        return None
+
+                # Branch B: attempt to classify a new ambient capture
+                # Only runs if there is no pending approval for this session.
+                if raw_text and _quick_key not in self._pending_approvals:
+                    _captured = await handle_ambient_capture(self, event)
+                    # handle_ambient_capture sends a confirmation prompt itself
+                    # and returns None; if it returns a non-None string it means
+                    # something was immediately processed — short-circuit the agent.
+                    if _captured is not None:
+                        return _captured
+                    # If the message was intercepted for confirmation (ambient
+                    # returned None after sending a prompt), fall through to the
+                    # agent so the LLM can also respond naturally.
+            except Exception as _ambient_exc:
+                logger.debug("Ambient capture hook error (non-fatal): %s", _ambient_exc)
+
         # ── Claim this session before any await ───────────────────────
         # Between here and _run_agent registering the real AIAgent, there
         # are numerous await points (hooks, vision enrichment, STT,

@@ -888,9 +888,27 @@ class WhatsAppAdapter(BasePlatformAdapter):
 
         try:
             import aiohttp
+            import asyncio
+            import random
 
-            # Format and chunk the message
+            # Format the message first
             formatted = self.format_message(content)
+
+            # Simulated Human-like message delays (0.8s - 2.5s) depending on message length
+            # Longer messages trigger slightly longer typing behaviors
+            if formatted:
+                # Dynamic delay mapping: roughly 12ms per character + base delay
+                char_delay = len(formatted) * 0.012
+                total_delay = min(max(char_delay, 0.8), 2.5)
+                # Apply a slight variance
+                total_delay += random.uniform(-0.15, 0.15)
+                total_delay = min(max(total_delay, 0.8), 2.5)
+
+                # Send typing state to bridge to engage the recipient
+                await self.send_typing(chat_id)
+                await asyncio.sleep(total_delay)
+
+            # Chunk the message
             chunks = self.truncate_message(formatted, self._outgoing_chunk_limit())
 
             last_message_id = None
