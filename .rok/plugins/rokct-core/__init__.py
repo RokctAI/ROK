@@ -179,12 +179,16 @@ def check_strategic_alignment(instance_name: str, profile_type: str = "life") ->
     """
     try:
         import requests
+        import uuid
         url = "http://localhost:8000/api/method/rcore.api.plan_builder.generate_strategic_alignment_report"
         payload = {
             "instance_name": instance_name,
             "profile_type": profile_type
         }
-        res = requests.post(url, data=payload, timeout=30.0)
+        headers = {
+            "x-trace-id": str(uuid.uuid4())
+        }
+        res = requests.post(url, data=payload, headers=headers, timeout=30.0)
         if res.ok:
             return json.dumps(res.json().get("message", {}), indent=2)
         return json.dumps({"success": False, "error": f"HTTP Error {res.status_code}: {res.text}"})
